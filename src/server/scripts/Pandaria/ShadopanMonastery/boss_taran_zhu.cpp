@@ -47,7 +47,8 @@ public:
         EVENT_SHA_BLAST              = 3,
         EVENT_SUMMON_GRIPPING_HATRED = 4,
         EVENT_GRIP_OF_HATE           = 5,
-        EVENT_OUTRO                  = 6
+        EVENT_OUTRO                  = 6,
+        EVENT_CHEST                  = 7
     };
 
     enum eSpells
@@ -58,6 +59,11 @@ public:
         SPELL_SHA_BLAST              = 114999,
         SPELL_SUMMON_GRIPPING_HATRED = 115002,
         SPELL_KNEEL                  = 130491
+    };
+
+    enum eCreature
+    {
+        NPC_SNOWDRIFT_QUESTENDER = 64387
     };
 
     struct boss_taran_zhuAI : public BossAI
@@ -85,8 +91,13 @@ public:
                     me->RemoveAllAuras();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
-                    if(auto const cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TARAN_ZHU_CACHE)))
-                        cache->SetPhaseMask(1, true);
+                    me->SummonCreature(NPC_SNOWDRIFT_QUESTENDER, 3855.144f, 2632.581f, 754.541f, 4.964f);
+                    nonCombatEvents.ScheduleEvent(EVENT_CHEST, 1 * IN_MILLISECONDS);
+
+                    float x, y, z;
+                    z = me->GetPositionZ();
+                    GetPositionWithDistInOrientation(me, -5.0f, me->GetOrientation(), x, y);
+                    me->NearTeleportTo(x, y, z, me->GetOrientation());
                 }
             }
 
@@ -97,9 +108,15 @@ public:
         {
             if(instance)
             {
-                if(instance->GetBossState(DATA_TARAN_ZHU) != DONE)
+                if (instance->GetBossState(DATA_TARAN_ZHU) != DONE)
+                {
                     _Reset();
+                    events.Reset();
+                    nonCombatEvents.Reset();
+                    me->SetReactState(REACT_AGGRESSIVE);
+                }
             }
+            
             newPower = 0;
         }
 
@@ -156,16 +173,22 @@ public:
                     _JustDied();
                     me->StopMoving();
                     me->setFaction(35);
-                    me->CombatStop(true);
                     me->RemoveAllAuras();
+                    me->CombatStop(true);
+                    me->DeleteThreatList();
+                    me->SetReactState(REACT_PASSIVE);
                     Talk(TALK_DEATH);
                     events.Reset();
                     nonCombatEvents.ScheduleEvent(EVENT_OUTRO, 3 * IN_MILLISECONDS);
+                    me->SummonCreature(NPC_SNOWDRIFT_QUESTENDER, 3855.144f, 2632.581f, 754.541f, 4.964f);
 
                     if(instance)
                     {
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
                         instance->SetData(DATA_TARAN_ZHU, DONE);
+
+                        if (auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
+                            snowdrift->SetPhaseMask(2, true);
                     }
 
                     std::list<Player*> playerList;
@@ -175,6 +198,8 @@ public:
                         for(auto player : playerList)
                             player->ModifyCurrency(395, player->GetMap()->IsHeroic() ? 100 * CURRENCY_PRECISION : 70 * CURRENCY_PRECISION);
                     }
+
+                    playerList.clear();
                 }
             }
         }
@@ -183,7 +208,7 @@ public:
         {
             if(who->ToPlayer())
             {
-                if(me->GetDistance(who) < 51.0f && !introStarted)
+                if(me->GetDistance(who) < 51.0f && !introStarted && instance->GetBossState(DATA_TARAN_ZHU) != DONE)
                 {
                     introStarted = true;
                     Talk(TALK_INTRO);
@@ -193,10 +218,19 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if(nonCombatEvents.ExecuteEvent() == EVENT_OUTRO)
+            if (uint32 eventId = nonCombatEvents.ExecuteEvent())
             {
-                Talk(TALK_OUTRO);
-                me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
+                switch (eventId)
+                {
+                    case EVENT_OUTRO:
+                        Talk(TALK_OUTRO);
+                        me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
+                        break;
+                    case EVENT_CHEST:
+                        if (auto const cache = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_TARAN_ZHU_CACHE)))
+                            cache->SetPhaseMask(1, true);
+                        break;
+                }
             }
 
             nonCombatEvents.Update(diff);
@@ -208,24 +242,27 @@ public:
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            switch(events.ExecuteEvent())
+            if (uint32 eventId = events.ExecuteEvent())
             {
-                case EVENT_RISING_HATE:
-                    me->CastSpell(me, SPELL_RISING_HATE, false);
-                    events.ScheduleEvent(EVENT_RISING_HATE, urand(10, 15) * IN_MILLISECONDS);
-                    break;
-                case EVENT_RING_OF_MALICE:
-                    me->CastSpell(me, SPELL_RING_OF_MALICE, true);
-                    events.ScheduleEvent(EVENT_RING_OF_MALICE, urand(28, 33) * IN_MILLISECONDS);
-                    break;
-                case EVENT_SHA_BLAST:
-                    me->CastSpell((Unit*)NULL, SPELL_SHA_BLAST, false);
-                    events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 6) * IN_MILLISECONDS);
-                    break;
-                case EVENT_SUMMON_GRIPPING_HATRED:
-                    me->CastSpell(me, SPELL_SUMMON_GRIPPING_HATRED, false);
-                    events.ScheduleEvent(EVENT_SUMMON_GRIPPING_HATRED, urand(20, 30) * IN_MILLISECONDS);
-                    break;
+                switch (eventId)
+                {
+                    case EVENT_RISING_HATE:
+                        me->CastSpell(me, SPELL_RISING_HATE, false);
+                        events.ScheduleEvent(EVENT_RISING_HATE, urand(10, 15) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_RING_OF_MALICE:
+                        me->CastSpell(me, SPELL_RING_OF_MALICE, true);
+                        events.ScheduleEvent(EVENT_RING_OF_MALICE, urand(28, 33) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SHA_BLAST:
+                        me->CastSpell((Unit*)NULL, SPELL_SHA_BLAST, false);
+                        events.ScheduleEvent(EVENT_SHA_BLAST, urand(4, 6) * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SUMMON_GRIPPING_HATRED:
+                        me->CastSpell(me, SPELL_SUMMON_GRIPPING_HATRED, false);
+                        events.ScheduleEvent(EVENT_SUMMON_GRIPPING_HATRED, urand(20, 30) * IN_MILLISECONDS);
+                        break;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -366,6 +403,48 @@ public:
     };
 };
 
+class RingOfMaliceTargetSelector
+{
+public:
+    explicit RingOfMaliceTargetSelector(Unit* _caster) : caster(_caster) {}
+
+    bool operator() (WorldObject* unit) const
+    {
+        if (caster->GetExactDist2d(unit) <= 8.5f)
+            return true;
+
+        return false;
+    }
+private:
+    Unit* caster;
+};
+
+class spell_taran_zhu_ring_of_malice : public SpellScriptLoader
+{
+public:
+    spell_taran_zhu_ring_of_malice() : SpellScriptLoader("spell_taran_zhu_ring_of_malice") {}
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_taran_zhu_ring_of_malice_SpellScript();
+    }
+
+    class spell_taran_zhu_ring_of_malice_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_taran_zhu_ring_of_malice_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(RingOfMaliceTargetSelector(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_taran_zhu_ring_of_malice_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+};
+
 void AddSC_boss_taran_zhu()
 {
     new boss_taran_zhu();
@@ -373,4 +452,5 @@ void AddSC_boss_taran_zhu()
     new spell_taran_zhu_hate();
     new spell_taran_zhu_meditation();
     new spell_taran_zhu_grip_of_hate();
+    new spell_taran_zhu_ring_of_malice();
 }

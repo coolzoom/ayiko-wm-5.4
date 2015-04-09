@@ -70,13 +70,13 @@ public:
             Reset();
         }
 
-        void Reset()
+        void Reset() override
         {
             _Reset();          
             enrageDone = false;
         }
-
-        void EnterCombat(Unit * who)
+         
+        void EnterCombat(Unit * who) override
         {
             _EnterCombat();
             Talk(TALK_AGGRO);
@@ -90,7 +90,7 @@ public:
             events.ScheduleEvent(EVENT_DISORIENTING_SMASH, urand(20000, 30000));
         }
 
-        void JustDied(Unit* killer)
+        void JustDied(Unit* killer) override
         {
             _JustDied();
             Talk(TALK_DEATH);
@@ -102,13 +102,13 @@ public:
             }
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if(victim->GetTypeId() == TYPEID_PLAYER)
                 Talk(TALK_SLAY);
         }
 
-        void EnterEvadeMode()
+        void EnterEvadeMode() override
         {
             BossAI::EnterEvadeMode();
             if(instance)
@@ -119,13 +119,13 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summon)
+        void JustSummoned(Creature* summon) override
         {
             summons.Summon(summon);
             summon->CastSpell(summon, SPELL_ICE_TRAP, true);
         }
 
-        void DamageTaken(Unit* attacker, uint32& damage)
+        void DamageTaken(Unit* attacker, uint32& damage) override
         {
             if(!enrageDone && me->HealthBelowPctDamaged(20, damage))
             {
@@ -134,7 +134,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -179,16 +179,23 @@ public:
         SPELL_EXPLOSION = 106966
     };
 
+    enum eEvents
+    {
+        EVENT_DIE = 1
+    };
+
     struct npc_sv_lesser_AI : public ScriptedAI
     {
         npc_sv_lesser_AI(Creature* creature) : ScriptedAI(creature) {}
 
         InstanceScript* instance;
+        EventMap events;
         bool canDead;
 
         void InitializeAI() override
         {
             canDead = false;
+            events.ScheduleEvent(EVENT_DIE, 30 * IN_MILLISECONDS);
         }
 
         void DamageTaken(Unit* attacker, uint32 &damage) override
@@ -201,8 +208,19 @@ public:
                     canDead = true;
                     me->CastSpell((Unit*)NULL, SPELL_EXPLOSION, false);
                     attacker->Kill(me);
+                    me->DespawnOrUnsummon(2 * IN_MILLISECONDS);
                 }
             }
+        }
+
+        void UpdateAI(const uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_DIE)
+                me->DealDamage(me, me->GetHealth());
+
+            DoMeleeAttackIfReady();
         }
     };
 };

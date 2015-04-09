@@ -502,10 +502,121 @@ public:
     };
 };
 
+class spell_spm_arc_lightning: public SpellScriptLoader
+{
+public:
+    spell_spm_arc_lightning() : SpellScriptLoader("spell_spm_arc_lightning") {}
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_spm_arc_lightning_AuraScript();
+    }
+
+    class spell_spm_arc_lightning_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_arc_lightning_AuraScript)
+
+        void OnPeriodic(AuraEffect const * aurEff)
+        {
+            auto const caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (auto const aura = caster->GetAuraEffect(aurEff->GetId(), EFFECT_0))
+                aura->SetAmplitude(caster->GetHealthPct() * 100);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_spm_arc_lightning_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+};
+
+class spell_spm_magnetic_shroud : public SpellScriptLoader
+{
+public:
+    spell_spm_magnetic_shroud() : SpellScriptLoader("spell_spm_magnetic_shroud") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_spm_magnetic_shroud_AuraScript();
+    }
+
+    enum eSpells
+    {
+        SPELL_MAGNETIC_SHROUD_OVERLOAD = 107174
+    };
+
+    class spell_spm_magnetic_shroud_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_magnetic_shroud_AuraScript);
+
+        void OnRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToPlayer();
+            if (!owner)
+                return;
+
+            owner->CastSpell(owner, SPELL_MAGNETIC_SHROUD_OVERLOAD, false);
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_spm_magnetic_shroud_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_HEAL_ABSORB, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
+class spell_spm_charging_soul : public SpellScriptLoader
+{
+public:
+    spell_spm_charging_soul() : SpellScriptLoader("spell_spm_charging_soul") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_spm_charging_soul_AuraScript();
+    }
+
+    class spell_spm_charging_soul_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_charging_soul_AuraScript);
+
+        void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            owner->ApplySpellImmune(0, IMMUNITY_SCHOOL, (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY), true);
+            owner->ApplySpellImmune(0, IMMUNITY_ID, 35395, true);
+        }
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            owner->ApplySpellImmune(0, IMMUNITY_SCHOOL, (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY), false);
+            owner->ApplySpellImmune(0, IMMUNITY_ID, 35395, false);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_spm_charging_soul_AuraScript::OnApply, EFFECT_0, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_spm_charging_soul_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_SCHOOL_IMMUNITY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
 void AddSC_boss_gu_cloudstrike()
 {
     new boss_gu_cloudstrike();
     new npc_azure_serpent();
     new AreaTrigger_at_gu_intro();
     new spell_kill_guardians();
+    new spell_spm_arc_lightning();
+    new spell_spm_magnetic_shroud();
+    new spell_spm_charging_soul();
 }

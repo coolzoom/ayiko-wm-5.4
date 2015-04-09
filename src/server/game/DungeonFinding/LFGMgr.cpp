@@ -756,6 +756,32 @@ void LFGMgr::Join(Player* player, uint8 roles, const LfgDungeonSet& selectedDung
         }
     }
 
+    if (joinData.result == LFG_JOIN_OK)
+    {
+        // check if join request is LFR
+        bool raidFinder = false;
+        for (auto dungeon : dungeons)
+        {
+            if (sLFGDungeonStore.LookupEntry(dungeon & 0xFFFFFF)->difficulty == RAID_TOOL_DIFFICULTY)
+            {
+                raidFinder = true;
+                break;
+            }
+        }
+
+        // make sure player or group all have a specialisation selected for PL
+        if (raidFinder)
+        {
+            if (!player->GetLootSpecOrClassSpec())
+                joinData.result = LFG_JOIN_NOT_MEET_REQS;
+            else if (grp)
+                for (auto member = grp->GetFirstMember(); member != nullptr && joinData.result == LFG_JOIN_OK; member = member->next())
+                    if (auto player = member->GetSource())
+                        if (!player->GetLootSpecOrClassSpec())
+                            joinData.result = LFG_JOIN_PARTY_NOT_MEET_REQS;
+        }
+    }
+
     // Can't join. Send result
     if (joinData.result != LFG_JOIN_OK)
     {

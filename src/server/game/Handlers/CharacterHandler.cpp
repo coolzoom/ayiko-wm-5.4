@@ -1157,7 +1157,7 @@ void WorldSession::HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLogin
         }
     }
 
-    if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+    if (!pCurrChar->CheckInstanceLoginValid() || !pCurrChar->GetMap()->AddPlayerToMap(pCurrChar))
     {
         AreaTriggerStruct const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
@@ -1856,6 +1856,9 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket& recvData)
 
     iconName = recvData.ReadString(iconNameLen);
     name = recvData.ReadString(setNameLen);
+
+    if (name.empty() || iconName.empty())
+        return;
 
     recvData.ReadByteSeq<5, 0, 1, 7, 6, 2>(setGuid);
 

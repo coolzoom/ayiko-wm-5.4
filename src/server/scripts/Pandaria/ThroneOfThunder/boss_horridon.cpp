@@ -708,6 +708,21 @@ public:
             }
         }
 
+        uint8 MaxSummonsByPhase()
+        {
+            switch (uiTrashPhase)
+            {
+            case TRASH_PHASE_FARRAKI:
+            case TRASH_PHASE_DRAKKARI:
+                return 3;
+            case TRASH_PHASE_GURUBASHI:
+            case TRASH_PHASE_AMANI:
+                return 2;
+            }
+
+            return 3;
+        }
+
         void UpdateAI(const uint32 uiDiff)
         {
             if (IsWipe())
@@ -754,10 +769,12 @@ public:
                             if (entries.empty()) // Entries is empty, no need to reschedule event
                                 break;
 
-                            for (uint8 i = 0; i < MAX_SUMMON_POSITIONS_BY_PHASE; ++i)
+                            uint8 maxSummonsPerPhase = MaxSummonsByPhase();
+
+                            for (uint8 i = 0; i < maxSummonsPerPhase; ++i)
                             {
                                 uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
-                                me->SummonCreature(uiSummonEntry, summonPositions[urand(0, MAX_SUMMON_POSITIONS_BY_PHASE - 1)]);
+                                me->SummonCreature(uiSummonEntry, summonPositions[maxSummonsPerPhase]);
                             }
 
                             if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
@@ -1354,7 +1371,7 @@ public:
                             DoCast(pTarget, SPELL_CHARGE);
                             Talk(EMOTE_CHARGE, pTarget->GetGUID());
                         }
-                        events.ScheduleEvent(EVENT_HORRIDON_CHARGE, urand(15, 25) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_HORRIDON_CHARGE, 26000 + rand() % 14000);
                         break;
 
                     case EVENT_DIRE_CALL:

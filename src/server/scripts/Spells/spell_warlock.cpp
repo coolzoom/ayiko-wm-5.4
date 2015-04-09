@@ -2996,6 +2996,41 @@ class spell_warl_soul_link : public SpellScriptLoader
         }
 };
 
+class spell_warl_ember_consumers : public SpellScriptLoader
+{
+    public:
+        spell_warl_ember_consumers() : SpellScriptLoader("spell_warl_ember_consumers") { }
+
+        class spell_warl_ember_consumers_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_ember_consumers_SpellScript);
+
+            void HandleOnHit()
+            {
+                Unit* caster = GetCaster();
+                if (caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (AuraEffect* mastery = caster->GetAuraEffect(77220, EFFECT_0))
+                {
+                    int32 damage = GetHitDamage();
+                    AddPct(damage, mastery->GetAmount());
+                    SetHitDamage(damage);
+                }
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_warl_ember_consumers_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_ember_consumers_SpellScript();
+        }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_health_funnel();
@@ -3064,4 +3099,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_havoc();
     new spell_warl_metamorphosis_overrides();
     new spell_warl_haunt();
+    new spell_warl_ember_consumers();
 }

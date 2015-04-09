@@ -624,7 +624,7 @@ Unit::AuraApplicationList AuraEffect::GetApplicationList() const
     return applicationList;
 }
 
-int32 AuraEffect::CalculateAmount(Unit* caster)
+int32 AuraEffect::CalculateAmount(Unit* caster, bool recalculate)
 {
     int32 amount = 0;
 
@@ -651,7 +651,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
 
                 //Compute the whole data and set it
                 float masteryTotal = (float(baseMastery) + points) * GetSpellEffectInfo().BonusMultiplier;
-                m_floatAmount = masteryTotal;
+                if (!recalculate)
+                    m_floatAmount = masteryTotal;
                 amount = (int32)masteryTotal;
 
                 // Update the player visual (round it to upper decimal)
@@ -686,7 +687,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                     if (!mainItem && !offItem)
                     {
-                        m_floatAmount = 0.0f;
+                        if (!recalculate)
+                            m_floatAmount = 0.0f;
                         amount = 0;
                     }
 
@@ -694,7 +696,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         break;
 
                     amount = 0;
-                    m_floatAmount = 0.0f;
+                    if (!recalculate)
+                        m_floatAmount = 0.0f;
                 }
             }
         }
@@ -837,6 +840,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                     switch (GetSpellInfo()->Id)
                     {
                         case 17: // Power Word: Shield
+                        case 123258: // Power Word: Shield
                         case 47753: // Divine Aegis
                         case 114908: // Spirit Shell
                         case 152118: // Clarity of Will
@@ -1293,7 +1297,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     GetBase()->CallScriptEffectCalcAmountHandlers(this, amount, m_canBeRecalculated);
     amount *= GetBase()->GetStackAmount();
 
-    if (!amount)
+    if (!amount && !recalculate)
         m_floatAmount = 0;
 
     // Fixate damage for periodic damage auras
@@ -1351,6 +1355,15 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             // Dampening
             if (AuraEffect* aurEff = caster->GetAuraEffect(110310, EFFECT_0))
                 AddPct(amount, -aurEff->GetAmount());
+
+            // Apply Power PvP healing bonus
+            if (amount > 0
+                    && caster->GetTypeId() == TYPEID_PLAYER
+                    && caster->GetMap()->IsBattlegroundOrArena()
+                    && (target->GetTypeId() == TYPEID_PLAYER || (target->isPet() && IS_PLAYER_GUID(target->GetOwnerGUID()))))
+            {
+                AddPct(amount, caster->GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
+            }
         }
     }
 
@@ -1554,7 +1567,7 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
 {
     // Reapply if amount change
     uint8 handleMask = 0;
-    if (newAmount != GetAmount())
+    if (newAmount != GetAmount() || m_floatAmount)
         handleMask |= AURA_EFFECT_HANDLE_CHANGE_AMOUNT;
     if (onStackOrReapply)
         handleMask |= AURA_EFFECT_HANDLE_REAPPLY;
@@ -1573,6 +1586,9 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
             m_amount = newAmount;
         else
             SetAmount(newAmount);
+
+        // Very unoptimal, need to change the float handling to something more proper
+        CalculateAmount(GetCaster());
 
         CalculateSpellMod();
     }
@@ -1711,6 +1727,55 @@ void AuraEffect::ApplySpellMod(Unit* target, bool apply)
                     {
                         if (aura->HasEffect(4))
                             aura->GetEffect(4)->RecalculateAmount();
+                    }
+                }
+            }
+            if (Player * player = target->ToPlayer())
+            {
+                if (Pet* pet = player->GetPet())
+                {
+                    Unit::AuraApplicationMap & auras = pet->GetAppliedAuras();
+                    for (Unit::AuraApplicationMap::iterator iter = auras.begin(); iter != auras.end(); ++iter)
+                    {
+                        Aura* aura = iter->second->GetBase();
+                        // only passive and permament auras-active auras should have amount set on spellcast and not be affected
+                        // if aura is casted by others, it will not be affected
+                        if ((aura->IsPassive() || aura->IsPermanent()) && m_spellmod->isAffectingSpell(aura->GetSpellInfo()))
+                        {
+                            if (GetMiscValue() == SPELLMOD_ALL_EFFECTS)
+                            {
+                                for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
+                                {
+                                    if (AuraEffect *aurEff = aura->GetEffect(i))
+                                        aurEff->RecalculateAmount();
+                                }
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT1)
+                            {
+                                if (AuraEffect *aurEff = aura->GetEffect(0))
+                                    aurEff->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT2)
+                            {
+                                if (aura->HasEffect(1))
+                                    aura->GetEffect(1)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT3)
+                            {
+                                if (aura->HasEffect(2))
+                                    aura->GetEffect(2)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT4)
+                            {
+                                if (aura->HasEffect(3))
+                                    aura->GetEffect(3)->RecalculateAmount();
+                            }
+                            else if (GetMiscValue() == SPELLMOD_EFFECT5)
+                            {
+                                if (aura->HasEffect(4))
+                                    aura->GetEffect(4)->RecalculateAmount();
+                            }
+                        }
                     }
                 }
             }
@@ -7409,6 +7474,17 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         {
             damage *= GetUserData();
         }
+        // Deep Wounds
+        else if (GetSpellInfo()->Id == 115767)
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+            {
+                if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_ARMS)
+                    damage *= 2;
+                else if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARRIOR_PROTECTION)
+                    damage /= 2;
+            }
+        }
         // Nether Tempest and Living Bomb deal 85% of damage if used on player
         else if (GetSpellInfo()->Id == 44457 || GetSpellInfo()->Id == 114923)
         {
@@ -7808,11 +7884,17 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     if (GetAuraType() == SPELL_AURA_OBS_MOD_HEALTH)
     {
-        // Mend Pet
-        if (m_spellInfo->Id == 136)
-            if (caster->HasAura(19573)) // Glyph of Mend Pet
-                if (roll_chance_i(50))
+        switch (m_spellInfo->Id)
+        {
+            case 136:
+                if (caster->HasAura(19573) && roll_chance_i(50)) // Glyph of Mend Pet
                     caster->CastSpell(target, 24406, true); // Dispel
+                break;
+            case 16491:
+                if (caster->GetHealthPct() > 35.0f)
+                    return;
+                break;
+        }
 
         damage = uint32(target->CountPctFromMaxHealth(damage));
 
@@ -8482,4 +8564,20 @@ void AuraEffect::HandleChangeSpellVisualEffect(AuraApplication const* aurApp, ui
     /*Похоже на то, что близы трактуруют значение из полей в зависимости от их номера, и названия это взяты не из клиента (PLAYER_DYNAMIC_RESEARCH_SITES)*/
     player->SetDynamicUInt32Value(PLAYER_DYNAMIC_RESEARCH_SITES, 0, spellToReplace);
     player->SetDynamicUInt32Value(PLAYER_DYNAMIC_RESEARCH_SITES, 1, replacer);
+}
+
+void AuraEffect::RecalculateAmount(Unit* caster)
+{
+    if (!CanBeRecalculated())
+        return;
+    
+    ChangeAmount(CalculateAmount(caster, true), false);
+}
+
+void AuraEffect::RecalculateAmount(bool reapplyingEffects)
+{ 
+    if (!CanBeRecalculated())
+        return;
+    
+    ChangeAmount(CalculateAmount(GetCaster(), true), false, reapplyingEffects);
 }

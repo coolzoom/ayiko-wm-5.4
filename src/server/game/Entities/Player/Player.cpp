@@ -906,7 +906,10 @@ Player::Player(WorldSession* session)
     m_averageSpeed = 0.0f;
 
     m_queuedSpell = NULL;
-    m_logonSendTimer = 60 * IN_MILLISECONDS;
+	m_logonSendTimer = 60 * IN_MILLISECONDS;
+
+    m_forcedLogoutTime = 0;
+    m_forcedLogoutEventStage = 0;
 }
 
 Player::~Player()
@@ -2004,16 +2007,36 @@ void Player::Update(uint32 p_time)
     {
         if (GetSession()->HasPermission(rbac::RBAC_PERM_BROADCAST_LOGON_CHANGE))
         {
-            WorldPacket* data = new WorldPacket();
+            WorldPacket data;
             // Yes hardcoded ftw
             const char* mess = "|cff99cc00Your game client is using our old realmlist to connect. Please update your realmlist to|r |cffffb100logon.warmane.com|r|cff99cc00. Tutorial on how to update your realmlist can be found at|r |cffffb100http://forum.warmane.com/showthread.php?t=290754|r|cff99cc00. Realmlist can be updated at any time and has no impact on your game progress.|r";
-            ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, mess, NULL);
-            SendDirectMessage(data);
+            ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, mess, NULL);
+            SendDirectMessage(&data);
         }
-        m_logonSendTimer = 5 * 60 * IN_MILLISECONDS;
+        m_logonSendTimer = 30 * IN_MILLISECONDS;
     }
     else
-        m_logonSendTimer -= p_time;
+        m_logonSendTimer -= p_time; 
+	
+    if (m_forcedLogoutEventStage)
+    {
+        if (m_forcedLogoutTime > p_time)
+            m_forcedLogoutTime -= p_time;
+        else
+        {
+            std::stringstream ss;
+            ss << "You will be logged out in ";
+            ss << m_forcedLogoutEventStage;
+            ss << " seconds.";
+            ChatHandler(GetSession()).PSendSysMessage(ss.str().c_str());
+            
+            m_forcedLogoutEventStage -= 1; // Go down a stage
+            m_forcedLogoutTime = 1000; // Add another second to the timer
+            
+            if (!m_forcedLogoutEventStage) // We have hit stage 0, request immediate logout (thread safe, handled in next world tick)
+                GetSession()->LogoutRequest(time(NULL) - 25); // A little hack to trick the server
+        }
+    }
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -8718,7 +8741,7 @@ void Player::UpdateArea(uint32 newArea)
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
     pvpInfo.inNoPvPArea = false;
     if (HasAura(137080) || // "Custom" Anniversary sanctuary spell
-        (area && area->IsSanctuary()))    // in sanctuary
+        (area && area->IsSanctuary()) && !sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.inNoPvPArea = true;
@@ -8726,6 +8749,20 @@ void Player::UpdateArea(uint32 newArea)
     }
     else
         RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
+
+    if (sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))
+        pvpInfo.inFFAPvPArea = true;
+    
+    if (sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_NO_FLYING) && IsFlying())
+    {
+        Dismount();
+        RemoveAurasByType(SPELL_AURA_FLY);
+        RemoveAurasByType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+        RemoveAurasByType(SPELL_AURA_MOUNTED);
+        SetCanFly(false);
+        CastSpell(this, 45472, true);
+    }
+
 
     m_phaseMgr.RemoveUpdateFlag(PHASE_UPDATE_FLAG_AREA_UPDATE);
 }
@@ -8809,8 +8846,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
             SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             SetRestType(REST_TYPE_IN_CITY);
             InnEnter(time(0), GetMapId(), 0, 0, 0);
-        }
-        pvpInfo.inNoPvPArea = true;
+		}
+        if (!sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_FFA))
+            pvpInfo.inNoPvPArea = true;
     }
     else
     {
@@ -9703,6 +9741,8 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
     // use triggered flag only for items with many spell casts and for not first cast
     uint8 count = 0;
 
+    std::vector<Spell*> SpellContainer;
+
     // item spells casted at use
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
@@ -9727,7 +9767,8 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
-        spell->prepare(&targets);
+        spell->prepare(&targets, NULL, 0, true);
+        SpellContainer.push_back(spell);
 
         ++count;
     }
@@ -9758,11 +9799,20 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->m_CastItem = item;
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
-            spell->prepare(&targets);
+            spell->prepare(&targets, NULL, 0, true);
+
+            SpellContainer.push_back(spell);
 
             ++count;
         }
     }
+
+    // Finally, clean up items. It is important that items are casted
+    // immediately and NOT deleted in the above spell handlers.
+    for (std::vector<Spell*>::iterator itr = SpellContainer.begin(); itr != SpellContainer.end(); itr++)
+        (*itr)->TakeCastItem();
+
+    SpellContainer.clear();
 }
 
 void Player::_RemoveAllItemMods()
@@ -18539,6 +18589,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
         return false;
     }
 
+	m_atLoginFlags = fields[32].GetUInt16();
+	if (m_atLoginFlags & AT_LOGIN_NO_CHAR)
+		return false;
+
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
@@ -18652,6 +18706,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     GetSession()->SetPlayer(this);
 
+    bool playerWasInBattleground = false;
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
     if (!mapEntry || !IsPositionValid())
     {
@@ -18684,6 +18739,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
         // Bg was not found - go to Entry Point
         else
         {
+            playerWasInBattleground = true;
             // leave bg
             if (player_at_bg)
                 currentBg->RemovePlayerAtLeave(GetGUID(), false, true);
@@ -18906,8 +18962,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     m_taxi.LoadTaxiMask(fields[17].GetCString());
 
     uint32 extraflags = fields[31].GetUInt16();
-
-    m_atLoginFlags = fields[32].GetUInt16();
 
     // Honor system
     // Update Honor kills data
@@ -19166,6 +19220,13 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, realmID);
 
     _LoadLFRLootBinds(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_LFR_LOOT_BOUND));
+
+    // Remove Brutal / Focused Assault after a server crash for example.
+    if (playerWasInBattleground)
+    {
+        RemoveAurasDueToSpell(46392);
+        RemoveAurasDueToSpell(46393);
+    }
 
     return true;
 }

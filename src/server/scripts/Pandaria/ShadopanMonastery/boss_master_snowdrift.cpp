@@ -85,7 +85,8 @@ public:
         EVENT_OUTRO_END      = 11,
         EVENT_CHECK_DEST     = 12,
         EVENT_CHECK_WIPE     = 13,
-        EVENT_PHASE_2        = 14
+        EVENT_PHASE_2        = 14,
+        EVENT_POSSESIONS     = 15
     };
 
     enum ePhases
@@ -143,12 +144,6 @@ public:
                     me->SetReactState(REACT_PASSIVE);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->NearTeleportTo(SnowdriftPos[0].GetPositionX(), SnowdriftPos[0].GetPositionY(), SnowdriftPos[0].GetPositionZ(), 4.114f);
-
-                }
-                else if(instance->GetBossState(DATA_MASTER_SNOWDRIFT != DONE))
-                {
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    me->setRegeneratingHealth(true);
                 }
 
                 if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) == DONE)
@@ -156,9 +151,15 @@ public:
                     me->setFaction(35);
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);    
+                    nonCombatEvents.ScheduleEvent(EVENT_POSSESIONS, 1 * IN_MILLISECONDS);
 
-                    if(auto const possesions = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_POSSESSIONS)))
-                        possesions->SetPhaseMask(1, true);
+                    float x, y, z;
+                    z = me->GetPositionZ();
+                    GetPositionWithDistInOrientation(me, -5.0f, me->GetOrientation(), x, y);
+                    me->NearTeleportTo(x, y, z, me->GetOrientation());
+
+                    if (instance->GetBossState(DATA_TARAN_ZHU) == DONE)
+                        me->SetPhaseMask(2, true);
                 }
             }
 
@@ -169,16 +170,22 @@ public:
         {
             if(instance)
             {
-                if(instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
+                if (instance->GetBossState(DATA_SNOWDRIFT_STATE) == DONE && instance->GetBossState(DATA_MASTER_SNOWDRIFT) != DONE)
+                {
                     _Reset();
+                    events.Reset();
+                    nonCombatEvents.Reset();
+                    me->SetReactState(REACT_AGGRESSIVE);
+                }
             }
 
-            aggroDone = false;
-            phaseTwo = false;
-            isBossSummoned = false;
-            hurlChiCnt = 0;
+            me->setRegeneratingHealth(true);
+            me->SetHealth(me->GetMaxHealth());      
             phase = PHASE_FIGHT_1;
-            events.Reset();
+            isBossSummoned = false;
+            aggroDone = false;
+            phaseTwo = false;           
+            hurlChiCnt = 0;     
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -242,7 +249,7 @@ public:
                 case ACTION_DISSAPEAR:
                     ++hurlChiCnt;
                     isBossSummoned = false;
-                    if(hurlChiCnt < 3)
+                    if (hurlChiCnt < 3)
                     {
                         me->SetVisible(false);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);   
@@ -274,6 +281,8 @@ public:
                                     clone->AI()->DoAction(0); // ACTION_BALL_OF_FIRE
                             }
                         }
+
+                        clonesList.clear();
                     }
                     break;
             }
@@ -281,11 +290,16 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage) override
         {
-            if(me->HealthBelowPctDamaged(70, damage) && !phaseTwo)
+            if(me->HealthBelowPctDamaged(50, damage) && !phaseTwo)
             {   
                 phaseTwo = true;
                 Talk(TALK_PHASE_2);
-                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 10 * IN_MILLISECONDS);
+                events.Reset();
+                me->StopMoving();
+                me->CombatStop(true);
+                me->setRegeneratingHealth(false);
+                me->SetReactState(REACT_PASSIVE);
+                nonCombatEvents.ScheduleEvent(EVENT_PHASE_2, 7 * IN_MILLISECONDS);
             }
 
             if(damage >= me->GetHealth() && phase == PHASE_FIGHT_3)
@@ -301,7 +315,8 @@ public:
                     me->StopMoving();
                     me->setFaction(35);
                     me->RemoveAllAuras();
-                    me->CombatStop(true);                   
+                    me->CombatStop(true);       
+                    me->DeleteThreatList();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUInt32Value(UNIT_FIELD_BYTES_1, UNIT_STAND_STATE_KNEEL);
                     events.Reset();
@@ -320,6 +335,8 @@ public:
                         for(auto player : playerList)
                             player->ModifyCurrency(395, player->GetMap()->IsHeroic() ? 100 * CURRENCY_PRECISION : 70 * CURRENCY_PRECISION);
                     }
+
+                    playerList.clear();
                 }
             }
         }
@@ -330,6 +347,10 @@ public:
             {
                 switch(eventId)
                 {
+                    case EVENT_POSSESIONS:
+                        if (auto const possesions = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_POSSESSIONS)))
+                            possesions->SetPhaseMask(1, true);
+                        break;
                     case EVENT_INTRO_1:
                         Talk(TALK_INTRO_1);
                         nonCombatEvents.ScheduleEvent(EVENT_INTRO_2, 7.4 * IN_MILLISECONDS);
@@ -412,10 +433,6 @@ public:
                     case EVENT_PHASE_2:
                         phase = PHASE_FIGHT_2;
                         Talk(TALK_P_2_EMOTE);
-                        me->StopMoving();
-                        me->CombatStop(true);
-                        me->setRegeneratingHealth(false);
-                        me->SetReactState(REACT_PASSIVE);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);
                         me->SetVisible(false);
                         events.Reset();
@@ -581,9 +598,10 @@ public:
 
     enum eEvents
     {
-        EVENT_INIT_EVENT = 1,
-        EVENT_CHECK_WIPE = 2,
-        EVENT_1_WAVE_END = 3
+        EVENT_INIT_EVENT   = 1,
+        EVENT_CHECK_WIPE   = 2,
+        EVENT_1_WAVE_END   = 3,
+        EVENT_SUMMON_NOVIE = 4
     };
 
     struct npc_spm_pandaren_refereeAI : public BossAI
@@ -592,14 +610,13 @@ public:
 
         InstanceScript* instance;
         EventMap events;
-        uint8 eventPhase, maxInitiateByWave, novoiceDefeated;
+        uint8 eventPhase, novoiceSummoned;
 
         void InitializeAI() override
         {
             instance = me->GetInstanceScript();
             eventPhase = 0;
-            novoiceDefeated = 0;
-            maxInitiateByWave = 5;
+            novoiceSummoned = 1;
         }
 
         void JustSummoned(Creature* summon) override
@@ -621,13 +638,15 @@ public:
                                  snowdrift->AI()->DoAction(5); //ACTION_TALK_WAVE_1_S
                        }
 
-                       for(uint8 i = 0; i < 5; i++)
-                            me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
-
+                       for (uint8 i = 0; i < 5; i++)
+                       {
+                           ++novoiceSummoned;
+                           me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
+                       }
                        events.ScheduleEvent(EVENT_CHECK_WIPE, 1 * IN_MILLISECONDS);
                     }
                     break;
-                case 6:
+                case 2:
                     if(instance)
                     {
                         if(auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
@@ -636,20 +655,6 @@ public:
                     }
                     me->SummonCreature(NPC_FLAGRANT_LOTUS, MinibossSpawnPos[0].GetPositionX(), MinibossSpawnPos[0].GetPositionY(), MinibossSpawnPos[0].GetPositionZ());
                     me->SummonCreature(NPC_FLYING_SNOW, MinibossSpawnPos[1].GetPositionX(), MinibossSpawnPos[1].GetPositionY(), MinibossSpawnPos[1].GetPositionZ());
-                    break;
-                default:
-                    {
-                        if(instance)
-                        {
-                            if(auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
-                               if(snowdrift->IsAIEnabled)
-                                   snowdrift->AI()->DoAction(1); //ACTION_NOVOCE_DEFEAT
-                        }
-
-                        maxInitiateByWave = eventPhase == 5 ? 4 : 5;
-                        for(uint8 i = 0; i < maxInitiateByWave; i++)
-                             me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[i].GetPositionX(), InitiateSpawnPos[i].GetPositionY(), InitiateSpawnPos[i].GetPositionZ());
-                    }
                     break;
             }
         }
@@ -683,12 +688,20 @@ public:
                     }
                     break;
                 case ACTION_NOVICE_DEFEAT:
-                    if(++novoiceDefeated == maxInitiateByWave)
+                    if (novoiceSummoned <= MAX_NOVICE)
                     {
-                        if(eventPhase < 5)
+                        ++novoiceSummoned;
+                        events.ScheduleEvent(EVENT_SUMMON_NOVIE, urand(1, 3) * IN_MILLISECONDS);
+
+                        switch (novoiceSummoned)
                         {
-                            novoiceDefeated = 0;
-                            events.ScheduleEvent(EVENT_INIT_EVENT, 2 * IN_MILLISECONDS);
+                            case 10:
+                            case 15:
+                            case 20:
+                                if (auto const snowdrift = Unit::GetCreature(*me, instance->GetData64(DATA_MASTER_SNOWDRIFT)))
+                                    if (snowdrift->IsAIEnabled)
+                                         snowdrift->AI()->DoAction(1); //ACTION_NOVOCE_DEFEAT
+                            break;
                         }
                     }
                     break;
@@ -712,6 +725,7 @@ public:
                             if(instance->IsWipe())
                             {
                                 eventPhase = 0;
+                                novoiceSummoned = 1;
                                 events.Reset();
                                 summons.DespawnAll();
                                 instance->SetData(DATA_SNOWDRIFT_STATE, FAIL);
@@ -731,8 +745,13 @@ public:
                                 if(novice->IsAIEnabled)
                                     novice->AI()->DoAction(0);
                             }
+
+							noviceList.clear();
                         }
                         events.ScheduleEvent(EVENT_INIT_EVENT, 1 * IN_MILLISECONDS);
+                        break;
+                    case EVENT_SUMMON_NOVIE:
+                         me->SummonCreature(NPC_NOVICE, InitiateSpawnPos[irand(0, 4)].GetPositionX(), InitiateSpawnPos[irand(0, 4)].GetPositionY(), InitiateSpawnPos[irand(0, 4)].GetPositionZ());
                         break;
                 }
             }
@@ -1312,22 +1331,51 @@ public:
     {
         PrepareAuraScript(spell_snowdrift_ball_of_fire_AuraScript);
 
-        uint32 angle;
-
         void OnApply(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             auto const owner = GetOwner()->ToCreature();
-            auto const caster = GetCaster();
-            if(!owner || !caster)
-                return;
 
-            owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
-            caster->CastSpell(caster, SPELL_BALL_OF_FIRE, true);
+            if(owner)
+                owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
         }
 
         void Register()
         {
             OnEffectApply += AuraEffectApplyFn(spell_snowdrift_ball_of_fire_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
+class spell_snowdrift_ball_of_fire_aura : public SpellScriptLoader
+{
+public:
+    spell_snowdrift_ball_of_fire_aura() : SpellScriptLoader("spell_snowdrift_ball_of_fire_aura") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_snowdrift_ball_of_fire_aura_AuraScript();
+    }
+
+    enum eSpells
+    {
+        SPELL_BALL_OF_FIRE = 113760
+    };
+
+    class spell_snowdrift_ball_of_fire_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_snowdrift_ball_of_fire_aura_AuraScript);
+
+        void OnPeriodic(AuraEffect const * /*aurEff*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+
+            if (owner)
+                owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_snowdrift_ball_of_fire_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 };
@@ -1455,25 +1503,6 @@ public:
     {
         PrepareAuraScript(spell_snowdrift_parry_stance_AuraScript);
 
-        std::list<uint32> parrySpells;
-
-        bool Load()
-        {
-            for(int i = 0; i < 2; ++i)
-            {
-                switch(i)
-                {
-                    case 0:
-                        parrySpells.push_back(SPELL_FLYING_KICK);
-                        break;
-                    case 1:
-                        parrySpells.push_back(SPELL_QUIVERING_PALM);
-                        break;
-                }
-            }
-            return true;
-        }
-
         void HanleOnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             auto const caster = eventInfo.GetActionTarget();
@@ -1481,8 +1510,13 @@ public:
             if(!caster || !target)
                 return;
 
-            if(auto const parrySpell = Trinity::Containers::SelectRandomContainerElement(parrySpells))
-                caster->CastSpell(target, parrySpell, TRIGGERED_FULL_MASK);
+            if (auto const aura = caster->GetAura(aurEff->GetId()))
+            {
+                if (aura->GetDuration() > 1.5 * IN_MILLISECONDS)
+                    caster->CastSpell(target, SPELL_QUIVERING_PALM, true);
+                else
+                    caster->CastSpell(target, SPELL_FLYING_KICK, true);
+            }
         }
 
         void Register()
@@ -1653,6 +1687,37 @@ public:
     };
 };
 
+class spell_spm_parry_stance : public SpellScriptLoader
+{
+public:
+    spell_spm_parry_stance() : SpellScriptLoader("spell_spm_parry_stance") { }
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_spm_parry_stance_AuraScript();
+    }
+
+    class spell_spm_parry_stance_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_spm_parry_stance_AuraScript);
+
+        void OnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            auto const owner = GetOwner()->ToCreature();
+            if (!owner)
+                return;
+
+            if (owner->IsAIEnabled)
+                owner->AI()->DoZoneInCombat();
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_spm_parry_stance_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_PACIFY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+};
+
 void AddSC_boss_master_snowdrift()
 {
     new boss_master_snowdrift();
@@ -1664,6 +1729,7 @@ void AddSC_boss_master_snowdrift()
     new npc_snowdrift_fireball();
     new spell_spm_swirling_steel();
     new spell_snowdrift_ball_of_fire();
+    new spell_snowdrift_ball_of_fire_aura();
     new spell_snowdrift_hurl_chi();
     new spell_snowdrift_tornado_slam();
     new spell_snowdrift_tornado_slam_effect();
@@ -1671,5 +1737,6 @@ void AddSC_boss_master_snowdrift()
     new spell_snowdrift_copy_health();
     new spell_snowdrift_ball_of_fire_damage();
     new spell_snowdrift_fists_of_fury();
+    new spell_spm_parry_stance();
     new at_before_snowdrift();
 }

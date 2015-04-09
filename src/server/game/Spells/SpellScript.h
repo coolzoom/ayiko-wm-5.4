@@ -472,6 +472,8 @@ public:
     int32 GetHitHeal();
     void SetHitHeal(int32 heal);
     void PreventHitHeal() { SetHitHeal(0); }
+
+    int32 GetAbsorbedDamage();
     Spell* GetSpell() { return m_spell; }
     // returns current spell hit target aura
     Aura *GetHitAura();

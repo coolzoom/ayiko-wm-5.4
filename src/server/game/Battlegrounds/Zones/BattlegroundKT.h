@@ -39,7 +39,9 @@ enum BG_KT_Objects
     BG_KT_OBJECT_ORB_2          = 3,
     BG_KT_OBJECT_ORB_3          = 4,
     BG_KT_OBJECT_ORB_4          = 5,
-    BG_KT_OBJECT_MAX            = 6
+    BG_KT_OBJECT_BERSERK_1      = 6,
+    BG_KT_OBJECT_BERSERK_2      = 7,
+    BG_KT_OBJECT_MAX            = 8
 };
 
 enum BG_KT_Creatures
@@ -62,7 +64,9 @@ enum BG_KT_Objets_Entry
     BG_KT_OBJECT_ORB_1_ENTRY    = 212091,
     BG_KT_OBJECT_ORB_2_ENTRY    = 212092,
     BG_KT_OBJECT_ORB_3_ENTRY    = 212093,
-    BG_KT_OBJECT_ORB_4_ENTRY    = 212094
+    BG_KT_OBJECT_ORB_4_ENTRY    = 212094,
+    BG_KT_OBJECT_BERSERK_1_ENTRY= 179905,
+    BG_KT_OBJECT_BERSERK_2_ENTRY= 179907
 };
 
 enum BG_KT_Sound

@@ -3022,6 +3022,10 @@ class spell_pri_echo_of_light : public SpellScriptLoader
                     {
                         int32 amount = heal * eff->GetFloatAmount() / 100;
                         amount /= 6; // tick count
+
+                        auto const remaining = target->GetRemainingPeriodicAmount(caster->GetGUID(), 77489, SPELL_AURA_PERIODIC_HEAL);
+                        amount += remaining.perTick();
+
                         if (amount)
                             caster->CastCustomSpell(target, SPELL_PRIEST_ECHO_OF_LIGHT_HEAL, &amount, NULL, NULL, true);
                     }

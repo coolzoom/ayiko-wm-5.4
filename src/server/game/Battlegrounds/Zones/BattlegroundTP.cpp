@@ -143,7 +143,7 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
         if (m_BothFlagsKept)
         {
             m_FlagSpellForceTimer += diff;
-            if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= 600000)  // 10 minutes
+            if (m_FlagDebuffState == 0 && m_FlagSpellForceTimer >= MINUTE*IN_MILLISECONDS)  //1 minutes for first focused assault
             {
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
                     player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
@@ -152,25 +152,54 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
                     player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
 
                 m_FlagDebuffState = 1;
+                m_FlagSpellForceTimer = 0;
             }
-            else if (m_FlagDebuffState == 1 && m_FlagSpellForceTimer >= 900000) // 15 minutes
+            else if (m_FlagDebuffState > 0 && m_FlagDebuffState < 4 && m_FlagSpellForceTimer >= 30 *IN_MILLISECONDS) // Every 30 seconds after spell cast stack it
             {
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
-                {
-                    player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
-                    player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
-                }
+                    player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
 
                 if (Player * player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+                    player->CastSpell(player, TP_SPELL_FOCUSED_ASSAULT, true);
+
+                m_FlagSpellForceTimer = 0;
+                m_FlagDebuffState++;
+            }
+            else if (m_FlagDebuffState > 3 && m_FlagSpellForceTimer >= 30 * IN_MILLISECONDS) // After 7 minutes apply Brutal Assault
+            {
+                if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
                 {
                     player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
-                    player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
+                    // At change to Brutal Assault it start from 5 stacks
+                    uint8 stacks = (m_FlagDebuffState == 4) ? 5 : 1;
+                    for (uint8 i = 0; i < stacks; ++i)
+                        player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
                 }
-                m_FlagDebuffState = 2;
+                if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+                {
+                    player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                    // At change to Brutal Assault it start from 5 stacks
+                    uint8 stacks = (m_FlagDebuffState == 4) ? 5 : 1;
+                    for (uint8 i = 0; i < stacks; ++i)
+                        player->CastSpell(player, TP_SPELL_BRUTAL_ASSAULT, true);
+                }
+                m_FlagSpellForceTimer = 0;
+                m_FlagDebuffState++;
             }
         }
         else
         {
+            if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[0]))
+            {
+                player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                player->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+            if (Player* player = ObjectAccessor::FindPlayer(_flagKeepers[1]))
+            {
+                player->RemoveAurasDueToSpell(TP_SPELL_FOCUSED_ASSAULT);
+                player->RemoveAurasDueToSpell(TP_SPELL_BRUTAL_ASSAULT);
+            }
+
             m_FlagSpellForceTimer = 0; // reset timer.
             m_FlagDebuffState = 0;
         }
@@ -240,6 +269,9 @@ void BattlegroundTP::RespawnFlag(uint32 Team, bool captured)
         SendMessageToAll(LANG_BG_TP_F_PLACED, CHAT_MSG_BG_SYSTEM_NEUTRAL);
         PlaySoundToAll(BG_TP_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
     }
+    else
+        UpdateFlagAreaTriggers();
+
     m_BothFlagsKept = false;
 }
 
@@ -609,6 +641,33 @@ void BattlegroundTP::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
+void BattlegroundTP::UpdateFlagAreaTriggers()
+{
+    if (Player* player = ObjectAccessor::FindPlayer(GetHordeFlagPickerGUID()))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(5904);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+
+    if (Player* player = ObjectAccessor::FindPlayer(GetAllianceFlagPickerGUID()))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(5905);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+}
+
 void BattlegroundTP::RemovePlayer(Player *player, uint64 guid, uint32)
 {
     // sometimes flag auras are not removed :(
@@ -840,26 +899,11 @@ WorldSafeLocsEntry const* BattlegroundTP::GetClosestGraveYard(Player* player)
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
         {
-            WorldSafeLocsEntry const* ret;
-            WorldSafeLocsEntry const* closest;
-            float dist, nearest;
-            float x, y, z;
-
-            player->GetPosition(x, y, z);
-
-            closest = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_ALLIANCE);
-            nearest = sqrt((closest->x - x)*(closest->x - x) + (closest->y - y)*(closest->y - y)+(closest->z - z)*(closest->z - z));
-
-            ret = sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_ALLIANCE);
-            dist = sqrt((ret->x - x)*(ret->x - x) + (ret->y - y)*(ret->y - y)+(ret->z - z)*(ret->z - z));
-
-            if (dist < nearest)
-            {
-                closest = ret;
-                nearest = dist;
-            }
-
-            return closest;
+            // Enemy Flagroom & area around it should make you spawn at start graveyard
+            if (player->GetAreaId() == 5775 || player->GetAreaId() == 5681)
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_ALLIANCE);
+            else
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_ALLIANCE);
         }
         else
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_ALLIANCE);
@@ -867,7 +911,13 @@ WorldSafeLocsEntry const* BattlegroundTP::GetClosestGraveYard(Player* player)
     else
     {
         if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_HORDE);
+        {
+            // Enemy Flagroom & area around it should make you spawn at start graveyard
+            if (player->GetAreaId() == 5776 || player->GetAreaId() == 5680)
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_START_HORDE);
+            else
+                return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_MIDDLE_HORDE);
+        }
         else
             return sWorldSafeLocsStore.LookupEntry(TP_GRAVEYARD_FLAGROOM_HORDE);
     }

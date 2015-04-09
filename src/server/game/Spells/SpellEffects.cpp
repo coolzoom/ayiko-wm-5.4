@@ -2163,7 +2163,7 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
                 if (unitTarget->GetGUID() == caster->GetGUID())
                     if (AuraEffect* bastion = caster->GetAuraEffect(114637, EFFECT_0))
                     {
-                        AddPct(addhealth, (bastion->GetBase()->GetStackAmount() * bastion->GetAmount()));
+                        AddPct(addhealth, bastion->GetAmount());
                         // Set duration to 1 to let aura amount calculation benefit from it too
                         bastion->GetBase()->SetDuration(1);
                     }

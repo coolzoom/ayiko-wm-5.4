@@ -62,6 +62,7 @@
 #include "SpellAuraEffects.h"
 #include "ScriptMgr.h"
 #include "ObjectVisitors.hpp"
+#include "Chat.h"
 
 #include <numeric>
 
@@ -7249,7 +7250,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (effIndex != EFFECT_0 || procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK || !roll_chance_f(triggeredByAura->GetAmount()))
                         return false;
 
-                    if (procSpell && procSpell->Id == 86392)
+                    if (procSpell && (procSpell->Id == 86392 || procSpell->Id == 22482))
                         return false;
 
                     triggered_spell_id = 86392;
@@ -11070,7 +11071,7 @@ void Unit::ModifyAuraState(AuraStateType flag, bool apply)
                 SpellInfo const* spellProto = (*itr).second->GetBase()->GetSpellInfo();
                 if (!spellProto)
                     continue;
-                if (spellProto->CasterAuraState == uint32(flag)) // Don't remove Second Wind, implemented in ::HandlePeriodicHealAurasTick
+                if (spellProto->CasterAuraState == uint32(flag))
                     RemoveAura(itr);
                 else
                     ++itr;
@@ -12439,6 +12440,9 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
 float Unit::GetSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType) const
 {
     float crit_chance = 0.0f;
+
+    if (spellProto->AttributesEx2 & SPELL_ATTR2_CANT_CRIT)
+        return crit_chance;
 
     // Pets have 100% of owner's crit_chance
     if (isPet() && GetOwner())
@@ -18091,6 +18095,15 @@ void Unit::Kill(Unit* victim, bool durabilityLoss, SpellInfo const* spellProto)
         else if (GetTypeId() == TYPEID_PLAYER && victim != this)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, ToPlayer()->GetTeam());
     }
+
+	// April fools
+	if (victim->GetTypeId() == TYPEID_PLAYER && sWorld->getBoolConfig(CONFIG_APRIL_FOOLS_PERMA_DEATH))
+	{
+		ChatHandler(victim->ToPlayer()->GetSession()).PSendSysMessage("You have died. Your character has been deleted.");
+		victim->ToPlayer()->SetAtLoginFlag(AT_LOGIN_NO_CHAR);
+		victim->ToPlayer()->m_forcedLogoutTime = 1000; // In one second, start stage count down
+		victim->ToPlayer()->m_forcedLogoutEventStage = 10; // We start at 10, and count down
+	}
 
     // Hook for OnPVPKill Event
     if (Player* killerPlr = ToPlayer())

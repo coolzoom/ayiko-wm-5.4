@@ -307,10 +307,10 @@ class boss_jikun : public CreatureScript
             void SummonEggs()
             {
                 // 5 places of eggs
-                for (uint8 i = 0; i <= 4; ++i)
+                for (uint8 i = 0; i < 5; ++i)
                 {
                     // bottom places 15 eggs in nest
-                    for (uint8 j = 0; j <= EggsLowNest-1; ++j)
+                    for (uint8 j = 0; j < EggsLowNest; ++j)
                     {
                         Position summonPos;
                         me->GetRandomPoint(NestPositionsGround[i], 7.0f, summonPos);
@@ -320,7 +320,7 @@ class boss_jikun : public CreatureScript
                     }
 
                     // top places 10 eggs in nest
-                    for (uint8 c = 0; c <= EggsHighNest-1; ++c)
+                    for (uint8 c = 0; c < EggsHighNest; ++c)
                     {
                         Position summonPosHigh;
                         me->GetRandomPoint(NestPositionsHigh[i], 6.0f, summonPosHigh);
@@ -393,15 +393,16 @@ class boss_jikun : public CreatureScript
 
                 _Reset();
 
-                //SummonEggs();
+                SummonEggs();
 
                 if (instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
+
+                DoAction(0);
             }
 
             void EnterCombat(Unit* who)
             {
-                me->MonsterYell("Welcome to pandawow.ir . We are first mist of pandaria 5.4.8 in Asia .", LANG_UNIVERSAL, 0);
                 DoCast(me, SPELL_INFECTED_TALONS_AURA);
 
                 events.ScheduleEvent(EVENT_TALON_RAKE, 5000); 

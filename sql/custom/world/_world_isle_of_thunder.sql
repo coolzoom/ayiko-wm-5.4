@@ -625,6 +625,7 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (217752, 5, 13509, 'Garde-périmètre, poteau de Kun-Lai', '', '', '', 0, 0, 1.35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (217758, 10, 13584, 'Sunreaver Perimeter Ward', '', 'Destruction', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 0, 32634, 0, 0, 136610, 1, 0, 0, 24585, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1);
 
+DELETE FROM `spell_area` WHERE spell=59073 AND area=5842;
 REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES 
 (59073, 5842, 32680, 0, 0, 0, 2, 1, 66, 11),
 (59073, 5842, 32681, 0, 0, 0, 2, 1, 66, 11);
@@ -5735,6 +5736,7 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (67991, 0, 0, 0, 4, 0, 100, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Silvermoon Spellbreaker - On Aggro - Say Line 0'),
 (67992, 0, 0, 1, 62, 0, 100, 0, 245, 0, 0, 0, 62, 1064, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7051.28, 5227.56, 82.51, 5.5, 'Lady Jaina Proudmoore - On Gossip Option 0 Selected - Teleport'),
 (67992, 0, 1, 0, 61, 0, 100, 0, 245, 0, 0, 0, 33, 67992, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Lady Jaina Proudmoore - On Gossip Option 0 Selected - Quest Credit \'The Fall of Shan Bu\''),
+(67992, 0, 2, 0, 1, 0, 100, 0, 0, 0, 1000, 1000, 33, 70364, 0, 0, 0, 0, 0, 18, 100, 0, 0, 0, 0, 0, 0, "Lady Jaina Proudmoore - Out of Combat - Quest Credit 'The Storm Gathers'"),
 (67993, 0, 0, 1, 0, 0, 100, 0, 0, 0, 5000, 8000, 46, 15, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - In Combat - Move Forward 15 Yards'),
 (67993, 0, 1, 2, 61, 0, 100, 0, 0, 0, 5000, 8000, 11, 97156, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - In Combat - Cast \'<Spell not found!>\''),
 (67993, 0, 2, 0, 61, 0, 100, 0, 0, 0, 5000, 8000, 11, 140339, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - In Combat - Cast \'<Spell not found!>\''),
@@ -6137,25 +6139,30 @@ REPLACE INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event
 (217165, 1, 0, 2, 70, 0, 100, 0, 2, 0, 0, 0, 33, 69186, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - On Gameobject State Changed - Quest Credit \'Bolstering the Defenses\''),
 (217165, 1, 1, 0, 1, 0, 100, 0, 0, 0, 30000, 30000, 104, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - Out of Combat - Set Gameobject Flag '),
 (217165, 1, 2, 0, 61, 0, 100, 0, 2, 0, 0, 0, 104, 16, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Garde-périmètre, réverbère mogu - On Gameobject State Changed - Set Gameobject Flag Not Selectable'),
-(70358, 0, 0, 10, 62, 0, 100, 0, 64940, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Add Aura \'<Spell not found!>\''),
-(70358, 0, 1, 8, 62, 0, 100, 0, 64940, 0, 0, 0, 1, 0, 12000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Say Line 0'),
-(70358, 0, 2, 0, 52, 0, 100, 0, 0, 70358, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 0 Over - Say Line 1'),
-(70358, 0, 3, 0, 52, 0, 100, 0, 1, 70358, 0, 0, 1, 2, 9000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 1 Over - Say Line 2'),
-(70358, 0, 4, 0, 52, 0, 100, 0, 2, 70358, 0, 0, 1, 3, 7000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 2 Over - Say Line 3'),
-(70358, 0, 8, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 33, 70358, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Quest Credit \'The Storm Gathers\''),
-(70358, 0, 9, 0, 52, 0, 100, 0, 3, 70358, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Text 3 Over - Remove Aura \'<Spell not found!>\''),
-(70358, 0, 10, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Scout Captain Elsia - On Gossip Option 0 Selected - Close Gossip'),
-(70360, 0, 0, 1, 62, 0, 100, 0, 70360, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Add Aura \'<Spell not found!>\''),
-(70360, 0, 1, 9, 61, 0, 100, 0, 70360, 0, 0, 0, 1, 0, 7000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Say Line 0'),
-(70360, 0, 2, 0, 52, 0, 100, 0, 0, 70360, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 0 Over - Say Line 1'),
-(70360, 0, 3, 0, 52, 0, 100, 0, 1, 70360, 0, 0, 1, 2, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 1 Over - Say Line 2'),
-(70360, 0, 4, 0, 52, 0, 100, 0, 2, 70360, 0, 0, 1, 3, 5000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 2 Over - Say Line 3'),
-(70360, 0, 5, 0, 52, 0, 100, 0, 3, 0, 0, 0, 1, 4, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 3 Over - Say Line 4'),
-(70360, 0, 6, 0, 52, 0, 100, 0, 4, 70360, 0, 0, 1, 5, 3000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 4 Over - Say Line 5'),
-(70360, 0, 7, 0, 52, 0, 100, 0, 5, 70360, 0, 0, 1, 6, 4000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 5 Over - Say Line 6'),
-(70360, 0, 8, 0, 52, 0, 100, 0, 6, 70360, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Text 6 Over - Remove Aura \'<Spell not found!>\''),
-(70360, 0, 9, 10, 61, 0, 100, 0, 70360, 0, 0, 0, 33, 70360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Quest Credit \'The Storm Gathers\''),
-(70360, 0, 10, 0, 61, 0, 100, 0, 70360, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Vereesa Windrunner - On Gossip Option 0 Selected - Close Gossip');
+(70358, 0, 0, 10, 62, 0, 100, 0, 64940, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Add Aura '<Spell not found!>'"),
+(70358, 0, 1, 10, 62, 0, 100, 0, 64940, 0, 0, 0, 1, 0, 12000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Say Line 0"),
+(70358, 0, 2, 0, 52, 0, 100, 0, 0, 70358, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 0 Over - Say Line 1"),
+(70358, 0, 3, 0, 52, 0, 100, 0, 1, 70358, 0, 0, 1, 2, 9000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 1 Over - Say Line 2"),
+(70358, 0, 4, 0, 52, 0, 100, 0, 2, 70358, 0, 0, 1, 3, 7000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 2 Over - Say Line 3"),
+(70358, 0, 8, 9, 52, 0, 100, 0, 3, 70358, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Text 3 Over - Remove Aura '<Spell not found!>'"),
+(70358, 0, 9, 0, 61, 0, 100, 0, 3, 70358, 0, 0, 62, 1064, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7220.35, 6312.28, 12.47, 3.911, "Scout Captain Elsia - On Text 3 Over - Teleport"),
+(70358, 0, 10, 11, 61, 0, 100, 0, 64940, 0, 0, 0, 33, 70358, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Quest Credit 'The Storm Gathers'"), 
+(70358, 0, 11, 0, 61, 0, 100, 0, 64940, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Scout Captain Elsia - On Gossip Option 0 Selected - Close Gossip"),
+(70360, 0, 0, 1, 62, 0, 100, 0, 70360, 0, 0, 0, 75, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Add Aura '<Spell not found!>'"),
+(70360, 0, 1, 10, 61, 0, 100, 0, 70360, 0, 0, 0, 1, 0, 7000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Say Line 0"),
+(70360, 0, 2, 0, 52, 0, 100, 0, 0, 70360, 0, 0, 1, 1, 11000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 0 Over - Say Line 1"),
+(70360, 0, 3, 0, 52, 0, 100, 0, 1, 70360, 0, 0, 1, 2, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 1 Over - Say Line 2"),
+(70360, 0, 4, 0, 52, 0, 100, 0, 2, 70360, 0, 0, 1, 3, 5000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 2 Over - Say Line 3"),
+(70360, 0, 5, 0, 52, 0, 100, 0, 3, 0, 0, 0, 1, 4, 8000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 3 Over - Say Line 4"),
+(70360, 0, 6, 0, 52, 0, 100, 0, 4, 70360, 0, 0, 1, 5, 3000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 4 Over - Say Line 5"),
+(70360, 0, 7, 0, 52, 0, 100, 0, 5, 70360, 0, 0, 1, 6, 4000, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 5 Over - Say Line 6"),
+(70360, 0, 8, 9, 52, 0, 100, 0, 6, 70360, 0, 0, 28, 97936, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Text 6 Over - Remove Aura '<Spell not found!>'"),
+(70360, 0, 9, 0, 61, 0, 100, 0, 6, 70360, 0, 0, 62, 1064, 0, 0, 0, 0, 0, 7, 0, 0, 0, 6158.81, 5022.57, 36.97, 1.521, "Vereesa Windrunner - On Text 6 Over - Teleport"),
+(70360, 0, 10, 11, 61, 0, 100, 0, 70360, 0, 0, 0, 33, 70360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Quest Credit 'The Storm Gathers'"),
+(70360, 0, 11, 0, 61, 0, 100, 0, 70360, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Vereesa Windrunner - On Gossip Option 0 Selected - Close Gossip"),
+(67663, 0, 0, 0, 1, 0, 100, 0, 0, 0, 1000, 1000, 33, 70365, 0, 0, 0, 0, 0, 18, 200, 0, 0, 0, 0, 0, 0, "Magister Hathorel - Out of Combat - Quest Credit 'The Storm Gathers'");
+
+
 
 
 /******************************** UPDATE QUERIES ************************************/
@@ -6169,6 +6176,7 @@ DELETE FROM `creature_questender` WHERE id=64566 AND quest=32678;
 UPDATE `gameobject` SET position_x=1928.39, position_y=4222.1, position_z=132.486, orientation=2.8239 WHERE id=218463;
 UPDATE `quest_template` SET prevQuestId=0 WHERE Id=32681;
 UPDATE `quest_template` SET NextQuestId=0, NextQuestIdChain=0 WHERE id=32679;
+UPDATE `quest_template` SET prevQuestId=0 WHERE id=32680;
 UPDATE `quest_objective` SET objectId=69265 WHERE questId=32526;
 UPDATE `quest_objective` SET objectId=69894 WHERE questId=32533;
 
@@ -6515,12 +6523,13 @@ INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_pos
 (138815, 0, 870, 1921.75, 4224.25, 132.41, 2.82),
 (138818, 0, 870, 1753.55, 4166.26, 159.5, 5.7);
 
--DELETE FROM `creature_aura` WHERE guid IN(993500, 993501, 350953, 350954);
--INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
+DELETE FROM `creature_aura` WHERE guid IN(993500, 993501, 350953, 350954);
+INSERT INTO `creature_aura` (`guid`, `aura`) VALUES
 (993500, 137503),
 (993501, 137503),
 (350953, 137503),
 (350954, 137503);
 
+DELETE FROM `event_scripts` WHERE id IN(216991);
 INSERT INTO `event_scripts` (`id`, `delay`, `command`, `datalong`, `datalong2`, `dataint`, `x`, `y`, `z`, `o`) VALUES 
 (216991, 0, 8, 69160, 1, 0, 0, 0, 0, 0);

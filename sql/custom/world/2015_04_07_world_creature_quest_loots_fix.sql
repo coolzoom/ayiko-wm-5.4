@@ -952,3 +952,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `creature` WHERE `id`=37153;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (37153, 1, 0, 0, 1, 1, 0, 0, -618.625, -1429.13, 155.722, 2.3703, 60, 0, 0, 2537, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Rezlak now give the quests to alliance as well */
+UPDATE `quest_template` SET `RequiredRaces` = 0 WHERE `Id` IN (834,835);
+UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 835;

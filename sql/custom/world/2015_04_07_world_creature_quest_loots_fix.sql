@@ -827,3 +827,6 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 1 AND `SourceGroup` = 
 
 /* Dung Beetle fixed */
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1 WHERE `entry` = 49743;
+
+/* Megs Dreadshredder (quest giver) fix */
+DELETE FROM `creature_queststarter` WHERE `id` = 38534 AND `quest` IN (27447,28509);

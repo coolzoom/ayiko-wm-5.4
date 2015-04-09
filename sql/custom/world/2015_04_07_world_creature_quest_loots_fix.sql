@@ -833,3 +833,9 @@ DELETE FROM `creature_queststarter` WHERE `id` = 38534 AND `quest` IN (27447,285
 
 /* Pozzik (quest giver) fix */
 DELETE FROM `creature_queststarter` WHERE `id` = 40028 AND `quest` = 28161;
+
+/* Anger'rel fixed */
+UPDATE `creature_template` SET `equipment_id` = 9035 WHERE `entry` = 9035;
+DELETE FROM `creature_equip_template` WHERE (`entry`=9035);
+INSERT INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES 
+(9035, 65476, 15014, 0);

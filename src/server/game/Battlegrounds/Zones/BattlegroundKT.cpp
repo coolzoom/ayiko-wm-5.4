@@ -337,7 +337,7 @@ void BattlegroundKT::HandleKillPlayer(Player *player, Player *killer)
         return;
 
     EventPlayerDroppedOrb(player, player->GetGUID(), player->GetTeam());
-    AccumulateScore(player->GetTeamId(), KT_KILLING_BLOW);
+    AccumulateScore(killer->GetTeamId(), KT_KILLING_BLOW);
 
     Battleground::HandleKillPlayer(player, killer);
 }

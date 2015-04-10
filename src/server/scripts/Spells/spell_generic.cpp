@@ -4080,19 +4080,13 @@ class spell_gen_orb_of_power final : public SpellScriptLoader
         {
             // Stack amount over time
             if (auto eff0 = GetEffect(EFFECT_0))
-            {
-                // Limit stacking
-                if (eff->GetAmount() <= -100)
-                    return;
-
-                eff0->SetAmount(eff0->GetAmount() - 5);
-            }
+                eff0->SetAmount(std::max(-100, int32(eff0->GetAmount() - 5)));
 
             if (auto eff1 = GetEffect(EFFECT_1))
                 eff1->SetAmount(eff1->GetAmount() + 30);
 
             if (auto eff2 = GetEffect(EFFECT_2))
-                eff2->SetAmount(eff2->GetAmount() + 10);
+                eff2->SetAmount(std::min(100, int32(eff2->GetAmount() + 10)));
         }
 
         void Register() final

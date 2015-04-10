@@ -1,0 +1,1 @@
+UPDATE battleground_template SET StartMaxDist=30 WHERE id=699;

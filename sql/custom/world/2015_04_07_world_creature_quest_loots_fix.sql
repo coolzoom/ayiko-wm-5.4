@@ -833,3 +833,215 @@ DELETE FROM `creature_queststarter` WHERE `id` = 38534 AND `quest` IN (27447,285
 
 /* Pozzik (quest giver) fix */
 DELETE FROM `creature_queststarter` WHERE `id` = 40028 AND `quest` = 28161;
+
+/* Anger'rel fixed */
+UPDATE `creature_template` SET `equipment_id` = 9035 WHERE `entry` = 9035;
+DELETE FROM `creature_equip_template` WHERE (`entry`=9035);
+INSERT INTO `creature_equip_template` (`entry`, `itemEntry1`, `itemEntry2`, `itemEntry3`) VALUES 
+(9035, 65476, 15014, 0);
+
+/* Ok'thor the Breaker faction fixed */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 9030;
+
+/* Hierophant Theodora Mulvadania missing spawn added */
+DELETE FROM `creature` WHERE `id`=45817;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(45817, 230, 0, 0, 2, 1, 0, 0, 837.494, -134.253, -54.101, 1.00787, 7200, 0, 0, 5742, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Galamav the Marksman missing spawn added */
+DELETE FROM `creature` WHERE `id`=45839;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(45839, 230, 0, 0, 2, 1, 0, 0, 488.255, 4.58772, -70.4265, 2.36387, 7200, 0, 0, 4594, 2289, 0, 0, 0, 0, 0, 0, 0);
+
+/* Thal'trak Proudtusk missing spawn added */
+DELETE FROM `creature` WHERE `id`= 45821;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(45821, 230, 0, 0, 2, 1, 0, 0, 460.21, 10.6469, -71.1, 1.69235, 7200, 0, 0, 5228, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Lor'danel Sentinel fixed */
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=33115 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(33115, 0, 0, 0, 0, 0, 100, 0, 2000, 4500, 12000, 20000, 11, 64439, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Lor'danel Sentinel - Cast Flame Arrow");
+
+/* Ban'thalos fixed */
+UPDATE `creature_template` SET `speed_walk` = 1, `speed_run` = 1.15 WHERE `entry` = 54320;
+
+/* Warden Thelwater fixed */
+UPDATE `creature` SET `MovementType` = 0 WHERE `id` = 46409;
+
+/* Hardened Steel Skycaller fixed */
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=28580 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(28580, 0, 0, 1, 4, 0, 100, 3, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28580, 0, 1, 2, 61, 0, 100, 3, 0, 0, 0, 0, 11, 16100, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot on Aggro"),
+(28580, 0, 2, 3, 61, 0, 100, 3, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28580, 0, 3, 0, 61, 0, 100, 3, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28580, 0, 4, 5, 9, 1, 100, 2, 5, 30, 2300, 3900, 11, 16100, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot"),
+(28580, 0, 5, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28580, 0, 6, 7, 9, 1, 100, 2, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 7, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 8, 9, 9, 1, 100, 2, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 9, 10, 61, 1, 100, 2, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Shoot Range"),
+(28580, 0, 10, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 11, 12, 9, 1, 100, 2, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28580, 0, 12, 13, 61, 1, 100, 2, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28580, 0, 13, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28580, 0, 14, 15, 7, 1, 100, 3, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28580, 0, 15, 0, 61, 1, 100, 3, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28580, 0, 16, 17, 4, 0, 100, 5, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28580, 0, 17, 18, 61, 0, 100, 5, 0, 0, 0, 0, 11, 61515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot on Aggro"),
+(28580, 0, 18, 19, 61, 0, 100, 5, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28580, 0, 19, 0, 61, 0, 100, 5, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28580, 0, 20, 21, 9, 1, 100, 4, 5, 30, 2300, 3900, 11, 61515, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Shoot"),
+(28580, 0, 21, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28580, 0, 22, 23, 9, 1, 100, 4, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 23, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 24, 25, 9, 1, 100, 4, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Shoot Range"),
+(28580, 0, 25, 26, 61, 1, 100, 4, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Shoot Range"),
+(28580, 0, 26, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Shoot Range"),
+(28580, 0, 27, 28, 9, 1, 100, 4, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28580, 0, 28, 29, 61, 1, 100, 4, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28580, 0, 29, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28580, 0, 30, 31, 7, 1, 100, 5, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28580, 0, 31, 0, 61, 1, 100, 5, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28580, 0, 32, 21, 9, 1, 100, 2, 5, 30, 15000, 20000, 11, 52754, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Shot"),
+(28580, 0, 33, 21, 9, 1, 100, 2, 5, 30, 12000, 18000, 11, 52755, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Multi-Shot"),
+(28580, 0, 34, 21, 9, 1, 100, 4, 5, 30, 15000, 20000, 11, 59148, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Shot"),
+(28580, 0, 35, 21, 9, 1, 100, 4, 5, 30, 12000, 18000, 11, 59147, 1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, "Cast Impact Multi-Shot"),
+(28580, 0, 36, 0, 9, 1, 100, 6, 0, 5, 6000, 9000, 11, 61507, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Cast Disengage on Close");
+
+/* Hardened Steel Berserker fixed */
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=28579 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(28579, 0, 0, 1, 4, 0, 100, 3, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28579, 0, 1, 2, 61, 0, 100, 3, 0, 0, 0, 0, 11, 52740, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Throw on Aggro"),
+(28579, 0, 2, 3, 61, 0, 100, 3, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28579, 0, 3, 0, 61, 0, 100, 3, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28579, 0, 4, 5, 9, 1, 100, 2, 5, 30, 2300, 3900, 11, 52740, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Throw"),
+(28579, 0, 5, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28579, 0, 6, 7, 9, 1, 100, 2, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Throw Range"),
+(28579, 0, 7, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Throw Range"),
+(28579, 0, 8, 9, 9, 1, 100, 2, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Throw Range"),
+(28579, 0, 9, 10, 61, 1, 100, 2, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Throw Range"),
+(28579, 0, 10, 0, 61, 1, 100, 2, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Throw Range"),
+(28579, 0, 11, 12, 9, 1, 100, 2, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28579, 0, 12, 13, 61, 1, 100, 2, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28579, 0, 13, 0, 61, 1, 100, 2, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28579, 0, 14, 15, 7, 1, 100, 3, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28579, 0, 15, 0, 61, 1, 100, 3, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28579, 0, 16, 17, 4, 0, 100, 5, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving on Aggro"),
+(28579, 0, 17, 18, 61, 0, 100, 5, 0, 0, 0, 0, 11, 59259, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Throw on Aggro"),
+(28579, 0, 18, 19, 61, 0, 100, 5, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack on Aggro"),
+(28579, 0, 19, 0, 61, 0, 100, 5, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Phase 1 on Aggro"),
+(28579, 0, 20, 21, 9, 1, 100, 4, 5, 30, 2300, 3900, 11, 59259, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Throw"),
+(28579, 0, 21, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model"),
+(28579, 0, 22, 23, 9, 1, 100, 4, 30, 80, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Throw Range"),
+(28579, 0, 23, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Throw Range"),
+(28579, 0, 24, 25, 9, 1, 100, 4, 0, 10, 0, 0, 21, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Moving when not in Throw Range"),
+(28579, 0, 25, 26, 61, 1, 100, 4, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model when not in Throw Range"),
+(28579, 0, 26, 0, 61, 1, 100, 4, 0, 0, 0, 0, 20, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Start Melee Attack when not in Throw Range"),
+(28579, 0, 27, 28, 9, 1, 100, 4, 11, 25, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Moving at 25 Yards"),
+(28579, 0, 28, 29, 61, 1, 100, 4, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Stop Melee Attack at 25 Yards"),
+(28579, 0, 29, 0, 61, 1, 100, 4, 0, 0, 0, 0, 40, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Ranged Weapon Model at 25 Yards"),
+(28579, 0, 30, 31, 7, 1, 100, 5, 0, 0, 0, 0, 40, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Set Melee Weapon Model on Evade"),
+(28579, 0, 31, 0, 61, 1, 100, 5, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Reset on Evade"),
+(28579, 0, 32, 0, 2, 0, 100, 7, 0, 30, 0, 0, 11, 61369, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Cast Enrage at 30% HP"),
+(28579, 0, 33, 0, 2, 0, 100, 7, 0, 30, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Say Text at 30% HP");
+
+/* Holgom missing spawn added */
+DELETE FROM `creature` WHERE `id`=37153;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(37153, 1, 0, 0, 1, 1, 0, 0, -618.625, -1429.13, 155.722, 2.3703, 60, 0, 0, 2537, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Rezlak now give the quests to alliance as well */
+UPDATE `quest_template` SET `RequiredRaces` = 0 WHERE `Id` IN (834,835);
+UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 835;
+
+/* Quest: Falling to Corruption old prerequisite removed now players can start the quest directly by Donova Snowden */
+UPDATE `quest_template` SET `NextQuestIdChain` = 0, `Flags` = 16384 WHERE `Id` = 28462;
+UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 28464;
+
+/* Quest: The Pursuit of Umbranse now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28847;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (50366, 28847);
+
+/* Quest: Exterminators at Work now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28676;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11079, 28676);
+
+/* Quest: Hammer Time now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28609;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11191, 28609);
+
+/* Quest: Delivery for Donova now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28524;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11556, 28524);
+
+/* Quest: Nice Hat... now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 12513;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (28126, 12513);
+
+/* Cutodian Dieworth now don't start wrong quests */
+DELETE FROM `creature_queststarter` WHERE `quest` IN (10182,10305,10306,10307);
+
+/* Twilight Cryptomancer SAI added */
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 44855;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=44855 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(44855, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Remove all aura OOC"),
+(44855, 0, 1, 0, 0, 0, 100, 1, 1, 1, 0, 0, 11, 79849, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Molten Armor"),
+(44855, 0, 2, 0, 0, 0, 100, 0, 9000, 12000, 10000, 12000, 11, 79857, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Blast Wave"),
+(44855, 0, 3, 0, 0, 0, 100, 0, 2500, 3000, 3000, 5000, 11, 79854, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Fireball");
+
+/* Zarrin <Cooking Trainer> fixed */
+UPDATE `creature_template` SET `gossip_menu_id` = 646 WHERE `entry` = 6286;
+
+/* Razormane Wolf fixed */
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 3939;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=3939 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(3939, 0, 0, 0, 0, 0, 100, 1, 30000, 30000, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Razormane Wolf - Despawn after 30 seconds");
+
+/* Dire Condor fixed */
+UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 428;
+
+/* Dire Wolf fixed */
+UPDATE `creature_template` SET `unit_flags` = 67108880 WHERE `entry` = 43704;
+
+/* Naga Explorer double spawn fixed */
+DELETE FROM `creature` WHERE `id`=1907;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13685.9, 503.687, 34.5387, 2.0277, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13702.5, 569.444, 18.1768, 5.01951, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13690.4, 618.826, 10.3495, 4.03791, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13723.1, 536.289, 38.7318, 4.22864, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13707.6, 650.949, 4.08576, 0.919555, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13781.4, 584.205, 46.1172, 0.83377, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13786.9, 647.548, 14.5426, 1.93025, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13744, 622.86, 15.3586, 1.11818, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13779.6, 497.001, 69.5664, 2.68182, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13736.7, 496.146, 57.6843, 1.69612, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13751.6, 554.217, 47.5036, 2.01144, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13820.9, 548.43, 46.6702, 1.44479, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1738, 1, 1, 0, 0, -13787.5, 437.659, 92.3298, 5.59832, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1738, 1, 1, 0, 0, -13818.3, 442.326, 90.7747, 5.50296, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13879.1, 685.06, 7.98386, 6.08725, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13924.5, 652.451, 8.23325, 4.66546, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13879.4, 619.873, 24.9282, 3.90308, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13850.2, 587.196, 47.0982, 6.24609, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1738, 1, 1, 0, 0, -13842.2, 432.188, 90.2303, 2.16421, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1738, 1, 1, 0, 0, -13908.3, 420.123, 98.9534, 2.64489, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13879.8, 503.802, 95.7131, 0.854495, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1738, 1, 1, 0, 0, -13866.5, 432.161, 92.3035, 2.70548, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1577, 1, 1, 0, 0, -13852.9, 487.225, 92.8257, 3.46326, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13858.1, 647.132, 12.933, 0.0998632, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(1907, 0, 5287, 1578, 1, 1, 0, 0, -13819.1, 685.19, 3.70399, 2.17072, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+
+/* Young Wolf fixed */
+UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `faction_A` = 7, `faction_H` = 7 WHERE `entry` = 299;
+
+/* Slaughtered Trogg fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768 WHERE `entry` = 45571;
+
+/* Twilight Abductors fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `VehicleId` = 0 WHERE `entry` IN (45616,45642,45648,45649);

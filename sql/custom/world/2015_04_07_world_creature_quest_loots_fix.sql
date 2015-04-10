@@ -1072,3 +1072,10 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 (56133, 870, 0, 0, 1, 1, 0, 0, -32.9558, -23.5728, 154.618, 2.323, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
 (56133, 870, 0, 0, 1, 1, 0, 0, -708.444, 1257.68, 136.024, 0.742997, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
 (56133, 870, 0, 0, 1, 1, 0, 0, -697.641, 1412.77, 135.561, 6.12685, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0);
+
+/* Spindly Bloodfeather increased drop */
+DELETE FROM `creature_loot_template` WHERE (`entry`=57299) AND (`item`=79198);
+DELETE FROM `creature_loot_template` WHERE (`entry`=58741) AND (`item`=79198);
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(57299, 79198, -35, 1, 0, 1, 1),
+(58741, 79198, -35, 1, 0, 1, 1);

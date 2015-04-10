@@ -956,3 +956,7 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 /* Rezlak now give the quests to alliance as well */
 UPDATE `quest_template` SET `RequiredRaces` = 0 WHERE `Id` IN (834,835);
 UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 835;
+
+/* Quest: Falling to Corruption old prerequisite removed now players can start the quest directly by Donova Snowden */
+UPDATE `quest_template` SET `NextQuestIdChain` = 0, `Flags` = 16384 WHERE `Id` = 28462;
+UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 28464;

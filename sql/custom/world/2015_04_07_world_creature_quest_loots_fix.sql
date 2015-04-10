@@ -968,3 +968,7 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (50366, 28847);
 /* Quest: Exterminators at Work now start only from the right NPC */
 DELETE FROM `creature_queststarter` WHERE `quest` = 28676;
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11079, 28676);
+
+/* Quest: Hammer Time now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28609;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11191, 28609);

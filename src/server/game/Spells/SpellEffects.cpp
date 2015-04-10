@@ -4599,10 +4599,10 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
             {
                 if (bg && bg->GetTypeID(true) == BATTLEGROUND_TP && bg->GetStatus() == STATUS_IN_PROGRESS)
                 {
-                    uint32 team = TEAM_ALLIANCE;
+                    uint32 team = ALLIANCE;
 
-                    if (player->GetTeamId() == team)
-                        team = TEAM_HORDE;
+                    if (player->GetTeam() == team)
+                        team = HORDE;
 
                     ((BattlegroundTP*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID(), team);
                 }

@@ -992,3 +992,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (44855, 0, 1, 0, 0, 0, 100, 1, 1, 1, 0, 0, 11, 79849, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Molten Armor"),
 (44855, 0, 2, 0, 0, 0, 100, 0, 9000, 12000, 10000, 12000, 11, 79857, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Blast Wave"),
 (44855, 0, 3, 0, 0, 0, 100, 0, 2500, 3000, 3000, 5000, 11, 79854, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Twilight Cryptomancer - Cast Fireball");
+
+/* Zarrin <Cooking Trainer> fixed */
+UPDATE `creature_template` SET `gossip_menu_id` = 646 WHERE `entry` = 6286;

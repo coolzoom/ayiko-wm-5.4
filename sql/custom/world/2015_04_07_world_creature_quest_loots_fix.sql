@@ -972,3 +972,7 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11079, 28676);
 /* Quest: Hammer Time now start only from the right NPC */
 DELETE FROM `creature_queststarter` WHERE `quest` = 28609;
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11191, 28609);
+
+/* Quest: Delivery for Donova now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28524;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11556, 28524);

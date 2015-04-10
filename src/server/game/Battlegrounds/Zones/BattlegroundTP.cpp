@@ -56,7 +56,7 @@ BattlegroundTP::BattlegroundTP()
     StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_TP_START_HALF_MINUTE;
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_TP_HAS_BEGUN;
 
-    m_BothFlagsKept = true;
+    m_BothFlagsKept = false;
     m_FlagDebuffState = 0;
     m_FlagSpellForceTimer = 0;
 }

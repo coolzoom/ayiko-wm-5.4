@@ -341,25 +341,25 @@ void AreaTrigger::Update(uint32 p_time)
 
             break;
         }
-        case 106979:// Fire Arrow
-        {
-            std::list<Player*> playerList;
-            GetPlayerListInGrid(playerList, 2.5f);
+        //case 106979:// Fire Arrow
+        //{
+        //    std::list<Player*> playerList;
+        //    GetPlayerListInGrid(playerList, 2.5f);
 
-            for (auto &player : playerList)
-            {
-                if (this->GetDistance2d(player) >= 1.5f)
-                    player->RemoveAura(131241);
-                else
-                {
-                    if (!player->HasAura(131241))
-                        caster->CastSpell(player, 131241, true);
-                }
-            }
+        //    for (auto &player : playerList)
+        //    {
+        //        if (this->GetDistance2d(player) >= 1.5f)
+        //            player->RemoveAura(131241);
+        //        else
+        //        {
+        //            if (!player->HasAura(131241))
+        //                caster->CastSpell(player, 131241, true);
+        //        }
+        //    }
 
-            playerList.clear();
-            break;
-        }
+        //    playerList.clear();
+        //    break;
+        //}
         case 115460:// Healing Sphere
         {
             std::list<Unit*> targetList;
@@ -774,17 +774,17 @@ void AreaTrigger::Remove()
 
                 break;
 			}
-			case 106979:	// Fire Arrow
-			{
-				std::list<Player*> playerList;
-				GetPlayerListInGrid(playerList, 3.0f);
+			//case 106979:	// Fire Arrow
+			//{
+			//	std::list<Player*> playerList;
+			//	GetPlayerListInGrid(playerList, 3.0f);
 
-				for (auto &player : playerList)
-					player->RemoveAura(131241);
+			//	for (auto &player : playerList)
+			//		player->RemoveAura(131241);
 
-				playerList.clear();
-			}
-			break;
+			//	playerList.clear();
+			//}
+			//break;
             default:
                 break;
         }

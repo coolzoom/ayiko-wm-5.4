@@ -3621,6 +3621,19 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(35);
                 spellInfo->AuraInterruptFlags = 0x0;
                 break;
+            case 139847:    // Acid Rain (visual)
+                spellInfo->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 139848:    // Acid Rain (missile)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                spellInfo->Effects[EFFECT_0].TargetB = 0;
+                spellInfo->Effects[EFFECT_0].TriggerSpell = 0;
+                //spellInfo->Effects[EFFECT_0].TriggerSpell = 139850;
+                break;
+            case 139850:     // Acid Rain (damage)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_DEST_AREA_ENEMY);
+                break;
             case 139433:    // Rampage Fire Cast.
                 spellInfo->Effects[0].Effect = SPELL_EFFECT_TRIGGER_MISSILE;
                 spellInfo->Effects[0].TargetA = TARGET_DEST_TARGET_ENEMY;
@@ -3653,9 +3666,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 break;
             case 139866:    // Torrent of Ice.
                 spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
-                break;
-            case 139870:    // Torrent of Ice summon
-                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(245);
                 break;
             case 139758:    // Megaera's Rage
             case 139816:

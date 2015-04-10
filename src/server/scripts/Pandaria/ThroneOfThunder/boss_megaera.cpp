@@ -93,9 +93,10 @@ enum Spells
     SPELL_ARCTIC_FREEZE_STUN    = 139844, // 20 sec stun.
 
     // Venomous Head
-    SPELL_ACID_RAIN             = 134378, // When in Concealing Fog. Each sec triggers SPELL_ACID_GLOB_DUMMY.
-    SPELL_ACID_GLOB_DUMMY       = 134343, // Dummy on eff 0 for SPELL_ACID_GLOB_MISSILE.
-    SPELL_ACID_GLOB_MISSILE     = 134344, // Triggers 1 (Heroic: 3) Acid Splash missiles.
+    SPELL_ACID_RAIN_SUMMON      = 139845, // Summons dummy npc (remove trigger spell)
+    SPELL_ACID_RAIN_VISUAL      = 139847, // Visual for dummy npc
+    SPELL_ACID_RAIN_MISSILE     = 139848, // Should target dummy npc only (needs trigger spell added (DAMAGE below))
+    SPELL_ACID_RAIN_DAMAGE      = 139850, // Damage, needs spellscript for range.
 
     SPELL_ROT_ARMOR             = 139838, // Triggers 139839 per. dmg. + 139840 damage taken debuff. 
 
@@ -126,7 +127,10 @@ enum Npcs
     NPC_ICY_GROUND              = 70446,
 
     // Arcane Head - Heroic only!
-    NPC_NETHER_WYRM             = 70507  // From Nether Tear.
+    NPC_NETHER_WYRM             = 70507,  // From Nether Tear.
+
+    // Venomous Head
+    NPC_ACID_RAIN             = 70435
 };
 
 enum GOs
@@ -280,6 +284,7 @@ class boss_megaera : public CreatureScript
             boss_megaeraAI(Creature* creature) : BossAI(creature, DATA_MEGAERA)
             {
                 instance  = creature->GetInstanceScript();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
 
             InstanceScript* instance;
@@ -361,8 +366,8 @@ class boss_megaera : public CreatureScript
                     return !pCreature->IsAlive();
                 });
 
-                uint32 spell;
-                uint32 offset;
+                uint32 spell = 0;
+                uint32 offset = 0;
                 
                 switch (entry)
                 {
@@ -758,7 +763,7 @@ class boss_megaera : public CreatureScript
                 me->SetReactState(REACT_DEFENSIVE);
 
                 if (instance)
-                    instance->SetData(DATA_MEGAERA, NOT_STARTED);
+                    instance->SetBossState(DATA_MEGAERA, NOT_STARTED);
 
                 _Reset();
 
@@ -794,7 +799,7 @@ class boss_megaera : public CreatureScript
                         concealingHead->AI()->DoZoneInCombat(concealingHead, 150.0f);
                     }
 
-                    instance->SetData(DATA_MEGAERA, IN_PROGRESS);
+                    instance->SetBossState(DATA_MEGAERA, IN_PROGRESS);
                 }
 
                 _EnterCombat();
@@ -896,7 +901,7 @@ class boss_megaera : public CreatureScript
 
                 if (instance)
                 {
-                    instance->SetData(DATA_MEGAERA, FAIL);
+                    instance->SetBossState(DATA_MEGAERA, FAIL);
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me); // Remove
                 }
 
@@ -1006,7 +1011,7 @@ class boss_megaera : public CreatureScript
                 if (instance)
                 {
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
-                    instance->SetData(DATA_MEGAERA, DONE);
+                    instance->SetBossState(DATA_MEGAERA, DONE);
                     instance->DoRespawnGameObject(instance->GetData64(GOB_MEGAERA_CHEST), 86400);
                 }
 
@@ -1051,7 +1056,7 @@ class boss_megaera : public CreatureScript
                             // Check and add the auras.
                             if (!me->HasAura(SPELL_RAMPAGE))
                             {
-                                Talk(ANN_RAMPAGE);
+                                Talk(ANN_RAMPAGE, 0, false, TEXT_RANGE_AREA);
 
                                 me->AddAura(SPELL_RAMPAGE, me);
 
@@ -1093,7 +1098,7 @@ class boss_megaera : public CreatureScript
                             // Check and remove the auras.
                             if (me->HasAura(SPELL_RAMPAGE))
                             {
-                                Talk(ANN_SUBSIDE);
+                                Talk(ANN_SUBSIDE, 0, false, TEXT_RANGE_AREA);
 
                                 me->RemoveAurasDueToSpell(SPELL_RAMPAGE);
 
@@ -1167,6 +1172,20 @@ class npc_flaming_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void JustSummoned(Creature* pSummoned) override
+            {
+                if (pSummoned)
+                {
+                    if (Aura* pAura = me->GetAura(SPELL_ELEMENTAL_BONDS_FIRE))
+                    {
+                        int32 offset = pAura->GetStackAmount();
+
+                        if (Aura* pAura = me->AddAura(SPELL_ELEMENTAL_BONDS_FIRE, pSummoned))
+                            pAura->ModStackAmount(offset - 1);
+                    }
+                }
+            }
+
             void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
             {
                 if (pSpell->Id == SPELL_SUBMERGE)
@@ -1206,12 +1225,11 @@ class npc_flaming_head_megaera : public CreatureScript
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
 				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
-                                        if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
-                                            Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
-
-                                events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
+                                    if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
+                                        if (!me->IsWithinMeleeRange(me->GetVictim()))
+                                            DoCast(me->GetVictim(), SPELL_MEGAERAS_RAGE_FIRE);
                             }
+                            events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
                             break;
 
                         case EVENT_CINDERS:
@@ -1280,6 +1298,20 @@ class npc_frozen_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void JustSummoned(Creature* pSummoned) override
+            {
+                if (pSummoned)
+                {
+                    if (Aura* pAura = me->GetAura(SPELL_ELEMENTAL_BONDS_FROST))
+                    {
+                        int32 offset = pAura->GetStackAmount();
+
+                        if (Aura* pAura = me->AddAura(SPELL_ELEMENTAL_BONDS_FROST, pSummoned))
+                            pAura->ModStackAmount(offset - 1);
+                    }
+                }
+            }
+
             void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
             {
                 if (pSpell->Id == SPELL_SUBMERGE)
@@ -1318,13 +1350,12 @@ class npc_frozen_head_megaera : public CreatureScript
                             if (!me->HasAura(SPELL_CONCEALING_FOG))
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
-				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
-                                        if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
-                                            Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
-
-                                events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
+                                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
+                                    if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
+                                        if (!me->IsWithinMeleeRange(me->GetVictim()))
+                                            DoCast(me->GetVictim(), SPELL_MEGAERAS_RAGE_FROST);
                             }
+                            events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
                             break;
 
                         case EVENT_TORRENT_OF_ICE:
@@ -1337,16 +1368,17 @@ class npc_frozen_head_megaera : public CreatureScript
                                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_CINDERS))
                                         {
                                             me->AddAura(SPELL_TORRENT_OF_ICE_TARGET, target);
-                                            if (Creature* torrent = me->SummonCreature(NPC_TORRENT_OF_ICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 9500))
+                                            if (Creature* torrent = me->SummonCreature(NPC_TORRENT_OF_ICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
                                             {
                                                 torrent->SetSpeed(MOVE_WALK, 0.8f);
                                                 torrent->SetSpeed(MOVE_RUN, 0.7f);
-                                                torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                                                torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                                                 torrent->Attack(target, false);
                                                 torrent->GetMotionMaster()->MoveChase(target, 2.0f);
                                                 if (Aura* pAura = torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent))
-                                                    pAura->SetDuration(8000);
+                                                    pAura->SetDuration(10000);
                                                 torrent->SetReactState(REACT_PASSIVE);
+                                                me->InterruptNonMeleeSpells(true);
                                                 DoCast(torrent, SPELL_TORRENT_OF_ICE);
                                             }
                                         }
@@ -1410,6 +1442,20 @@ class npc_venomous_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void JustSummoned(Creature* pSummoned) override
+            {
+                if (pSummoned)
+                {
+                    if (Aura* pAura = me->GetAura(SPELL_ELEMENTAL_BONDS_VENOM))
+                    {
+                        int32 offset = pAura->GetStackAmount();
+
+                        if (Aura* pAura = me->AddAura(SPELL_ELEMENTAL_BONDS_VENOM, pSummoned))
+                            pAura->ModStackAmount(offset - 1);
+                    }
+                }
+            }
+
             void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
             {
                 if (pSpell->Id == SPELL_SUBMERGE)
@@ -1448,13 +1494,12 @@ class npc_venomous_head_megaera : public CreatureScript
                             if (!me->HasAura(SPELL_CONCEALING_FOG))
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
-				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
-                                        if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
-                                            Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
-
-                                events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
+                                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
+                                    if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
+                                        if (!me->IsWithinMeleeRange(me->GetVictim()))
+                                            DoCast(me->GetVictim(), SPELL_MEGAERAS_RAGE_POISON);
                             }
+                            events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
                             break;
 
                         case EVENT_ACID_RAIN:
@@ -1463,7 +1508,7 @@ class npc_venomous_head_megaera : public CreatureScript
                                 if (me->HasAura(SPELL_CONCEALING_FOG) && !me->HasAura(SPELL_EMERGE))
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
-                                        DoCast(me, SPELL_ACID_RAIN);
+                                        DoCast(me, SPELL_ACID_RAIN_SUMMON);
                                     events.ScheduleEvent(EVENT_ACID_RAIN, (me->GetMap()->IsHeroic() ? urand(54000, 60000) : urand(23000, 29000)));
                                 }
                             }
@@ -1523,6 +1568,20 @@ class npc_arcane_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void JustSummoned(Creature* pSummoned) override
+            {
+                if (pSummoned)
+                {
+                    if (Aura* pAura = me->GetAura(SPELL_ELEMENTAL_BONDS_ARCAN))
+                    {
+                        int32 offset = pAura->GetStackAmount();
+
+                        if (Aura* pAura = me->AddAura(SPELL_ELEMENTAL_BONDS_ARCAN, pSummoned))
+                            pAura->ModStackAmount(offset - 1);
+                    }
+                }
+            }
+
             void SpellHit(Unit* pCaster, SpellInfo const* pSpell) override
             {
                 if (pSpell->Id == SPELL_SUBMERGE)
@@ -1561,13 +1620,12 @@ class npc_arcane_head_megaera : public CreatureScript
                             if (!me->HasAura(SPELL_CONCEALING_FOG))
                             {
                                 // Find boss and check for melee distance to victim + unscheduled boss action.
-				                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
-                                    if (!me->IsWithinMeleeRange(me->GetVictim()))
-                                        if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRaging == false)
-                                            Megaera->AI()->DoAction(ACTION_MEGAERAS_RAGE);
-
-                                events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
+                                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
+                                    if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
+                                        if (!me->IsWithinMeleeRange(me->GetVictim()))
+                                            DoCast(me->GetVictim(), SPELL_MEGAERAS_RAGE_ARCANE);
                             }
+                            events.ScheduleEvent(EVENT_CHECK_MEGAERAS_RAGE, 4000);
                             break;
 
                         case EVENT_NETHER_TEAR:
@@ -2128,12 +2186,12 @@ class spell_acid_glob_megaera : public SpellScriptLoader
 
                 if (!caster->ToCreature())
                     return;
-
+                /*
                 // The aura is 3 seconds long, and this is triggered each sec. So if not heroic, we should remove the main aura after this first cast.
                 if (Unit* target = caster->ToCreature()->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                     caster->CastSpell(target, SPELL_ACID_GLOB_MISSILE, true);
                 if (!caster->GetMap()->IsHeroic())
-                    caster->RemoveAurasDueToSpell(SPELL_ACID_RAIN);
+                    caster->RemoveAurasDueToSpell(SPELL_ACID_RAIN);*/
             }
 
             void Register()
@@ -2166,6 +2224,216 @@ public:
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class spell_megaera_submerged : public SpellScriptLoader
+{
+public:
+    spell_megaera_submerged() : SpellScriptLoader("spell_megaera_submerged") {}
+
+    class aura_impl : public AuraScript
+    {
+        PrepareAuraScript(aura_impl);
+
+        void HandleOnApply(AuraEffect const* /*aureff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetOwner()->ToUnit())
+                target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void HandleOnRemove(AuraEffect const* /*aureff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetOwner()->ToUnit())
+                if (!target->HasAura(SPELL_CONCEALING_FOG))
+                    target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(aura_impl::HandleOnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(aura_impl::HandleOnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new aura_impl();
+    }
+};
+
+class correctSummonerPredicate
+{
+private:
+    uint64 uiGuid;
+public:
+    correctSummonerPredicate(uint64 _guid) : uiGuid(_guid) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        if (target->ToCreature())
+        {
+            return target->ToCreature()->GetOwnerGUID() != uiGuid;
+        }
+    }
+};
+
+// 139845
+class spell_acid_rain_summon : public SpellScriptLoader
+{
+public:
+    spell_acid_rain_summon() : SpellScriptLoader("spell_acid_rain_summon") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(notPlayerPredicate());
+
+            if (Unit* pCaster = GetCaster())
+            {
+                uint32 max_targets = pCaster->GetMap()->Is25ManRaid() ? 3 : 1;
+
+                if (targets.size() > max_targets)
+                    Trinity::Containers::RandomResizeList(targets, max_targets);
+            }
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex /*eff_idx*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+
+            if (!caster || !target)
+                return;
+
+            if (Creature* pRain = caster->SummonCreature(NPC_ACID_RAIN, *target, TEMPSUMMON_TIMED_DESPAWN, 15000))
+            {
+                caster->AddAura(SPELL_ACID_RAIN_VISUAL, pRain);
+                caster->CastSpell(pRain, SPELL_ACID_RAIN_MISSILE, true);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_FORCE_CAST);
+        }
+    };
+    
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class isFriendlyPredicate
+{
+private:
+    Unit* caster;
+public:
+    isFriendlyPredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        return target->ToUnit() && target->ToUnit()->IsFriendlyTo(caster);
+    }
+};
+
+class spell_acid_rain_missile : public SpellScriptLoader
+{
+public:
+    spell_acid_rain_missile() : SpellScriptLoader("spell_acid_rain_missile") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffectHit(SpellEffIndex /*eff_idx*/)
+        {
+            Position pos;
+
+            GetExplTargetDest()->GetPosition(&pos);
+
+            if (Creature* pTrigger = GetCaster()->SummonCreature(66305, pos, TEMPSUMMON_TIMED_DESPAWN, 2000))
+            {
+                if (Creature* pAcidRain = GetClosestCreatureWithEntry(pTrigger, NPC_ACID_RAIN, 1.f))
+                {
+                    pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
+                    pAcidRain->DespawnOrUnsummon();
+                }
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHit += SpellEffectFn(spell_impl::HandleEffectHit, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+// 139850
+class spell_acid_rain_damage : public SpellScriptLoader
+{
+public:
+    spell_acid_rain_damage() : SpellScriptLoader("spell_acid_rain_damage") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                targets.remove_if(isFriendlyPredicate(GetCaster()));
+
+                std::list<Creature*> acidRains;
+                GetCreatureListWithEntryInGrid(acidRains, caster, NPC_ACID_RAIN, 220.f);
+
+                for (auto pCreature : acidRains)
+                {
+                    if (Aura* pAura = pCreature->GetAura(SPELL_ACID_RAIN_VISUAL, caster->GetGUID()))
+                        targets.push_back((WorldObject*)pCreature);
+                }
+            }
+        }
+
+        void HandleEffectHitTarget(SpellEffIndex /*eff_idx*/)
+        {
+            if (Unit* pUnit = GetHitUnit())
+            {
+                // 75% damage reduction after 30 yards distance
+                float max_reduction = 75.f;
+
+                float fDist = pUnit->GetDistance(GetExplTargetDest()->GetPosition());
+                float fRed = 30 - fDist;
+
+                fRed = fRed < (30.f - (max_reduction * 0.3)) ? (30.f - (max_reduction * 0.3)) : fRed;
+
+                int32 iSubtractedDamage = (GetHitDamage() * (fRed/30));
+
+                SetHitDamage(iSubtractedDamage);
+            }
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -2262,5 +2530,9 @@ void AddSC_boss_megaera()
     new spell_arctic_freeze_megaera();
     new spell_acid_glob_megaera();
     new spell_icy_ground_dummy();
+    new spell_megaera_submerged();
+    new spell_acid_rain_summon();
+    new spell_acid_rain_missile();
+    new spell_acid_rain_damage();
     new sat_icy_ground();
 }

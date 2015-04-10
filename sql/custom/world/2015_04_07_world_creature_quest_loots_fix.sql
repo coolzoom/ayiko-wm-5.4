@@ -980,3 +980,6 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (11556, 28524);
 /* Quest: Nice Hat... now start only from the right NPC */
 DELETE FROM `creature_queststarter` WHERE `quest` = 12513;
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (28126, 12513);
+
+/* Cutodian Dieworth now don't start wrong quests */
+DELETE FROM `creature_queststarter` WHERE `quest` IN (10182,10305,10306,10307);

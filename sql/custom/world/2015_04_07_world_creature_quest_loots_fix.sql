@@ -1004,3 +1004,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Dire Condor fixed */
 UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 428;
+
+/* Dire Wolf fixed */
+UPDATE `creature_template` SET `unit_flags` = 67108880 WHERE `entry` = 43704;

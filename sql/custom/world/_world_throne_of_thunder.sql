@@ -2978,7 +2978,7 @@ REPLACE INTO spell_script_names VALUES
 
 DELETE FROM spell_areatrigger_template WHERE Entry IN (853);
 INSERT INTO spell_areatrigger_template (Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName) VALUES
-(853, 0, 0, 9.4, 9.4, 9.4, 'sat_icy_ground');
+(853, 0, 0, 9, 9, 9, 'sat_icy_ground');
 
 /*---------------------------------------------------------------------------------------------------------------*/
 

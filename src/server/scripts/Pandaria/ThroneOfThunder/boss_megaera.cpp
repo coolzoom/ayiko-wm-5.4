@@ -1373,8 +1373,7 @@ class npc_frozen_head_megaera : public CreatureScript
                                                 torrent->SetSpeed(MOVE_WALK, 0.8f);
                                                 torrent->SetSpeed(MOVE_RUN, 0.7f);
                                                 torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                                torrent->Attack(target, false);
-                                                torrent->GetMotionMaster()->MoveChase(target, 2.0f);
+                                                torrent->GetMotionMaster()->MoveChase(target, 0.4f);
                                                 if (Aura* pAura = torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent))
                                                     pAura->SetDuration(10000);
                                                 torrent->SetReactState(REACT_PASSIVE);
@@ -2315,7 +2314,7 @@ public:
             if (!caster || !target)
                 return;
 
-            if (Creature* pRain = caster->SummonCreature(NPC_ACID_RAIN, *target, TEMPSUMMON_TIMED_DESPAWN, 15000))
+            if (Creature* pRain = caster->SummonCreature(NPC_ACID_RAIN, *target, TEMPSUMMON_TIMED_DESPAWN, 5000))
             {
                 caster->AddAura(SPELL_ACID_RAIN_VISUAL, pRain);
                 caster->CastSpell(pRain, SPELL_ACID_RAIN_MISSILE, true);
@@ -2365,10 +2364,16 @@ public:
 
             if (Creature* pTrigger = GetCaster()->SummonCreature(66305, pos, TEMPSUMMON_TIMED_DESPAWN, 2000))
             {
-                if (Creature* pAcidRain = GetClosestCreatureWithEntry(pTrigger, NPC_ACID_RAIN, 1.f))
+                std::list<Creature*> acidRains;
+                GetCreatureListWithEntryInGrid(acidRains, pTrigger, NPC_ACID_RAIN, 2.f);
+                
+                for (auto pAcidRain : acidRains)
                 {
-                    pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
-                    pAcidRain->DespawnOrUnsummon();
+                    if (pAcidRain->HasAura(SPELL_ACID_RAIN_VISUAL, GetCaster()->GetGUID()))
+                    {
+                        pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
+                        pAcidRain->DespawnOrUnsummon();
+                    }
                 }
             }
         }

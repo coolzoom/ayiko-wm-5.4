@@ -1042,3 +1042,6 @@ UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `faction_A` = 7, 
 
 /* Slaughtered Trogg fixed */
 UPDATE `creature_template` SET `unit_flags` = 32768 WHERE `entry` = 45571;
+
+/* Twilight Abductors fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768, `VehicleId` = 0 WHERE `entry` IN (45616,45642,45648,45649);

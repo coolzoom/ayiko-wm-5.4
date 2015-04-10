@@ -1079,3 +1079,9 @@ DELETE FROM `creature_loot_template` WHERE (`entry`=58741) AND (`item`=79198);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
 (57299, 79198, -35, 1, 0, 1, 1),
 (58741, 79198, -35, 1, 0, 1, 1);
+
+/* Sheepie faction & spawn missing fixed */
+UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35 WHERE `entry` = 64391;
+DELETE FROM `creature` WHERE `id`=64391;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(864391, 870, 0, 0, 1, 1, 0, 0, -45.124, 1494.2, 366.592, 0.27013, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 2048, 0, 0);

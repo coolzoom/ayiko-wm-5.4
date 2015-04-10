@@ -3011,10 +3011,20 @@ class spell_warl_ember_consumers : public SpellScriptLoader
                 if (caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
+                int32 damage = GetHitDamage();
+                switch (GetSpellInfo()->Id)
+                {
+                    case 108686:
+                    case 108685:
+                    case 114654:
+                        if (SpellInfo const* info = sSpellMgr->GetSpellInfo(108683))
+                            damage = CalculatePct(damage, info->Effects[EFFECT_5].CalcValue());
+                        break;
+                }
+
                 if (AuraEffect* mastery = caster->GetAuraEffect(77220, EFFECT_0))
                 {
-                    int32 damage = GetHitDamage();
-                    AddPct(damage, mastery->GetAmount());
+                    AddPct(damage, mastery->GetFloatAmount());
                     SetHitDamage(damage);
                 }
             }

@@ -960,3 +960,7 @@ UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 835;
 /* Quest: Falling to Corruption old prerequisite removed now players can start the quest directly by Donova Snowden */
 UPDATE `quest_template` SET `NextQuestIdChain` = 0, `Flags` = 16384 WHERE `Id` = 28462;
 UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 28464;
+
+/* Quest: The Pursuit of Umbranse now start only from the right NPC */
+DELETE FROM `creature_queststarter` WHERE `quest` = 28847;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (50366, 28847);

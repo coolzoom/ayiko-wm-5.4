@@ -1039,3 +1039,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Young Wolf fixed */
 UPDATE `creature_template` SET `minlevel` = 1, `maxlevel` = 1, `faction_A` = 7, `faction_H` = 7 WHERE `entry` = 299;
+
+/* Slaughtered Trogg fixed */
+UPDATE `creature_template` SET `unit_flags` = 32768 WHERE `entry` = 45571;

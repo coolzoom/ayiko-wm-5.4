@@ -302,6 +302,20 @@ class boss_megaera : public CreatureScript
 
             /*** SPECIFIC AI FUNCTIONS ***/
 
+            std::list<Creature*> GetActiveHeadList()
+            {
+                std::list<Creature*> heads;
+                GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.first, 200.f);
+                GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.second, 200.f);
+
+                heads.remove_if([this](Creature const* pCreature) -> bool
+                {
+                    return pCreature->HasAura(SPELL_CONCEALING_FOG);
+                });
+
+                return heads;
+            }
+
             void FillPairVector()
             {
                 movingHeadGuid = 0;
@@ -1334,6 +1348,44 @@ class npc_frozen_head_megaera : public CreatureScript
                         Megaera->AI()->DoAction(ACTION_SET_IN_COMBAT);
             }
 
+            Unit* SelectTorrentOfIceTarget() const
+            {
+                if (Creature* Megaera = me->FindNearestCreature(BOSS_MEGAERA, 200.0f, true))
+                {
+                    std::list<Creature*> heads = (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->GetActiveHeadList());
+                    std::list<Player*> potentials;
+                    std::list<Player*> backupList;
+
+                    GetPlayerListInGrid(potentials, me, 250.f);
+                    std::copy(std::begin(potentials), std::end(potentials), std::inserter(backupList, std::begin(backupList)));
+
+                    potentials.remove_if([this, heads](Player const* pPlayer) -> bool
+                    {
+                        if (pPlayer->HasAura(SPELL_TORRENT_OF_ICE_TARGET))
+                            return true;
+
+                        if (pPlayer->HasAura(SPELL_CINDERS))
+                            return true;
+                        
+                        for (auto pHead : heads)
+                        {
+                            if (pPlayer->GetExactDist2d(pHead) < 15.f)
+                                return true;
+                        }
+
+                        return false;
+                    });
+
+                    if (!potentials.empty())
+                        return Trinity::Containers::SelectRandomContainerElement(potentials);
+                    
+                    if (!backupList.empty())
+                        return Trinity::Containers::SelectRandomContainerElement(backupList);
+                }
+
+                return nullptr;
+            }
+
             void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_EMERGE))
@@ -1365,17 +1417,17 @@ class npc_frozen_head_megaera : public CreatureScript
                                 {
                                     if (CAST_AI(boss_megaera::boss_megaeraAI, Megaera->AI())->isRampaging == false)
                                     {
-                                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_CINDERS))
+                                        if (Unit* target = SelectTorrentOfIceTarget())
                                         {
                                             me->AddAura(SPELL_TORRENT_OF_ICE_TARGET, target);
                                             if (Creature* torrent = me->SummonCreature(NPC_TORRENT_OF_ICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
                                             {
                                                 torrent->SetSpeed(MOVE_WALK, 0.8f);
                                                 torrent->SetSpeed(MOVE_RUN, 0.7f);
-                                                torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                                                torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
                                                 torrent->GetMotionMaster()->MoveChase(target, 0.4f);
                                                 if (Aura* pAura = torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent))
-                                                    pAura->SetDuration(10000);
+                                                    pAura->SetDuration(9000);
                                                 torrent->SetReactState(REACT_PASSIVE);
                                                 me->InterruptNonMeleeSpells(true);
                                                 DoCast(torrent, SPELL_TORRENT_OF_ICE);
@@ -2373,6 +2425,7 @@ public:
                     {
                         pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
                         pAcidRain->DespawnOrUnsummon();
+                        break;
                     }
                 }
             }

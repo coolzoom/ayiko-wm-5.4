@@ -105,6 +105,7 @@ public:
                 case GOB_COUNCIL_EXIT:
                 case GOB_TORTOS_DOOR:
                 case GOB_TORTOS_COLLISION:
+                case GOB_MEGAERA_EXIT:
                     AddDoor(pGo, true);
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
@@ -351,6 +352,7 @@ public:
                 case GOB_COUNCIL_EXIT:
                 case GOB_TORTOS_DOOR:
                 case GOB_TORTOS_COLLISION:
+                case GOB_MEGAERA_EXIT:
                 case GOB_TRIBAL_DOOR_FARRAKI:
                 case GOB_TRIBAL_DOOR_GURUBASHI:
                 case GOB_TRIBAL_DOOR_DRAKKARI: 

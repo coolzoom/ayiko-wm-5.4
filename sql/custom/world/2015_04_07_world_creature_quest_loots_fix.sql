@@ -1130,3 +1130,8 @@ INSERT INTO `npc_vendor` VALUES
 
 /* Unbudging Rocks can't fight back or move now */
 UPDATE `creature_template` SET `speed_walk` = 0.001, `speed_run` = 0.001, `unit_flags` = 4, `VehicleId` = 57 WHERE `entry` = 58719;
+
+/* Chief Yip-Yip missing spawn fixed */
+DELETE FROM `creature` WHERE (`id`=59567);
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(59567, 870, 1, 1, 0, 0, 556.943, 1409.88, 423.582, 5.04341, 300, 0, 0, 11818230, 0, 0, 0, 0, 0, 0);

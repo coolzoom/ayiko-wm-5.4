@@ -794,6 +794,10 @@ void BattlegroundWS::EndBattleground(uint32 winner)
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), HORDE);
 
+    // (2014-03-11)[5.4.7]: "The winning team now receives an 18 Honor Point bonus for each capture the opposing team is prevented from completing. 
+    // This means every capture below 3, up to a maximum of 54 bonus Honor if the losing team had 0 captures." (Winning team : (Enemy flags captured - Own flags captured) * 18 honor)
+    RewardHonorToTeam((GetTeamScore(winner) - GetTeamScore(GetOtherTeam(winner))) * 18, winner);
+
     Battleground::EndBattleground(winner);
 }
 

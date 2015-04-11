@@ -258,6 +258,8 @@ void BattlegroundWS::RespawnFlag(uint32 Team, bool captured)
         SendMessageToAll(LANG_BG_WS_F_PLACED, CHAT_MSG_BG_SYSTEM_NEUTRAL);
         PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
     }
+    else
+        UpdateFlagAreaTriggers();
     _bothFlagsKept = false;
 }
 
@@ -582,6 +584,33 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player* player, GameObject* target
 
     SendMessageToAll(message_id, type, player);
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+}
+
+void BattlegroundWS::UpdateFlagAreaTriggers()
+{
+    if (Player* player = ObjectAccessor::FindPlayer(GetFlagPickerGUID(BG_TEAM_HORDE)))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(3646);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+
+    if (Player* player = ObjectAccessor::FindPlayer(GetFlagPickerGUID(BG_TEAM_ALLIANCE)))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(3647);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
 }
 
 void BattlegroundWS::RemovePlayer(Player* player, uint64 guid, uint32 /*team*/)

@@ -1085,3 +1085,6 @@ UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35 WHERE `entry` 
 DELETE FROM `creature` WHERE `id`=64391;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (864391, 870, 0, 0, 1, 1, 0, 0, -45.124, 1494.2, 366.592, 0.27013, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Quest: Everything I Know About Cooking fixed */
+UPDATE `quest_template` SET `Title` = 'Everything I Know About Cooking', `Objectives` = 'Deliver the Letter to Sungshin Ironpaw. She teaches in Halfhill Market.', `Details` = 'I''m so glad you enjoy my food. Are you interested in the recipes?  If so, you should learn them properly, from my teachers in Halfhill Market.  Everything I know about the kitchen, I learned from them.$B$BSay, if you happen to pass through there, would you deliver this note to Sungshin Ironpaw for me? She was my favorite teacher, and I want her to know that I miss her.', `EndText` = 'Return to Sungshin Ironpaw in Valley of the Four Winds.', `CompletedText` = '', `ObjectiveText1` = '' WHERE `Id` = 31279;

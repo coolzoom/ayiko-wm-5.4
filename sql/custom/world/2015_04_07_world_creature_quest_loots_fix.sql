@@ -1135,3 +1135,10 @@ UPDATE `creature_template` SET `speed_walk` = 0.001, `speed_run` = 0.001, `unit_
 DELETE FROM `creature` WHERE (`id`=59567);
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (59567, 870, 1, 1, 0, 0, 556.943, 1409.88, 423.582, 5.04341, 300, 0, 0, 11818230, 0, 0, 0, 0, 0, 0);
+
+/* Clever Ashyo spawn missing fixed */
+DELETE FROM `creature_template_aura` WHERE `entry`=56113;
+DELETE FROM `creature` WHERE `id`=56113;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(56113, 870, 1, 1, 0, 56113, 374.627, 353.512, 186.013, 0.921803, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0),
+(56113, 870, 1, 1, 0, 56113, 202.022, 278.973, 153.965, 3.1484,   120, 0, 0, 156000, 0, 0, 0, 0, 0, 0);

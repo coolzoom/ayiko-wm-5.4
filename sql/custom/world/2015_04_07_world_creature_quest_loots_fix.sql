@@ -1127,3 +1127,6 @@ INSERT INTO `npc_vendor` VALUES
 ('58718', '0', '95451', '0', '0', '0', '1'),
 ('58718', '0', '95454', '0', '0', '0', '1'),
 ('58718', '0', '95457', '0', '0', '0', '1');
+
+/* Unbudging Rocks can't fight back or move now */
+UPDATE `creature_template` SET `speed_walk` = 0.001, `speed_run` = 0.001, `unit_flags` = 4, `VehicleId` = 57 WHERE `entry` = 58719;

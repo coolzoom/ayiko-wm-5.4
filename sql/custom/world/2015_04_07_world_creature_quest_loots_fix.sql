@@ -1088,3 +1088,42 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 
 /* Quest: Everything I Know About Cooking fixed */
 UPDATE `quest_template` SET `Title` = 'Everything I Know About Cooking', `Objectives` = 'Deliver the Letter to Sungshin Ironpaw. She teaches in Halfhill Market.', `Details` = 'I''m so glad you enjoy my food. Are you interested in the recipes?  If so, you should learn them properly, from my teachers in Halfhill Market.  Everything I know about the kitchen, I learned from them.$B$BSay, if you happen to pass through there, would you deliver this note to Sungshin Ironpaw for me? She was my favorite teacher, and I want her to know that I miss her.', `EndText` = 'Return to Sungshin Ironpaw in Valley of the Four Winds.', `CompletedText` = '', `ObjectiveText1` = '' WHERE `Id` = 31279;
+
+/* Merchant Greenfield now sells his goods */
+DELETE FROM `npc_vendor` WHERE `entry` = 58718;
+INSERT INTO `npc_vendor` VALUES
+('58718', '0', '79102', '0', '0', '0', '1'),
+('58718', '0', '80590', '0', '0', '0', '1'),
+('58718', '0', '80591', '0', '0', '0', '1'),
+('58718', '0', '80592', '0', '0', '0', '1'),
+('58718', '0', '80593', '0', '0', '0', '1'),
+('58718', '0', '80594', '0', '0', '0', '1'),
+('58718', '0', '80595', '0', '0', '0', '1'),
+('58718', '0', '80809', '0', '0', '0', '1'),
+('58718', '0', '84782', '0', '0', '0', '1'),
+('58718', '0', '84783', '0', '0', '0', '1'),
+('58718', '0', '85153', '0', '0', '0', '1'),
+('58718', '0', '85158', '0', '0', '0', '1'),
+('58718', '0', '85162', '0', '0', '0', '1'),
+('58718', '0', '85163', '0', '0', '0', '1'),
+('58718', '0', '85215', '0', '0', '0', '1'),
+('58718', '0', '85216', '0', '0', '0', '1'),
+('58718', '0', '85217', '0', '0', '0', '1'),
+('58718', '0', '85267', '0', '0', '0', '1'),
+('58718', '0', '85268', '0', '0', '0', '1'),
+('58718', '0', '85269', '0', '0', '0', '1'),
+('58718', '0', '89197', '0', '0', '0', '1'),
+('58718', '0', '89202', '0', '0', '0', '1'),
+('58718', '0', '89233', '0', '0', '0', '1'),
+('58718', '0', '89326', '0', '0', '0', '1'),
+('58718', '0', '89328', '0', '0', '0', '1'),
+('58718', '0', '89329', '0', '0', '0', '1'),
+('58718', '0', '89847', '0', '0', '0', '1'),
+('58718', '0', '89848', '0', '0', '0', '1'),
+('58718', '0', '89849', '0', '0', '0', '1'),
+('58718', '0', '95445', '0', '0', '0', '1'),
+('58718', '0', '95447', '0', '0', '0', '1'),
+('58718', '0', '95449', '0', '0', '0', '1'),
+('58718', '0', '95451', '0', '0', '0', '1'),
+('58718', '0', '95454', '0', '0', '0', '1'),
+('58718', '0', '95457', '0', '0', '0', '1');

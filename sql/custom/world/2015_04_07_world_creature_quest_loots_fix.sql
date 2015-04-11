@@ -1146,3 +1146,19 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 /* Daggerfen Servant fixed */
 UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 19733;
 
+/* Acroniss, Sunwing, Manas templates, spawn missing and SAI fixed */
+UPDATE `creature_template` SET `modelid1` = 23333, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4 WHERE `entry` = 50737;
+UPDATE `creature_template` SET `modelid1` = 18920, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4, `AIName` = 'SmartAI' WHERE `entry` = 50357;
+UPDATE `creature_template` SET `modelid1` = 18920, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4, `AIName` = 'SmartAI' WHERE `entry` = 50353;
+DELETE FROM `creature` WHERE `id` IN (50353,50357,50737);
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(50353, 1, 1, 1, 0, 0, 5519.45, -4934.01, 856.074, 5.96707, 28800, 0, 0, 6761, 0, 0, 0, 0, 0, 0),
+(50357, 0, 1, 1, 0, 0, -8131.93, -732.183, 154.738, 5.75965, 28800, 0, 0, 4584, 0, 0, 0, 0, 0, 0),
+(50737, 1, 1, 1, 0, 0, -6308.63, -3.51383, 149.01, 1.35784, 28800, 0, 0, 5228, 0, 0, 0, 0, 0, 0);
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (50353,50357) AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(50353, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 3, 0, 45200, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Manas - Change Model"),
+(50353, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Manas - Cast 'Fire Breath'"),
+(50357, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 3, 0, 45201, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Change Model"),
+(50357, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Cast 'Fire Breath'");

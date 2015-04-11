@@ -1142,3 +1142,7 @@ DELETE FROM `creature` WHERE `id`=56113;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (56113, 870, 1, 1, 0, 56113, 374.627, 353.512, 186.013, 0.921803, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0),
 (56113, 870, 1, 1, 0, 56113, 202.022, 278.973, 153.965, 3.1484,   120, 0, 0, 156000, 0, 0, 0, 0, 0, 0);
+
+/* Daggerfen Servant fixed */
+UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 19733;
+

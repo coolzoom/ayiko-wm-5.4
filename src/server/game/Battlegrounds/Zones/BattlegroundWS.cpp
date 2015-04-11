@@ -258,6 +258,8 @@ void BattlegroundWS::RespawnFlag(uint32 Team, bool captured)
         SendMessageToAll(LANG_BG_WS_F_PLACED, CHAT_MSG_BG_SYSTEM_NEUTRAL);
         PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
     }
+    else
+        UpdateFlagAreaTriggers();
     _bothFlagsKept = false;
 }
 
@@ -584,6 +586,33 @@ void BattlegroundWS::EventPlayerClickedOnFlag(Player* player, GameObject* target
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
+void BattlegroundWS::UpdateFlagAreaTriggers()
+{
+    if (Player* player = ObjectAccessor::FindPlayer(GetFlagPickerGUID(BG_TEAM_HORDE)))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(3646);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+
+    if (Player* player = ObjectAccessor::FindPlayer(GetFlagPickerGUID(BG_TEAM_ALLIANCE)))
+    {
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(3647);
+        if (atEntry->radius > 0)
+        {
+            // if we have radius check it
+            float dist = player->GetDistance(atEntry->x, atEntry->y, atEntry->z);
+            if (dist < (atEntry->radius))
+                HandleAreaTrigger(player, atEntry->id);
+        }
+    }
+}
+
 void BattlegroundWS::RemovePlayer(Player* player, uint64 guid, uint32 /*team*/)
 {
     // sometimes flag aura not removed :(
@@ -764,6 +793,10 @@ void BattlegroundWS::EndBattleground(uint32 winner)
     //complete map_end rewards (even if no team wins)
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), HORDE);
+
+    // (2014-03-11)[5.4.7]: "The winning team now receives an 18 Honor Point bonus for each capture the opposing team is prevented from completing. 
+    // This means every capture below 3, up to a maximum of 54 bonus Honor if the losing team had 0 captures." (Winning team : (Enemy flags captured - Own flags captured) * 18 honor)
+    RewardHonorToTeam((GetTeamScore(winner) - GetTeamScore(GetOtherTeam(winner))) * 18, winner);
 
     Battleground::EndBattleground(winner);
 }

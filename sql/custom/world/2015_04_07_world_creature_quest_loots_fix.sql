@@ -1045,3 +1045,123 @@ UPDATE `creature_template` SET `unit_flags` = 32768 WHERE `entry` = 45571;
 
 /* Twilight Abductors fixed */
 UPDATE `creature_template` SET `unit_flags` = 32768, `VehicleId` = 0 WHERE `entry` IN (45616,45642,45648,45649);
+
+/* Noblegarden Merchant fixed */
+DELETE FROM `npc_vendor` WHERE `entry` = 32837;
+INSERT INTO `npc_vendor` VALUES
+('32837', '0', '6833', '0', '0', '2572', '1'),
+('32837', '0', '6835', '0', '0', '2572', '1'),
+('32837', '0', '19028', '0', '0', '2573', '1'),
+('32837', '0', '44792', '0', '0', '2571', '1'),
+('32837', '0', '44793', '0', '0', '2574', '1'),
+('32837', '0', '44794', '0', '0', '2574', '1'),
+('32837', '0', '44800', '0', '0', '2573', '1'),
+('32837', '0', '44803', '0', '0', '2573', '1'),
+('32837', '0', '44818', '0', '0', '2575', '1'),
+('32837', '0', '45073', '0', '0', '2573', '1'),
+('32837', '0', '72145', '0', '0', '3689', '1'),
+('32837', '0', '74282', '0', '0', '2573', '1'),
+('32837', '0', '74283', '0', '0', '2573', '1');
+
+/* Chen Stormstout missing spawn fixed */
+DELETE FROM `creature` WHERE `id`=56133;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(56133, 870, 0, 0, 1, 1, 0, 0, 166.943, -275.458, 236.344, 3.49066, 1800, 0, 0, 1, 0, 0, 3, 0, 32768, 0, 0, 0),
+(56133, 870, 0, 0, 1, 1, 0, 0, -209.624, 482.325, 186.686, 3.93073, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
+(56133, 870, 0, 0, 1, 1, 0, 0, 515.586, -698.46, 247.19, 5.4426, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
+(56133, 870, 0, 0, 1, 1, 0, 0, -32.9558, -23.5728, 154.618, 2.323, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
+(56133, 870, 0, 0, 1, 1, 0, 0, -708.444, 1257.68, 136.024, 0.742997, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0),
+(56133, 870, 0, 0, 1, 1, 0, 0, -697.641, 1412.77, 135.561, 6.12685, 300, 0, 0, 4742370, 8908, 0, 0, 0, 0, 0, 0, 0);
+
+/* Spindly Bloodfeather increased drop */
+DELETE FROM `creature_loot_template` WHERE (`entry`=57299) AND (`item`=79198);
+DELETE FROM `creature_loot_template` WHERE (`entry`=58741) AND (`item`=79198);
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(57299, 79198, -35, 1, 0, 1, 1),
+(58741, 79198, -35, 1, 0, 1, 1);
+
+/* Sheepie faction & spawn missing fixed */
+UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35 WHERE `entry` = 64391;
+DELETE FROM `creature` WHERE `id`=64391;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(864391, 870, 0, 0, 1, 1, 0, 0, -45.124, 1494.2, 366.592, 0.27013, 300, 0, 0, 393941, 0, 0, 0, 0, 0, 2048, 0, 0);
+
+/* Quest: Everything I Know About Cooking fixed */
+UPDATE `quest_template` SET `Title` = 'Everything I Know About Cooking', `Objectives` = 'Deliver the Letter to Sungshin Ironpaw. She teaches in Halfhill Market.', `Details` = 'I''m so glad you enjoy my food. Are you interested in the recipes?  If so, you should learn them properly, from my teachers in Halfhill Market.  Everything I know about the kitchen, I learned from them.$B$BSay, if you happen to pass through there, would you deliver this note to Sungshin Ironpaw for me? She was my favorite teacher, and I want her to know that I miss her.', `EndText` = 'Return to Sungshin Ironpaw in Valley of the Four Winds.', `CompletedText` = '', `ObjectiveText1` = '' WHERE `Id` = 31279;
+
+/* Merchant Greenfield now sells his goods */
+DELETE FROM `npc_vendor` WHERE `entry` = 58718;
+INSERT INTO `npc_vendor` VALUES
+('58718', '0', '79102', '0', '0', '0', '1'),
+('58718', '0', '80590', '0', '0', '0', '1'),
+('58718', '0', '80591', '0', '0', '0', '1'),
+('58718', '0', '80592', '0', '0', '0', '1'),
+('58718', '0', '80593', '0', '0', '0', '1'),
+('58718', '0', '80594', '0', '0', '0', '1'),
+('58718', '0', '80595', '0', '0', '0', '1'),
+('58718', '0', '80809', '0', '0', '0', '1'),
+('58718', '0', '84782', '0', '0', '0', '1'),
+('58718', '0', '84783', '0', '0', '0', '1'),
+('58718', '0', '85153', '0', '0', '0', '1'),
+('58718', '0', '85158', '0', '0', '0', '1'),
+('58718', '0', '85162', '0', '0', '0', '1'),
+('58718', '0', '85163', '0', '0', '0', '1'),
+('58718', '0', '85215', '0', '0', '0', '1'),
+('58718', '0', '85216', '0', '0', '0', '1'),
+('58718', '0', '85217', '0', '0', '0', '1'),
+('58718', '0', '85267', '0', '0', '0', '1'),
+('58718', '0', '85268', '0', '0', '0', '1'),
+('58718', '0', '85269', '0', '0', '0', '1'),
+('58718', '0', '89197', '0', '0', '0', '1'),
+('58718', '0', '89202', '0', '0', '0', '1'),
+('58718', '0', '89233', '0', '0', '0', '1'),
+('58718', '0', '89326', '0', '0', '0', '1'),
+('58718', '0', '89328', '0', '0', '0', '1'),
+('58718', '0', '89329', '0', '0', '0', '1'),
+('58718', '0', '89847', '0', '0', '0', '1'),
+('58718', '0', '89848', '0', '0', '0', '1'),
+('58718', '0', '89849', '0', '0', '0', '1'),
+('58718', '0', '95445', '0', '0', '0', '1'),
+('58718', '0', '95447', '0', '0', '0', '1'),
+('58718', '0', '95449', '0', '0', '0', '1'),
+('58718', '0', '95451', '0', '0', '0', '1'),
+('58718', '0', '95454', '0', '0', '0', '1'),
+('58718', '0', '95457', '0', '0', '0', '1');
+
+/* Unbudging Rocks can't fight back or move now */
+UPDATE `creature_template` SET `speed_walk` = 0.001, `speed_run` = 0.001, `unit_flags` = 4, `VehicleId` = 57 WHERE `entry` = 58719;
+
+/* Chief Yip-Yip missing spawn fixed */
+DELETE FROM `creature` WHERE (`id`=59567);
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(59567, 870, 1, 1, 0, 0, 556.943, 1409.88, 423.582, 5.04341, 300, 0, 0, 11818230, 0, 0, 0, 0, 0, 0);
+
+/* Clever Ashyo spawn missing fixed */
+DELETE FROM `creature_template_aura` WHERE `entry`=56113;
+DELETE FROM `creature` WHERE `id`=56113;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(56113, 870, 1, 1, 0, 56113, 374.627, 353.512, 186.013, 0.921803, 120, 0, 0, 156000, 0, 0, 0, 0, 0, 0),
+(56113, 870, 1, 1, 0, 56113, 202.022, 278.973, 153.965, 3.1484,   120, 0, 0, 156000, 0, 0, 0, 0, 0, 0);
+
+/* Daggerfen Servant fixed */
+UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 19733;
+
+/* Acroniss, Sunwing, Manas templates, spawn missing and SAI fixed */
+UPDATE `creature_template` SET `modelid1` = 23333, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4 WHERE `entry` = 50737;
+UPDATE `creature_template` SET `modelid1` = 18920, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4, `AIName` = 'SmartAI' WHERE `entry` = 50357;
+UPDATE `creature_template` SET `modelid1` = 18920, `exp` = 2, `faction_A` = 14, `faction_H` = 14, `InhabitType` = 4, `AIName` = 'SmartAI' WHERE `entry` = 50353;
+DELETE FROM `creature` WHERE `id` IN (50353,50357,50737);
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(50353, 1, 1, 1, 0, 0, 5519.45, -4934.01, 856.074, 5.96707, 28800, 0, 0, 6761, 0, 0, 0, 0, 0, 0),
+(50357, 0, 1, 1, 0, 0, -8131.93, -732.183, 154.738, 5.75965, 28800, 0, 0, 4584, 0, 0, 0, 0, 0, 0),
+(50737, 1, 1, 1, 0, 0, -6308.63, -3.51383, 149.01, 1.35784, 28800, 0, 0, 5228, 0, 0, 0, 0, 0, 0);
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (50353,50357) AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(50353, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 3, 0, 45200, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Manas - Change Model"),
+(50353, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Manas - Cast 'Fire Breath'"),
+(50357, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 3, 0, 45201, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Change Model"),
+(50357, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Cast 'Fire Breath'");
+
+/* Quest: On The Prowl spawn time fixed */
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 65612;

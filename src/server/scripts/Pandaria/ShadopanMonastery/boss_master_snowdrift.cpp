@@ -125,7 +125,7 @@ public:
 
         EventMap events, nonCombatEvents;
         InstanceScript* instance;
-        bool aggroDone, isBossSummoned, isFightWon, phaseTwo;
+        bool aggroDone, isBossSummoned, isFightWon;
         uint8 phase, hurlChiCnt;
         uint8 randIndex[3];
 
@@ -183,8 +183,7 @@ public:
             me->SetHealth(me->GetMaxHealth());      
             phase = PHASE_FIGHT_1;
             isBossSummoned = false;
-            aggroDone = false;
-            phaseTwo = false;           
+            aggroDone = false;         
             hurlChiCnt = 0;     
         }
 
@@ -290,9 +289,9 @@ public:
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage) override
         {
-            if(me->HealthBelowPctDamaged(50, damage) && !phaseTwo)
+            if(me->HealthBelowPctDamaged(50, damage) && phase == PHASE_FIGHT_1)
             {   
-                phaseTwo = true;
+                phase = PHASE_FIGHT_2;
                 Talk(TALK_PHASE_2);
                 events.Reset();
                 me->StopMoving();
@@ -392,6 +391,11 @@ public:
                         me->SetFacingTo(4.114f);
                         me->SetReactState(REACT_AGGRESSIVE);                       
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        if (instance)
+                        {
+                            instance->SetBossState(DATA_MASTER_SNOWDRIFT, NOT_STARTED);
+                            instance->SetData(DATA_MASTER_SNOWDRIFT, NOT_STARTED);
+                        }
                         break;
                     case EVENT_DISAPPEAR:
                         {
@@ -431,7 +435,6 @@ public:
                         }
                         break;
                     case EVENT_PHASE_2:
-                        phase = PHASE_FIGHT_2;
                         Talk(TALK_P_2_EMOTE);
                         me->CastSpell(me, SPELL_SMOKE_BOMB, true);
                         me->SetVisible(false);
@@ -617,6 +620,10 @@ public:
             instance = me->GetInstanceScript();
             eventPhase = 0;
             novoiceSummoned = 1;
+
+            if (instance)
+                if (instance->GetBossState(DATA_SNOWDRIFT_STATE) != DONE)
+                    _Reset();
         }
 
         void JustSummoned(Creature* summon) override
@@ -843,12 +850,16 @@ public:
             {
                 damage = 0;
                 stillInFight = false;
+                me->StopMoving();
                 me->setFaction(35);
                 me->RemoveAllAuras();
-                me->SetReactState(REACT_PASSIVE);
                 me->CombatStop(true);
+                me->DeleteThreatList();
+                me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+
+                events.Reset();
                 events.ScheduleEvent(EVENT_JUMP, 2 * IN_MILLISECONDS);
 
                 if(auto const referee = Unit::GetCreature(*me, instance->GetData64(DATA_PANDAREN_REFEREE)))
@@ -1023,13 +1034,16 @@ public:
             {
                 damage = 0;
                 stillInFight = false;
-                events.Reset();
+                me->StopMoving();
                 me->setFaction(35);
-                summons.DespawnAll();
+                me->RemoveAllAuras();
+                me->CombatStop(true);
+                me->DeleteThreatList();
                 me->SetReactState(REACT_PASSIVE);
-                me->CombatStop(true);              
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+
+                events.Reset();
                 nonCombatEvents.ScheduleEvent(EVENT_MOVE_AWAY, 2 * IN_MILLISECONDS);
 
                 if(instance)
@@ -1335,8 +1349,34 @@ public:
         {
             auto const owner = GetOwner()->ToCreature();
 
-            if(owner)
+            if (owner)
+            {
+                std::list<Player*> playerList;
+                GetPlayerListInGrid(playerList, owner, 150.0f);
+                if (!playerList.empty())
+                {
+                    for (std::list<Player*>::iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    {
+                        if (auto const player = (*itr)->ToPlayer())
+                        {
+                            if (!player->isInFront(owner, M_PI))
+                                playerList.erase(itr);
+
+                            if (!playerList.empty())
+                            {
+                                if (auto const target = Trinity::Containers::SelectRandomContainerElement(playerList))
+                                {
+                                    owner->SetFacingToObject(target);
+                                    owner->SetOrientation(owner->GetAngle(target));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                playerList.clear();
                 owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
+            }
         }
 
         void Register()
@@ -1370,7 +1410,33 @@ public:
             auto const owner = GetOwner()->ToCreature();
 
             if (owner)
+            {
+                std::list<Player*> playerList;
+                GetPlayerListInGrid(playerList, owner, 150.0f);
+                if (!playerList.empty())
+                {
+                    for (std::list<Player*>::iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                    {
+                        if (auto const player = (*itr)->ToPlayer())
+                        {
+                            if (!player->isInFront(owner, M_PI))
+                                playerList.erase(itr);
+
+                            if (!playerList.empty())
+                            {
+                                if (auto const target = Trinity::Containers::SelectRandomContainerElement(playerList))
+                                {
+                                    owner->SetFacingToObject(target);
+                                    owner->SetOrientation(owner->GetAngle(target));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                playerList.clear();
                 owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
+            }
         }
 
         void Register()

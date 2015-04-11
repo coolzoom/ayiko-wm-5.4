@@ -123,6 +123,9 @@ class CreatureAI : public UnitAI
         // Called when hit by a spell
         virtual void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) {}
 
+        // Called when spellcast was interrupted for any reason
+        virtual void CastInterrupted(SpellInfo const* /*spell*/) {}
+
         // Called when spell hits a target
         virtual void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) {}
 

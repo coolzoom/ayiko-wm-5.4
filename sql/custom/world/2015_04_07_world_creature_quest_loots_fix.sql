@@ -1165,3 +1165,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 /* Quest: On The Prowl spawn time fixed */
 UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 65612;
+
+/* Whrrrl fixed */
+UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 41334;
+UPDATE `creature` SET `position_z` = 92.4 WHERE `id` = 41334;

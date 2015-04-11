@@ -1162,3 +1162,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (50353, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Manas - Cast 'Fire Breath'"),
 (50357, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 3, 0, 45201, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Change Model"),
 (50357, 0, 1, 0, 0, 0, 100, 0, 5000, 15000, 5000, 15000, 11, 37985, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Sunwing - Cast 'Fire Breath'");
+
+/* Quest: On The Prowl spawn time fixed */
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `id` = 65612;

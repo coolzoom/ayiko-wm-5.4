@@ -1192,3 +1192,5 @@ UPDATE `quest_template` SET `PrevQuestId` = -25797 WHERE `Id` = 25814;
 /* Quest: Sacrifices fixed */
 UPDATE `creature_template` SET `MovementType` = 0 WHERE `entry` = 35231;
 
+/* Quest: Into the Prison fixed */
+UPDATE `quest_template` SET `Title` = 'Into the Prison', `Objectives` = 'Find Lexlort.', `Details` = 'Da Twilight''s Hammer be here for some reason. We don''t know why, but Thal''trak be lettin'' you in on a lil'' secret of ours - da rogue Lexlort waits outside da hall where High Interrogator Gerstahn be so he can kill her if he gets da chance.$B$BShe''s too smart for dat, though, so you gonna go in an'' do it, ya? Go talk to Lexlort and let him know. I''m sure he be ok with it.', `EndText` = 'Return to Lexlort in Blackrock Depths.' WHERE `Id` = 27579;

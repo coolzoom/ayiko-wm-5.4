@@ -1172,3 +1172,7 @@ UPDATE `creature` SET `position_z` = 92.4 WHERE `id` = 41334;
 
 /* Honeykeeper fixed */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 58363;
+
+/* Apprentice Osterkilgr QI drop fixed */
+DELETE FROM `creature_loot_template` WHERE (`entry`=30409) AND (`item`=42772);
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES (30409, 42772, 66, 1, 0, 1, 1);

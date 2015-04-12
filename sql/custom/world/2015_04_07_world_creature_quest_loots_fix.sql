@@ -1176,3 +1176,7 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` 
 /* Apprentice Osterkilgr QI drop fixed */
 DELETE FROM `creature_loot_template` WHERE (`entry`=30409) AND (`item`=42772);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES (30409, 42772, 66, 1, 0, 1, 1);
+
+/* PvP Vendors not more attackable */
+UPDATE `creature_template` SET `unit_flags` = 164614, `type_flags` = 0, `faction_A` = 1735, `faction_H` = 1735, `minlevel` = 91, `maxlevel` = 91, `npcflag` = 4225 WHERE `name` IN ('Lok''nor Bloodfist','Doris Chiltonius');
+UPDATE `creature_template` SET `unit_flags` = 164614, `type_flags` = 0, `faction_A` = 1733, `faction_H` = 1733, `minlevel` = 91, `maxlevel` = 91, `npcflag` = 4225 WHERE `name` IN ('Hayden Christophen','Lucan Malory');

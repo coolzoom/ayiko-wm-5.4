@@ -1180,3 +1180,11 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /* PvP Vendors not more attackable */
 UPDATE `creature_template` SET `unit_flags` = 164614, `type_flags` = 0, `faction_A` = 1735, `faction_H` = 1735, `minlevel` = 91, `maxlevel` = 91, `npcflag` = 4225 WHERE `name` IN ('Lok''nor Bloodfist','Doris Chiltonius');
 UPDATE `creature_template` SET `unit_flags` = 164614, `type_flags` = 0, `faction_A` = 1733, `faction_H` = 1733, `minlevel` = 91, `maxlevel` = 91, `npcflag` = 4225 WHERE `name` IN ('Hayden Christophen','Lucan Malory');
+
+/* Quest: Eminent Domain quest order fixed both alliance & horde side */
+DELETE FROM `creature_queststarter` WHERE `quest` = 25745;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (40028, 25745);
+UPDATE `quest_template` SET `ExclusiveGroup` = -25796 WHERE `Id` IN (25796,25798);
+UPDATE `quest_template` SET `PrevQuestId` = -25796 WHERE `Id` = 25813;
+UPDATE `quest_template` SET `ExclusiveGroup` = -25797 WHERE `Id` IN (25797,25799);
+UPDATE `quest_template` SET `PrevQuestId` = -25797 WHERE `Id` = 25814;

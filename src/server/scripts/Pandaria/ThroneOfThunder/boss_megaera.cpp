@@ -151,6 +151,7 @@ enum Events
     EVENT_RELOCATE_HEAD,
     EVENT_REEMERGE_HEAD,
     EVENT_SUBMERGE_HEAD,
+    EVENT_START_HEADS,
 
     // Heads - General
     EVENT_CHECK_MEGAERAS_RAGE,
@@ -286,6 +287,8 @@ class boss_megaera : public CreatureScript
                 instance  = creature->GetInstanceScript();
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
+
+            EventMap RPevents;
 
             InstanceScript* instance;
             uint8 headKills;
@@ -551,8 +554,11 @@ class boss_megaera : public CreatureScript
             }
 
             // Selection of the three starting heads (from those available according to difficulty).
-            void SpawnStartingHeads()
+            bool SpawnStartingHeads()
             {
+                if (instance->GetData(TYPE_BELLS_RUNG) < 0 /*3*/)
+                    return false;
+
                 FillPairVector();
 
                 uint32 concealingHead = 0;
@@ -573,34 +579,36 @@ class boss_megaera : public CreatureScript
                 {
                     // Throw some error or shit.
                     TC_LOG_ERROR("scripts", "Cannot complete SpawnStartingHeads() function on Megaera encounter (TOT) - Head spawns are bad / missing!");
-                    return;
+                    return false;
                 }
 
                 // Summon the front heads.
                 if (Creature* fiHead = SpawnNewHead(NPC_VENOMOUS_HEAD, false))
                 {
+                    me->AddAura(SPELL_EMERGE, fiHead);
                     fiHead->AddAura(SPELL_WATER_WALK, fiHead);
                     fiHead->SetReactState(REACT_DEFENSIVE);
-                    fiHead->RemoveAurasDueToSpell(SPELL_EMERGE);
 			    }
 
                 if (Creature* secHead = SpawnNewHead(NPC_FROZEN_HEAD, false))
                 {
+                    me->AddAura(SPELL_EMERGE, secHead);
                     secHead->AddAura(SPELL_WATER_WALK, secHead);
                     secHead->SetReactState(REACT_DEFENSIVE);
-                    secHead->RemoveAurasDueToSpell(SPELL_EMERGE);
 			    }
 
                 // Summon the Concealing Fog head and add the aura to it.
                 if (Creature* concealing = SpawnNewHead(me->GetMap()->IsHeroic() ? NPC_ARCANE_HEAD : NPC_FLAMING_HEAD, true))
                 {
+                    me->AddAura(SPELL_EMERGE, concealing);
                     concealing->AddAura(SPELL_WATER_WALK, concealing);
                     concealing->SetReactState(REACT_DEFENSIVE);
-                    concealing->RemoveAurasDueToSpell(SPELL_EMERGE);
                 }
 
                 activeHeadEntries.first = NPC_VENOMOUS_HEAD;
                 activeHeadEntries.second = NPC_FROZEN_HEAD;
+
+                return true;
             }
 
             Creature* FindAliveActiveHead(uint32 entry) const
@@ -781,8 +789,7 @@ class boss_megaera : public CreatureScript
 
                 _Reset();
 
-                // Select and spawn the 3 heads.
-                SpawnStartingHeads();
+                RPevents.ScheduleEvent(EVENT_START_HEADS, 5000);
             }
 
             void EnterCombat(Unit* who)
@@ -1040,6 +1047,16 @@ class boss_megaera : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
+                RPevents.Update(diff);
+
+                switch (RPevents.ExecuteEvent())
+                {
+                case EVENT_START_HEADS:
+                    if (!SpawnStartingHeads())
+                        RPevents.ScheduleEvent(EVENT_START_HEADS, 5000);
+                    break;
+                }
+
                 if (!UpdateVictim() || !CheckInRoom() || me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
@@ -1422,10 +1439,11 @@ class npc_frozen_head_megaera : public CreatureScript
                                             me->AddAura(SPELL_TORRENT_OF_ICE_TARGET, target);
                                             if (Creature* torrent = me->SummonCreature(NPC_TORRENT_OF_ICE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 60000))
                                             {
-                                                torrent->SetSpeed(MOVE_WALK, 0.8f);
-                                                torrent->SetSpeed(MOVE_RUN, 0.7f);
+                                                torrent->SetSpeed(MOVE_WALK, 0.64f);
+                                                torrent->SetSpeed(MOVE_RUN, 0.64f);
                                                 torrent->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
-                                                torrent->GetMotionMaster()->MoveChase(target, 0.4f);
+                                                torrent->GetMotionMaster()->MoveChase(target, 1.0f);
+                                                torrent->Attack(target, false);
                                                 if (Aura* pAura = torrent->AddAura(SPELL_TORRENT_OF_ICE_NPC_A, torrent))
                                                     pAura->SetDuration(9000);
                                                 torrent->SetReactState(REACT_PASSIVE);
@@ -1816,6 +1834,33 @@ class npc_icy_ground_megaera : public CreatureScript
         {
             return new npc_icy_ground_megaeraAI(creature);
         }
+};
+
+class npc_torrent_of_ice : public CreatureScript
+{
+public:
+    npc_torrent_of_ice() : CreatureScript("npc_torrent_of_ice") {}
+
+    struct ai_impl : public ScriptedAI
+    {
+        ai_impl(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+
+        }
+
+        void MoveInLineOfSight(Unit* /*pWho*/) override
+        {
+        }
+
+        void UpdateAI(const uint32 /*uiDiff*/) override
+        {
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new ai_impl(pCreature);
+    }
 };
 
 // Nether Wyrm 70507 - From Arcane Head - Heroic only!
@@ -2578,6 +2623,7 @@ void AddSC_boss_megaera()
     new npc_arcane_head_megaera();
     new npc_cinders_megaera();
     new npc_icy_ground_megaera();
+    new npc_torrent_of_ice();
     new npc_nether_wyrm_megaera();
     new spell_concealing_fog_megaera();
     new spell_rampage_flaming_head_megaera();

@@ -1188,3 +1188,7 @@ UPDATE `quest_template` SET `ExclusiveGroup` = -25796 WHERE `Id` IN (25796,25798
 UPDATE `quest_template` SET `PrevQuestId` = -25796 WHERE `Id` = 25813;
 UPDATE `quest_template` SET `ExclusiveGroup` = -25797 WHERE `Id` IN (25797,25799);
 UPDATE `quest_template` SET `PrevQuestId` = -25797 WHERE `Id` = 25814;
+
+/* Quest: Sacrifices fixed */
+UPDATE `creature_template` SET `MovementType` = 0 WHERE `entry` = 35231;
+

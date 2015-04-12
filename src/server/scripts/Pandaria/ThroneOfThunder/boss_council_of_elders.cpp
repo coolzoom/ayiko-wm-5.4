@@ -379,11 +379,11 @@ static const std::array<uint32, 4> uiBossEntries = {BOSS_COUNCIL_FROST_KING_MALA
 // Creature Scripts
 
 // Base class for the councillor's AI (only override common functions)
-class boss_council_of_elders_base_AI : public ScriptedAI
+class boss_council_of_elders_base_AI : public BossAI
 {
 public:
     boss_council_of_elders_base_AI(Creature *pCreature) :
-        ScriptedAI(pCreature), pInstance(pCreature->GetInstanceScript())
+        BossAI(pCreature, DATA_COUNCIL_OF_ELDERS), pInstance(pCreature->GetInstanceScript())
     {
         events.Reset();
     }
@@ -433,8 +433,15 @@ public:
         InitStandartEvents();
     }
 
+    void EnterEvadeMode()
+    {
+        me->SetFullHealth();
+
+        BossAI::EnterEvadeMode();
+    }
+
     // Override DoAction for the generic actions
-    void DoAction(const int32 iAction)
+    void DoAction(const int32 iAction) 
     {
         switch(iAction)
         {
@@ -1905,6 +1912,11 @@ public:
             HandleTargetSelection();
         }
 
+        void JustDied(Unit* /*pkiller*/) override
+        {
+            me->DespawnOrUnsummon(5000);
+        }
+
         void Move()
         {
             if (Creature *pCouncillor = ObjectAccessor::GetCreature(*me, uiTargetGuid))
@@ -2157,6 +2169,8 @@ public:
         {
             if (Player *pPlayer = ObjectAccessor::GetPlayer(*me, uiTargetGuid))
                 pPlayer->RemoveAurasDueToSpell(SPELL_MARKED_SOUL);
+
+            me->DespawnOrUnsummon(5000);
         }
 
     private:

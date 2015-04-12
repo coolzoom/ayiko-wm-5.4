@@ -1746,6 +1746,31 @@ public:
             return (pUnit->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE) || pUnit->HasAura(SPELL_STONE_GAZE));
         }
 
+        void CastInterrupted(SpellInfo const* spell) override
+        {
+            switch (spell->Id)
+            {
+            case SPELL_SUMMON_SAND_TRAP:
+                events.ScheduleEvent(EVENT_SUMMON_SAND_TRAP, 500);
+                break;
+            case SPELL_VENOM_BOLT_VOLLEY:
+                events.ScheduleEvent(EVENT_GURUBASHI_VENOM_BOLT_VOLLEY, 2000);
+                break;
+            case SPELL_BLAZING_SUNLIGHT:
+                events.ScheduleEvent(EVENT_BLAZING_LIGHT, 500);
+                break;
+            case SPELL_SUMMON_FROZEN_ORB:
+                events.ScheduleEvent(EVENT_SUMMON_FROZEN_ORB, 500);
+                break;
+            case SPELL_FIREBALL:
+                events.ScheduleEvent(EVENT_FIREBALL, 2400);
+                break;
+            case SPELL_HEX_OF_CONFUSION:
+                events.ScheduleEvent(EVENT_HEX_OF_CONFUSION, 4000);
+                break;
+            }
+        }
+
         void UpdateAI(const uint32 uiDiff) override
         {
             if (!UpdateVictim())
@@ -1806,7 +1831,7 @@ public:
                         break;
 
                     case EVENT_SUMMON_VENOMOUS_EFFUSION:
-                        DoCast(me, SPELL_SUMMON_VENOMOUS_EFFUSION);
+                        DoCast(me, SPELL_SUMMON_VENOMOUS_EFFUSION, true);
                         events.ScheduleEvent(EVENT_SUMMON_VENOMOUS_EFFUSION, 30 * IN_MILLISECONDS);
                         break;
 

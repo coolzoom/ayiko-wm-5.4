@@ -1374,7 +1374,6 @@ public:
                     }
                 }
 
-                playerList.clear();
                 owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
             }
         }
@@ -1434,7 +1433,6 @@ public:
                     }
                 }
 
-                playerList.clear();
                 owner->CastSpell(owner, SPELL_BALL_OF_FIRE, true);
             }
         }

@@ -170,3 +170,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (18956, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 33, 18956, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Lakka - Give Quest Credit on gossip"),
 (18956, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 13, 183051, 0, 40, 0, 0, 0, 0, "Lakka - Open Cage on gossip"),
 (18956, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 5000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Lakka - Despawn after the gossip");
+
+/* Prince Taldaram fixed */
+UPDATE `creature_template` SET `mechanic_immune_mask` = 650854399 WHERE `entry` IN (29308,31469);
+UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` = 31686;

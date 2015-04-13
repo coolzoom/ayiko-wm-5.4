@@ -140,3 +140,18 @@ INSERT INTO `creature_text` VALUES
 (22432, 2, 0, 'This is fruitless, draenei! You and your little helper cannot wrest control of this pathetic human. He is mine!', 12, 0, 100, 0, 0, 0, 'Colonel Jules'),
 (22432, 3, 0, 'I see your ancestors, Anchorite! They writhe and scream in the darkness... they are with us!', 12, 0, 100, 0, 0, 0, 'Colonel Jules'),
 (22432, 4, 0, 'I will tear your soul into morsels and slow roast them over demon fire.', 12, 0, 100, 0, 0, 0, 'Colonel Jules');
+
+/* Vizier Jin'bak Normal & HC Loots fixed */
+DELETE FROM `creature_loot_template` WHERE `entry` IN (61567,361567);
+INSERT INTO `creature_loot_template` VALUES 
+(61567, 81262, 0, 1, 1, 1, 1),
+(61567, 81263, 0, 1, 1, 1, 1),
+(61567, 81270, 0, 1, 1, 1, 1),
+(61567, 81271, 0, 1, 1, 1, 1),
+(61567, 81272, 0, 1, 1, 1, 1),
+
+(361567, 100950, 0, 1, 1, 1, 1),
+(361567, 100951, 0, 1, 1, 1, 1),
+(361567, 100952, 0, 1, 1, 1, 1),
+(361567, 100953, 0, 1, 1, 1, 1),
+(361567, 100954, 0, 1, 1, 1, 1);

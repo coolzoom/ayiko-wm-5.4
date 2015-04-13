@@ -155,3 +155,8 @@ INSERT INTO `creature_loot_template` VALUES
 (361567, 100952, 0, 1, 1, 1, 1),
 (361567, 100953, 0, 1, 1, 1, 1),
 (361567, 100954, 0, 1, 1, 1, 1);
+
+/* The Botanica - Backdoor dungeon exit fixed */
+DELETE FROM `areatrigger_teleport` WHERE `id` IN (4459,4612);
+INSERT INTO `areatrigger_teleport` VALUES
+(4612,'The Botanica (Exit)',530,3413.65,1483.32,182.838,2.54432);

@@ -81,3 +81,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 /* Mushgog spawn missing fixed */
 DELETE FROM `creature` WHERE `id`= 11447;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (11447, 1, 1, 1, 0, 0, -5086.65, 455.29, 14.3371, 5.99476, 21600, 40, 0, 5836, 0, 1, 0, 0, 0, 0);
+
+/* Nascent Fel Orc fixed */
+UPDATE `creature_template` SET `dmg_multiplier` = 3, `unit_flags` = 32832 WHERE `entry` = 17398;
+UPDATE `creature_template` SET `dmg_multiplier` = 4, `unit_flags` = 32832 WHERE `entry` = 18612;

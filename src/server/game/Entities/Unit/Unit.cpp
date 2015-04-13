@@ -11907,6 +11907,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         }
     }
 
+    if (GetMaxPower(POWER_MANA))
+    {
+        AuraEffectList const& mModDamagePercentDoneFromMana = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER);
+        float amount = 0;
+        for (AuraEffectList::const_iterator i = mModDamagePercentDoneFromMana.begin(); i != mModDamagePercentDoneFromMana.end(); ++i)
+            if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
+                amount += (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount();
+
+        amount *= float(float(GetPower(POWER_MANA)) / float(GetMaxPower(POWER_MANA)));
+        AddPct(DoneTotalMod, int32(amount));
+    }
+
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
     // Add flat bonus from spell damage versus
     DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);

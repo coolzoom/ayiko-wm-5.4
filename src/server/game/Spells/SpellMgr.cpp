@@ -6157,6 +6157,9 @@ void SpellMgr::LoadSpellCustomAttr()
 				case 115141:
 					spellInfo->Effects[0].Amplitude = 25000;
 					break;
+                case 53817: // Maelstorm Weapon
+                    spellInfo->Effects[EFFECT_1].SpellClassMask[4] = 0x4;
+                    break;
                 default:
                     break;
             }

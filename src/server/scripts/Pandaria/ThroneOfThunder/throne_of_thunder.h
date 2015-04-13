@@ -43,6 +43,7 @@ enum SaveData
     TYPE_RA_DEN,
     TYPE_JINROKH_INTRO,
     TYPE_TORTOS_INTRO,
+    TYPE_BELLS_RUNG,
     MAX_TYPES
 };
 

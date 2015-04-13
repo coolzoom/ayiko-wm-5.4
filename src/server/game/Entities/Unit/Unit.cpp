@@ -8617,7 +8617,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 {
                     if (!procSpell || procSpell->Id == 124041 || procSpell->Id == 117907)
                         return false;
-                    if (roll_chance_f(triggeredByAura->GetFloatAmount() * procSpell->GetGiftOfTheSerpentScaling(this) / 100))
+                    if (roll_chance_f(triggeredByAura->GetFloatAmount() * procSpell->GetGiftOfTheSerpentScaling(this)))
                     {
                         std::list<Unit*> targetList;
 
@@ -11905,6 +11905,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     AddPct(DoneTotalMod, (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount());
             }
         }
+    }
+
+    if (GetMaxPower(POWER_MANA))
+    {
+        AuraEffectList const& mModDamagePercentDoneFromMana = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_FROM_PCT_POWER);
+        float amount = 0;
+        for (AuraEffectList::const_iterator i = mModDamagePercentDoneFromMana.begin(); i != mModDamagePercentDoneFromMana.end(); ++i)
+            if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
+                amount += (*i)->GetFloatAmount() ? (*i)->GetFloatAmount() : (*i)->GetAmount();
+
+        amount *= float(float(GetPower(POWER_MANA)) / float(GetMaxPower(POWER_MANA)));
+        AddPct(DoneTotalMod, int32(amount));
     }
 
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();

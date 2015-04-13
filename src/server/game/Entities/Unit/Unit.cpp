@@ -8617,7 +8617,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                 {
                     if (!procSpell || procSpell->Id == 124041 || procSpell->Id == 117907)
                         return false;
-                    if (roll_chance_f(triggeredByAura->GetFloatAmount() * procSpell->GetGiftOfTheSerpentScaling(this) / 100))
+                    if (roll_chance_f(triggeredByAura->GetFloatAmount() * procSpell->GetGiftOfTheSerpentScaling(this)))
                     {
                         std::list<Unit*> targetList;
 

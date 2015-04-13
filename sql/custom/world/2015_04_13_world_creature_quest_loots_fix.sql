@@ -174,3 +174,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 /* Prince Taldaram fixed */
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854399 WHERE `entry` IN (29308,31469);
 UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` = 31686;
+
+/* Ingvar the Plunderer now drop the QI in HC */
+DELETE FROM `creature_loot_template` WHERE (`entry`=31674) AND (`item`=33330);
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES (31674, 33330, -100, 1, 0, 1, 1);

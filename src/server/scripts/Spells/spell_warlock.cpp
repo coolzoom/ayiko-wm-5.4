@@ -897,7 +897,7 @@ class spell_warl_molten_core_dot : public SpellScriptLoader
                         if (roll_chance_i(8))
                             GetCaster()->CastSpell(GetCaster(), WARLOCK_MOLTEN_CORE, true);
 
-                    GetCaster()->EnergizeBySpell(GetCaster(), aurEff->GetSpellInfo()->Id, 2, POWER_DEMONIC_FURY);
+                    GetCaster()->EnergizeBySpell(GetCaster(), aurEff->GetSpellInfo()->Id, 2 * aurEff->GetBase()->GetStackAmount(), POWER_DEMONIC_FURY);
                 }
             }
 

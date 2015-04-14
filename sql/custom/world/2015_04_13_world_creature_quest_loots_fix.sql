@@ -198,3 +198,41 @@ UPDATE `creature_template` SET `minlevel` = 42, `maxlevel` = 43 WHERE `entry` = 
 /* Skeletal Flayer & Skeletal Sorcerer fixed */
 UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 36 WHERE `entry` IN (1783,1784);
 
+/* Quests from Fleet Master Seahorn at Booty Bay fixed */
+DELETE FROM `creature_queststarter` WHERE `quest` = 26617;
+
+UPDATE `creature` SET `spawntimesecs` = 20 WHERE `id` = 43505;
+UPDATE `creature_template` SET `gossip_menu_id` = 11743, `AIName` = 'SmartAI' WHERE `entry` = 2663;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (2487,43505);
+UPDATE `gossip_menu_option` SET `option_id` = 1, `npc_option_npcflag` = 1 WHERE `menu_id` = 11743 AND `id` = 0;
+UPDATE `gossip_menu_option` SET `option_text` = 'I want to browse your goods.' WHERE `menu_id` = 11743 AND `id` = 1;
+UPDATE `gossip_menu_option` SET `option_id` = 1, `npc_option_npcflag` = 1 WHERE `menu_id` = 11741;
+
+DELETE FROM `quest_template` WHERE `Id` = 26630;
+INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `ZoneOrSort`, `Type`, `SuggestedPlayers`, `LimitTime`, `RequiredClasses`, `RequiredRaces`, `RequiredSkillId`, `RequiredSkillPoints`, `RequiredFactionId1`, `RequiredFactionId2`, `RequiredFactionValue1`, `RequiredFactionValue2`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`, `RequiredMaxRepValue`, `PrevQuestId`, `NextQuestId`, `ExclusiveGroup`, `NextQuestIdChain`, `RewardXPId`, `RewardMoneyMaxLevel`, `RewardSpell`, `RewardSpellCast`, `RewardHonor`, `RewardHonorMultiplier`, `RewardMailTemplateId`, `RewardMailDelay`, `SourceItemId`, `SourceItemCount`, `SourceSpellId`, `Flags`, `SpecialFlags`, `RewardTitleId`, `RequiredPlayerKills`, `RewardTalents`, `RewardArenaPoints`, `RewardItemId1`, `RewardItemId2`, `RewardItemId3`, `RewardItemId4`, `RewardItemCount1`, `RewardItemCount2`, `RewardItemCount3`, `RewardItemCount4`, `RewardChoiceItemId1`, `RewardChoiceItemId2`, `RewardChoiceItemId3`, `RewardChoiceItemId4`, `RewardChoiceItemId5`, `RewardChoiceItemId6`, `RewardChoiceItemCount1`, `RewardChoiceItemCount2`, `RewardChoiceItemCount3`, `RewardChoiceItemCount4`, `RewardChoiceItemCount5`, `RewardChoiceItemCount6`, `RewardFactionId1`, `RewardFactionId2`, `RewardFactionId3`, `RewardFactionId4`, `RewardFactionId5`, `RewardFactionValueId1`, `RewardFactionValueId2`, `RewardFactionValueId3`, `RewardFactionValueId4`, `RewardFactionValueId5`, `RewardFactionValueIdOverride1`, `RewardFactionValueIdOverride2`, `RewardFactionValueIdOverride3`, `RewardFactionValueIdOverride4`, `RewardFactionValueIdOverride5`, `PointMapId`, `PointX`, `PointY`, `PointOption`, `Title`, `Objectives`, `Details`, `EndText`, `OfferRewardText`, `RequestItemsText`, `CompletedText`, `RequiredNpcOrGo1`, `RequiredNpcOrGo2`, `RequiredNpcOrGo3`, `RequiredNpcOrGo4`, `RequiredNpcOrGoCount1`, `RequiredNpcOrGoCount2`, `RequiredNpcOrGoCount3`, `RequiredNpcOrGoCount4`, `RequiredSourceItemId1`, `RequiredSourceItemId2`, `RequiredSourceItemId3`, `RequiredSourceItemId4`, `RequiredSourceItemCount1`, `RequiredSourceItemCount2`, `RequiredSourceItemCount3`, `RequiredSourceItemCount4`, `RequiredItemId1`, `RequiredItemId2`, `RequiredItemId3`, `RequiredItemId4`, `RequiredItemId5`, `RequiredItemId6`, `RequiredItemCount1`, `RequiredItemCount2`, `RequiredItemCount3`, `RequiredItemCount4`, `RequiredItemCount5`, `RequiredItemCount6`, `RequiredSpellCast1`, `RequiredSpellCast2`, `RequiredSpellCast3`, `RequiredSpellCast4`, `Unknown0`, `ObjectiveText1`, `ObjectiveText2`, `ObjectiveText3`, `ObjectiveText4`, `DetailsEmote1`, `DetailsEmote2`, `DetailsEmote3`, `DetailsEmote4`, `DetailsEmoteDelay1`, `DetailsEmoteDelay2`, `DetailsEmoteDelay3`, `DetailsEmoteDelay4`, `EmoteOnIncomplete`, `EmoteOnComplete`, `OfferRewardEmote1`, `OfferRewardEmote2`, `OfferRewardEmote3`, `OfferRewardEmote4`, `OfferRewardEmoteDelay1`, `OfferRewardEmoteDelay2`, `OfferRewardEmoteDelay3`, `OfferRewardEmoteDelay4`, `WDBVerified`) VALUES (26630, 2, 33, 31, 0, 5287, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 59146, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Looks Like a Tauren Pirate to Me', 'Obtain a Cow Head and an Oversized Pirate Hat, then bring them back to Fleet Master Seahorn.', 'Firallon wants MY head?  Now that\'s interesting.  But it\'s nothing we can\'t work around.$b$bThis Yancey character probably doesn\'t know my face too well.  Most non-tauren find us tauren indistinguishable from one another.  In fact... most non-tauren find us indistinguishable from... a certain four-legged farm creature.$b$bRikqiz the leatherworker keeps one of these creatures here in Booty Bay, and Narkk is my chief supplier for pirate hats.  Get a replacement head and a hat, then return with both.', '', 'That should fool that Bloodsail dimwit.$B$BThis was fun, $N.', 'You should know that most tauren would find this shameful.  I find it... amusing.', 'Return to Fleet Master Seahorn at Booty Bay in the Cape of Stranglethorn.', 2487, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59148, 59147, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16048);
+
+DELETE FROM `quest_objective` WHERE `questId` = 26630;
+INSERT INTO `quest_objective` VALUES
+(26630,0,0,0,2487 ,1,1,'Return both items to Fleet Master Seahorn'),
+(26630,1,0,1,59148,1,0,''),	
+(26630,2,0,1,59147,1,0,'');
+	
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`= 15 AND `SourceGroup` IN (11741,11743,11744) AND `SourceEntry`= 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(15, 11741, 0, 0, 0, 9, 0, 26630, 0, 0, 0, 0, "", "Bossy - Show gossip on quest"),
+(15, 11743, 0, 0, 0, 9, 0, 26630, 0, 0, 0, 0, "", "Narkk - Show gossip on quest"),
+(15, 11744, 0, 0, 0, 2, 0, 59147, 1, 0, 0, 0, "0", "Fleet Master Seahorn - Show gossip with item"),
+(15, 11744, 0, 0, 0, 2, 0, 59148, 1, 0, 0, 0, "0", "Fleet Master Seahorn - Show gossip with item"),
+(15, 11744, 0, 0, 0, 9, 0, 26630, 0, 0, 0, 0, "0", "Fleet Master Seahorn - Show gossip on quest");
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (2487,2663,43505) AND `source_type`= 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(2487, 0, 0, 0, 62, 0, 100, 0, 11744, 0, 0, 0, 33, 2487, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Fleet Master Seahorn - On Gossip Select Add QI"),
+(2487, 0, 1, 0, 62, 0, 100, 0, 11744, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Fleet Master Seahorn - On Gossip Select Close Gossip"),
+
+(2663, 0, 0, 0, 62, 0, 100, 0, 11743, 0, 0, 0, 11, 81315, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Narkk - On Gossip Select Add QI"),
+(2663, 0, 1, 0, 62, 0, 100, 0, 11743, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Narkk - On Gossip Select Close Gossip"),
+
+(43505, 0, 0, 0, 62, 0, 100, 0, 11741, 0, 0, 0, 11, 81311, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Bossy - On Gossip Select Add QI"),
+(43505, 0, 1, 0, 62, 0, 100, 0, 11741, 1, 0, 0, 98, 11742, 16439, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Bossy - On Gossip Select Send a new Gossip");
+

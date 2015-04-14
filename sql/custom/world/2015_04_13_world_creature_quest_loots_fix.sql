@@ -268,3 +268,21 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 
 /* Anduin Wrynn fixed */
 UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` = 1747;
+
+/* Tarenar Sunstrike missing spawn added */
+DELETE FROM `creature` WHERE `id`=45429;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(45429, 0, 139, 5446, 1, 1, 0, 45429, 1692.83, -3027.97, 79.4409, 3.15905, 120, 0, 0, 3070, 1587, 0, 0, 0, 0, 0, 0, 0),
+(45429, 0, 0, 0, 1, 1, 0, 45429, 1855.27, -3705.98, 160.586, 1.2089, 120, 0, 0, 3070, 1587, 0, 0, 0, 0, 0, 0, 0),
+(45429, 0, 0, 0, 1, 1, 0, 45429, 1915.99, -2649.66, 60.4346, 0.407009, 120, 0, 0, 3070, 1587, 0, 0, 0, 0, 0, 0, 0);
+
+/* Eitrigg missing spawn added */
+DELETE FROM `creature` WHERE `id`=48569;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(48569, 0, 0, 0, 1, 1, 0, 0, -7499.39, -2192.12, 165.762, 2.61999, 60, 0, 0, 1549800, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Ariok spawn missing fixed */
+DELETE FROM `creature` WHERE `id`=48565;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(48565, 0, 0, 0, 1, 1, 0, 0, -7496.44, -2177.98, 165.574, 5.67448, 60, 0, 0, 9812, 0, 0, 0, 0, 0, 0, 0, 0);
+

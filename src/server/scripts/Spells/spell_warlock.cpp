@@ -786,6 +786,7 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
     enum NPCEntries
     {
         NPC_FELGUARD    = 17252,
+        NPC_WRATHGUARD  = 58965,
         NPC_DOOMGUARD   = 11859,
         NPC_INFERNAL    = 89,
         NPC_IMP         = 416,
@@ -847,6 +848,7 @@ class spell_warl_flames_of_xoroth : public SpellScriptLoader
                                     needResummon = true;
                                     break;
                                 case NPC_FELGUARD:
+                                case NPC_WRATHGUARD:
                                     if (player->GetSpecializationId(player->GetActiveSpec()) != SPEC_WARLOCK_DEMONOLOGY)
                                         needResummon = true;
                                     break;

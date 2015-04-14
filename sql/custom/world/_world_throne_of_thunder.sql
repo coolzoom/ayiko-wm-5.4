@@ -95,7 +95,7 @@ INSERT INTO `game_graveyard_zone` (`id`, `ghost_zone`, `faction`) VALUES
 
 DELETE FROM `spell_area` WHERE `spell` IN (55164,55173) AND `area` = 6507;
 INSERT INTO `spell_area` VALUES 
-(55164,6507,0,0,8326,1783,2,1,0,0), -- (Pandaria) Isle of Thunder
+(55164,6507,0,0,8326,10487799,2,1,0,0), -- (Pandaria) Isle of Thunder
 (55173,6507,0,0,8326,8,2,1,0,0);    -- (Pandaria-NightElf) Isle of Thunder
 
 -- Instance Script

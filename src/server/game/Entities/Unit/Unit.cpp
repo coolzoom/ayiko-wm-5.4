@@ -13120,6 +13120,9 @@ bool Unit::IsImmunedToDamage(SpellInfo const* spellInfo)
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
         {
             SpellInfo const* itrInfo = sSpellMgr->GetSpellInfo(itr->spellId);
+            if (!itrInfo)
+                continue;
+
             if (itr->type & shoolMask
                 && !(itrInfo->IsPositive() && spellInfo->IsPositive())
                 && !spellInfo->CanPierceImmuneAura(sSpellMgr->GetSpellInfo(itr->spellId)))

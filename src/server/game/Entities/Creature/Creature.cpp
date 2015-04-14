@@ -344,8 +344,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
 
     SetName(normalInfo->Name);                              // at normal entry always
 
-    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBAT_REACH, minfo->combat_reach);
+    SetBoundingRadius(minfo->bounding_radius);
+    SetCombatReach(minfo->combat_reach);
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
     SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);

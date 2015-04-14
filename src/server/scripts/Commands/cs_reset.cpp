@@ -107,8 +107,8 @@ public:
         if (!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
             player->SetShapeshiftForm(FORM_NONE);
 
-        player->SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, DEFAULT_WORLD_OBJECT_SIZE);
-        player->SetFloatValue(UNIT_FIELD_COMBAT_REACH, DEFAULT_COMBAT_REACH);
+        player->SetBoundingRadius(DEFAULT_WORLD_OBJECT_SIZE);
+        player->SetCombatReach(DEFAULT_COMBAT_REACH);
 
         player->setFactionForRace(player->getRace());
 

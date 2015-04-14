@@ -995,8 +995,8 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     uint8 powertype = cEntry->powerType;
 
-    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, DEFAULT_WORLD_OBJECT_SIZE);
-    SetFloatValue(UNIT_FIELD_COMBAT_REACH, 1.5f);
+    SetBoundingRadius(DEFAULT_WORLD_OBJECT_SIZE);
+    SetCombatReach(1.5f);
 
     setFactionForRace(createInfo->Race);
 
@@ -5898,7 +5898,7 @@ void Player::BuildPlayerRepop()
 
     StopMirrorTimers();                                     //disable timers(bars)
 
-    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, float(1.0f));   //see radius of death player?
+    SetBoundingRadius(float(1.0f));   //see radius of death player?
 
     // set and clear other
     SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
@@ -18616,8 +18616,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     _LoadIntoDataField(fields[53].GetCString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
     _LoadKnownTitles(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_KNOWN_TITLES));
 
-    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, DEFAULT_WORLD_OBJECT_SIZE);
-    SetFloatValue(UNIT_FIELD_COMBAT_REACH, 1.5f);
+    SetBoundingRadius(DEFAULT_WORLD_OBJECT_SIZE);
+    SetCombatReach(1.5f);
     SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.0f);
 
     // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)

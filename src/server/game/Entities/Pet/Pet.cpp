@@ -821,8 +821,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
 
         if (sObjectMgr->GetCreatureModelInfo(GetDisplayId()))
         {
-            SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, GetOwner()->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS));
-            SetFloatValue(UNIT_FIELD_COMBAT_REACH, GetOwner()->GetFloatValue(UNIT_FIELD_COMBAT_REACH));
+            SetBoundingRadius(GetOwner()->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS));
+            SetCombatReach(GetOwner()->GetFloatValue(UNIT_FIELD_COMBAT_REACH));
         }
 
         SetObjectScale(scale);

@@ -483,7 +483,7 @@ public:
                     {
                         // TODO : Add missing text
                         if (Creature* pGuardian = DoSummon(NPC_ICECROWN, Pos[RAND(2, 5, 8, 11)]))
-                            pGuardian->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 2);
+                            pGuardian->SetCombatReach(2);
                         ++nGuardiansOfIcecrownCount;
                         uiGuardiansOfIcecrownTimer = 5000;
                     }

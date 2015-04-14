@@ -8478,6 +8478,16 @@ bool Spell::IsAutoActionResetSpell() const
 
 bool Spell::IsNeedSendToClient() const
 {
+    // This switch is here because the spell included has SPELL_ATTR4_TRIGGERED which causes it not to be sent to client
+    // It should however be sent, since changing which spells are sent to client could have client crash like consequences I added this exception instead
+    switch (m_spellInfo->Id)
+    {
+        case 120465: // Trigger Summon Demon Cooldown
+            return true;
+        default:
+            break;
+    }
+
     return m_spellInfo->SpellVisual[0] || m_spellInfo->SpellVisual[1] || m_spellInfo->IsChanneled() ||
         (m_spellInfo->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT) || m_spellInfo->Speed > 0.0f || (!m_triggeredByAuraSpell && !IsTriggered());
 }

@@ -3999,20 +3999,9 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
         return;
     }
 
-    // Hack to execute cooldown of Soulburn Summon effect
-    if (m_spellInfo->Id == 688 || m_spellInfo->Id == 691 || m_spellInfo->Id == 697 || m_spellInfo->Id == 712)
-    {
-        for (auto mod : m_appliedMods)
-            if (auto effect = mod->ownerEffect)
-                if (effect->GetId() == 74434)
-                {
-                    owner->AddSpellCooldown(688, 0, 60 * IN_MILLISECONDS, true);
-                    owner->AddSpellCooldown(691, 0, 60 * IN_MILLISECONDS, true);
-                    owner->AddSpellCooldown(697, 0, 60 * IN_MILLISECONDS, true);
-                    owner->AddSpellCooldown(712, 0, 60 * IN_MILLISECONDS, true);
-                    break;
-                }
-    }
+    // Handle Soulburn Cooldown handling
+    if (m_spellInfo->Category == 1363 && m_caster->HasAura(74434))
+        m_caster->CastSpell(m_caster, 120465, true);
 
     // if pet requested type already exist
     if (Pet* oldSummon = owner->GetPet())

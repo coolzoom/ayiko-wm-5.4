@@ -1359,17 +1359,12 @@ public:
                     {
                         if (auto const player = (*itr)->ToPlayer())
                         {
-                            if (!player->isInFront(owner, M_PI))
-                                playerList.erase(itr);
-
-                            if (!playerList.empty())
+                            if (player->isInFront(owner, M_PI))
                             {
-                                if (auto const target = Trinity::Containers::SelectRandomContainerElement(playerList))
-                                {
-                                    owner->SetFacingToObject(target);
-                                    owner->SetOrientation(owner->GetAngle(target));
-                                }
-                            }
+                                owner->SetFacingToObject(player);
+                                owner->SetOrientation(owner->GetAngle(player));
+                                break;
+                            }                            
                         }
                     }
                 }
@@ -1418,16 +1413,11 @@ public:
                     {
                         if (auto const player = (*itr)->ToPlayer())
                         {
-                            if (!player->isInFront(owner, M_PI))
-                                playerList.erase(itr);
-
-                            if (!playerList.empty())
+                            if (player->isInFront(owner, M_PI))
                             {
-                                if (auto const target = Trinity::Containers::SelectRandomContainerElement(playerList))
-                                {
-                                    owner->SetFacingToObject(target);
-                                    owner->SetOrientation(owner->GetAngle(target));
-                                }
+                                owner->SetFacingToObject(player);
+                                owner->SetOrientation(owner->GetAngle(player));
+                                break;
                             }
                         }
                     }

@@ -260,3 +260,8 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 (772, 0, 0, 0, 1, 1, 0, 0, -13027.6, 295.343, 19.5536, 4.53818, 60, 7, 0, 1910, 0, 1, 0, 0, 0, 0, 0, 0),
 (772, 0, 0, 0, 1, 1, 0, 0, -13014.0, 251.269, 18.9863, 4.9835 , 60, 7, 0, 1910, 0, 1, 0, 0, 0, 0, 0, 0),
 (772, 0, 0, 0, 1, 1, 0, 0, -13067.6, 256.738, 25.9949, 4.15648, 60, 7, 0, 1810, 0, 1, 0, 0, 0, 0, 0, 0);
+
+/* Squiddic wrong spawns fix */
+DELETE FROM `creature` WHERE `id`= 14270;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(14270, 0, 1, 1, 5243, 0, -9426.87, -2387.9, 53.9999, 1.00264, 28800, 25, 0, 449, 0, 1, 0, 0, 0, 0);

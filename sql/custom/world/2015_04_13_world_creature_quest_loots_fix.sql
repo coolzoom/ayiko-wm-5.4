@@ -243,3 +243,6 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 /* Thysta fixed */
 UPDATE `creature_template` SET `faction_A` = 83, `faction_H` = 83 WHERE `entry` = 53008;
 
+/* Abyssal Flamewalker fixed */
+UPDATE `creature_template` SET `modelid1` = 18139 WHERE `entry` = 25001;
+

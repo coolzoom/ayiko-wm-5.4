@@ -265,3 +265,6 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 DELETE FROM `creature` WHERE `id`= 14270;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (14270, 0, 1, 1, 5243, 0, -9426.87, -2387.9, 53.9999, 1.00264, 28800, 25, 0, 449, 0, 1, 0, 0, 0, 0);
+
+/* Anduin Wrynn fixed */
+UPDATE `creature_template` SET `modelid2` = 0 WHERE `entry` = 1747;

@@ -19432,6 +19432,25 @@ UPDATE `quest_template` SET NextQuestId=0, NextQuestIdChain=0 WHERE id=32679;
 UPDATE `quest_template` SET prevQuestId=0 WHERE id=32680;
 UPDATE `quest_objective` SET objectId=69265 WHERE questId=32526;
 UPDATE `quest_objective` SET objectId=69894 WHERE questId=32533;
+UPDATE `creature_template` SET ScriptName="npc_sunreaver_construct" WHERE entry=50358;
+UPDATE `creature_template` SET ScriptName="boss_nalak" WHERE entry=69099;
+UPDATE `creature_template` SET ScriptName="npc_spirit_of_warlord_teng" WHERE entry=69471;
+UPDATE `creature_template` SET ScriptName="npc_mumta" WHERE entry=69664;
+UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=69768;
+UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=69769;
+UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=69841;
+UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=69842;
+UPDATE `creature_template` SET ScriptName="npc_thunder_pterodactyls" WHERE entry=69996;
+UPDATE `creature_template` SET ScriptName="npc_progenitus" WHERE entry=69997;
+UPDATE `creature_template` SET ScriptName="npc_goda" WHERE entry=69998;
+UPDATE `creature_template` SET ScriptName="npc_godhulk_ramuk" WHERE entry=69999;
+UPDATE `creature_template` SET ScriptName="npc_altabim_the_allseeing" WHERE entry=70000;
+UPDATE `creature_template` SET ScriptName="npc_backbreaker_uru" WHERE entry=70001;
+UPDATE `creature_template` SET ScriptName="npc_luban" WHERE entry=70002;
+UPDATE `creature_template` SET ScriptName="npc_molthor" WHERE entry=70003;
+UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=70096;
+UPDATE `creature_template` SET ScriptName="npc_thunder_pterodactyls" WHERE entry=70141;
+UPDATE `creature_template` SET ScriptName="npc_rasha" WHERE entry=70530;
 
 
 /******************************** OTHERS QUERIES ************************************/

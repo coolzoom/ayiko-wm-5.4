@@ -655,7 +655,6 @@ void AddSC_boss_raigonn();
 void AddSC_boss_sha_of_anger();
 void AddSC_boss_galion();
 void AddSC_boss_oondasta();
-void AddSC_boss_nalak();
 void AddSC_boss_xuen();
 void AddSC_boss_yu_lon();
 void AddSC_boss_chi_ji();
@@ -733,6 +732,7 @@ void AddSC_krasarang_wilds();
 void AddSC_jade_forest();
 void AddSC_vale_of_eternal_blossoms();
 void AddSC_kun_lai_summit();
+void AddSC_isle_of_thunder();
 
 void AddSC_WanderingIsland_North();
 void AddSC_WanderingIsland_East();
@@ -1435,7 +1435,6 @@ void AddPandariaScripts()
     AddSC_boss_sha_of_anger();                      // Pandaria World Bosses
     AddSC_boss_galion();
     AddSC_boss_oondasta();
-    AddSC_boss_nalak();
     AddSC_boss_xuen();
     AddSC_boss_yu_lon();
     AddSC_boss_chi_ji();
@@ -1509,6 +1508,7 @@ void AddPandariaScripts()
     AddSC_jade_forest();
     AddSC_kun_lai_summit();
     AddSC_vale_of_eternal_blossoms();
+    AddSC_isle_of_thunder();
 
     AddSC_WanderingIsland_North();
     AddSC_WanderingIsland_East();

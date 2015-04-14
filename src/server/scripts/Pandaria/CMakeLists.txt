@@ -13,7 +13,6 @@ set(scripts_STAT_SRCS
   Pandaria/boss_sha_of_anger.cpp
   Pandaria/boss_galion.cpp
   Pandaria/boss_chi_ji.cpp
-  Pandaria/boss_nalak.cpp
   Pandaria/boss_niuzao.cpp
   Pandaria/boss_ordos.cpp
   Pandaria/boss_xuen.cpp
@@ -132,6 +131,7 @@ set(scripts_STAT_SRCS
   Pandaria/kun_lai_summit.cpp
   Pandaria/jade_forest.cpp
   Pandaria/vale_of_eternal_blossoms.cpp
+  Pandaria/isle_of_thunder.cpp
 )
 
 message("  -> Prepared: Pandaria")

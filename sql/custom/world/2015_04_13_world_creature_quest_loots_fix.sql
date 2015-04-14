@@ -194,3 +194,7 @@ UPDATE `gameobject_template` SET `data5` = 300 WHERE `entry` = 181584;
 
 /* Infected Mossflayer fixed */
 UPDATE `creature_template` SET `minlevel` = 42, `maxlevel` = 43 WHERE `entry` = 12261;
+
+/* Skeletal Flayer & Skeletal Sorcerer fixed */
+UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 36 WHERE `entry` IN (1783,1784);
+

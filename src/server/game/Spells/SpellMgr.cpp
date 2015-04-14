@@ -6160,6 +6160,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 53817: // Maelstorm Weapon
                     spellInfo->Effects[EFFECT_1].SpellClassMask[4] = 0x4;
                     break;
+                case 86213: // Soul Swap Exhale
+                    spellInfo->spellPower.CostBasePercentage = 0;
+                    break;
                 default:
                     break;
             }

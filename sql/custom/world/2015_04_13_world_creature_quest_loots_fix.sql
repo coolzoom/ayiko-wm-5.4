@@ -191,3 +191,6 @@ INSERT INTO `npc_vendor` VALUES
 /* Unstable Mana Crystals now can be looted */
 UPDATE `gameobject_template` SET `data7` = 0 WHERE `entry` = 180600;
 UPDATE `gameobject_template` SET `data5` = 300 WHERE `entry` = 181584;
+
+/* Infected Mossflayer fixed */
+UPDATE `creature_template` SET `minlevel` = 42, `maxlevel` = 43 WHERE `entry` = 12261;

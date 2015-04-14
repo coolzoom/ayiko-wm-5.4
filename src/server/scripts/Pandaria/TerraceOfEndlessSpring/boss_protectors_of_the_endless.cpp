@@ -1471,7 +1471,7 @@ class spell_expelled_corruption : public SpellScriptLoader
 
                 float distance = caster->GetExactDist2d(target);
 
-                if (distance >= 0.0f && distance <= (30.f + caster->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
+                if (distance >= 0.0f && distance <= (30.f + caster->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS)))
                     SetHitDamage(GetHitDamage() * (1 - (distance / 30.0f)));
             }
 

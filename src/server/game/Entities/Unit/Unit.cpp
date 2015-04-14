@@ -13950,6 +13950,16 @@ void Unit::ClearInCombat()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
+void Unit::SetBoundingRadius(float radius)
+{
+    SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, radius);
+}
+
+void Unit::SetCombatReach(float radius)
+{
+    SetFloatValue(UNIT_FIELD_COMBAT_REACH, radius);
+}
+
 bool Unit::isTargetableForAttack(bool checkFakeDeath) const
 {
     if (!IsAlive())

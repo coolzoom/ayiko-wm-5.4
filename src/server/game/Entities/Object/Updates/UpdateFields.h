@@ -129,8 +129,8 @@ enum EUnitFields
     UNIT_FIELD_AURASTATE                             = OBJECT_END + 0x0037, // Size: 1, Type: INT, Flags: PUBLIC
     UNIT_FIELD_BASEATTACKTIME                        = OBJECT_END + 0x0038, // Size: 2, Type: INT, Flags: PUBLIC
     UNIT_FIELD_RANGEDATTACKTIME                      = OBJECT_END + 0x003A, // Size: 1, Type: INT, Flags: PRIVATE
-    UNIT_FIELD_BOUNDINGRADIUS                        = OBJECT_END + 0x003B, // Size: 1, Type: FLOAT, Flags: PUBLIC
-    UNIT_FIELD_COMBATREACH                           = OBJECT_END + 0x003C, // Size: 1, Type: FLOAT, Flags: PUBLIC
+    UNIT_FIELD_BOUNDING_RADIUS                       = OBJECT_END + 0x003B, // Size: 1, Type: FLOAT, Flags: PUBLIC
+    UNIT_FIELD_COMBAT_REACH                           = OBJECT_END + 0x003C, // Size: 1, Type: FLOAT, Flags: PUBLIC
     UNIT_FIELD_DISPLAYID                             = OBJECT_END + 0x003D, // Size: 1, Type: INT, Flags: DYNAMIC
     UNIT_FIELD_NATIVEDISPLAYID                       = OBJECT_END + 0x003E, // Size: 1, Type: INT, Flags: PUBLIC
     UNIT_FIELD_MOUNTDISPLAYID                        = OBJECT_END + 0x003F, // Size: 1, Type: INT, Flags: PUBLIC

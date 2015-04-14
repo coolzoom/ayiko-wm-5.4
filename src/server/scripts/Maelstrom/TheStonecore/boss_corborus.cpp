@@ -55,7 +55,7 @@ class boss_corborus : public CreatureScript
             events.SetPhase(PHASE_NORMAL);
             me->SetReactState(REACT_AGGRESSIVE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE );
-            me->SetFloatValue(UNIT_FIELD_COMBATREACH, 12.0f);
+            me->SetCombatReach(12.0f);
             _Reset();
         }
 
@@ -106,7 +106,7 @@ class boss_corborus : public CreatureScript
                     break;
                 case EVENT_SUBMERGE:
                     thrashingCharges = 0;
-                    me->SetFloatValue(UNIT_FIELD_COMBATREACH, 3.0f);
+                    me->SetCombatReach(3.0f);
                     events.SetPhase(PHASE_SUBMERGED);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetReactState(REACT_PASSIVE);
@@ -129,7 +129,7 @@ class boss_corborus : public CreatureScript
                 case EVENT_EMERGE_END:
                     me->RemoveAllAuras();
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetFloatValue(UNIT_FIELD_COMBATREACH, 12.0f);
+                    me->SetCombatReach(12.0f);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     if (Unit * victim = me->GetVictim())
                         DoStartMovement(victim);

@@ -81,7 +81,7 @@ class boss_sha_of_anger : public CreatureScript
                 me->setPowerType(POWER_RAGE);
                 me->SetPower(POWER_RAGE, 0);
 
-                me->SetFloatValue(UNIT_FIELD_COMBATREACH, 5.0f);
+                me->SetCombatReach(5.0f);
 
                 summons.DespawnAll();
 

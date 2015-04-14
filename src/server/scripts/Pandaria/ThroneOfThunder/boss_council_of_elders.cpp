@@ -1812,7 +1812,7 @@ public:
 
                     for (Player *pPlayer : playerList)
                     {
-                        if (pPlayer->GetExactDist2d(me) < (7.4f + me->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS)))
+                        if (pPlayer->GetExactDist2d(me) < (7.4f + me->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS)))
                         {
                             if (Aura* pAura = pPlayer->GetAura(SPELL_QUICKSAND_PERIODIC_DAMAGES, me->GetGUID()))
                             {

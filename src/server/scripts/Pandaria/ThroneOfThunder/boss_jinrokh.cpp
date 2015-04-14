@@ -124,7 +124,7 @@ private:
     {
         if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
         {
-            return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+            return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS);
         }
 
         return 0;
@@ -636,7 +636,7 @@ public:
         {
             if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
             {
-                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS);
             }
 
             return 0;
@@ -1524,7 +1524,7 @@ public:
         {
             if (Aura* pAura = propagator->GetAura(SPELL_CONDUCTIVE_WATER_GROW))
             {
-                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+                return ((float)0.5f * pAura->GetStackAmount()) + propagator->GetFloatValue(UNIT_FIELD_BOUNDING_RADIUS);
             }
 
             return 0;

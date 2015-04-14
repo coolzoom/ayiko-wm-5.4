@@ -187,3 +187,7 @@ UPDATE `creature_template` SET `minlevel` = 72, `maxlevel` = 72 WHERE `entry` IN
 DELETE FROM `npc_vendor` WHERE `entry` = 19373 AND `item`= 25847;
 INSERT INTO `npc_vendor` VALUES 
 (19373, 0, 25847, 0, 0, 0, 1);
+
+/* Unstable Mana Crystals now can be looted */
+UPDATE `gameobject_template` SET `data7` = 0 WHERE `entry` = 180600;
+UPDATE `gameobject_template` SET `data5` = 300 WHERE `entry` = 181584;

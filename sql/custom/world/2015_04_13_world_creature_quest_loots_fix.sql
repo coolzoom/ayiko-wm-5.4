@@ -240,3 +240,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `creature` WHERE `id`= 44789;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (44789, 0, 1, 65535, 0, 0, 1414.89, 1010.27, 52.74, 2.17415, 300, 0, 0, 4170, 0, 0, 0, 0, 0, 0);
 
+/* Thysta fixed */
+UPDATE `creature_template` SET `faction_A` = 83, `faction_H` = 83 WHERE `entry` = 53008;
+

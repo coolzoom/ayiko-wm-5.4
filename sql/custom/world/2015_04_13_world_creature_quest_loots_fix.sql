@@ -280,3 +280,9 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 DELETE FROM `creature` WHERE `id`=48569;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (48569, 0, 0, 0, 1, 1, 0, 0, -7499.39, -2192.12, 165.762, 2.61999, 60, 0, 0, 1549800, 0, 0, 0, 0, 0, 0, 0, 0);
+
+/* Ariok spawn missing fixed */
+DELETE FROM `creature` WHERE `id`=48565;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(48565, 0, 0, 0, 1, 1, 0, 0, -7496.44, -2177.98, 165.574, 5.67448, 60, 0, 0, 9812, 0, 0, 0, 0, 0, 0, 0, 0);
+

@@ -236,3 +236,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (43505, 0, 0, 0, 62, 0, 100, 0, 11741, 0, 0, 0, 11, 81311, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Bossy - On Gossip Select Add QI"),
 (43505, 0, 1, 0, 62, 0, 100, 0, 11741, 1, 0, 0, 98, 11742, 16439, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Bossy - On Gossip Select Send a new Gossip");
 
+/* Deathstalker Commander Belmont spawn missing added */
+DELETE FROM `creature` WHERE `id`= 44789;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (44789, 0, 1, 65535, 0, 0, 1414.89, 1010.27, 52.74, 2.17415, 300, 0, 0, 4170, 0, 0, 0, 0, 0, 0);
+

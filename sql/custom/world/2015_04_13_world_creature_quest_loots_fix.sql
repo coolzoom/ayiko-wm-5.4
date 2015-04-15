@@ -104,7 +104,7 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`= 22507 AND `source_type`= 0;
 UPDATE `creature_template` SET `npcflag` = 3, `speed_walk` = 0.4, `speed_run` = 0.4,`unit_flags` = 163848, `ScriptName`= 'npc_barada' WHERE `entry`= 22431;
 UPDATE `creature_template` SET `npcflag` = 0, `speed_fly` = 0.2, `ScriptName`= 'npc_colonel_jules' WHERE `entry`= 22432;
 UPDATE `creature_template` SET `speed_walk` = 0.4, `speed_run` = 0.4 WHERE `entry` = 22506;
-UPDATE `creature_template` SET `AIName` = 'SmartAI', `unit_flags` = 131072, `speed_fly` = 0.5, `InhabitType` = 4, `flags_extra` = 66 WHERE `entry` = 22507;
+UPDATE `creature_template` SET `AIName` = 'SmartAI', `unit_flags` = 655360, `speed_fly` = 0.2, `InhabitType` = 4, `flags_extra` = 66 WHERE `entry` = 22507;
 
 INSERT INTO `creature_template_aura` VALUES
 (22506,39300),

@@ -934,9 +934,6 @@ class spell_warl_decimate : public SpellScriptLoader
                         if (_player->HasAura(WARLOCK_DECIMATE_AURA))
                             if (target->GetHealthPct() < 25.0f)
                                 _player->CastSpell(_player, WARLOCK_MOLTEN_CORE, true);
-
-                    if (_player->GetSpecializationId(_player->GetActiveSpec()) == SPEC_WARLOCK_DEMONOLOGY)
-                        _player->EnergizeBySpell(_player, GetSpellInfo()->Id, GetSpellInfo()->Id == 686 ? 25 : 30, POWER_DEMONIC_FURY);
                 }
             }
 
@@ -2062,34 +2059,6 @@ class spell_warl_shadowburn : public SpellScriptLoader
         }
 };
 
-// Fel Flame - 77799
-class spell_warl_fel_flame : public SpellScriptLoader
-{
-    public:
-        spell_warl_fel_flame() : SpellScriptLoader("spell_warl_fel_flame") { }
-
-        class spell_warl_fel_flame_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_warl_fel_flame_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    _player->EnergizeBySpell(_player, GetSpellInfo()->Id, 15, POWER_DEMONIC_FURY);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_warl_fel_flame_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warl_fel_flame_SpellScript();
-        }
-};
-
 // Drain Life - 689
 class spell_warl_drain_life : public SpellScriptLoader
 {
@@ -3090,7 +3059,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_conflagrate_aura();
     new spell_warl_shadowburn();
     new spell_warl_burning_embers();
-    new spell_warl_fel_flame();
     new spell_warl_drain_life();
     new spell_warl_soul_harverst();
     new spell_warl_life_tap();

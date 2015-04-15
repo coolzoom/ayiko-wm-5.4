@@ -86,13 +86,6 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 UPDATE `creature_template` SET `dmg_multiplier` = 3, `unit_flags` = 32832 WHERE `entry` = 17398;
 UPDATE `creature_template` SET `dmg_multiplier` = 4, `unit_flags` = 32832 WHERE `entry` = 18612;
 
-/* */
-UPDATE `gameobject_template` SET `type` = 1, `data0` = 0 WHERE `entry` = 188173;
-
-DELETE FROM `spell_target_position` WHERE `id` = 46841;
-INSERT INTO `spell_target_position` VALUES
-(46841, 0, 530, 12888,-6876, 9, 0.3);
-
 /* Escape to the Isle of Quel'Danas now work */
 UPDATE `gameobject_template` SET `type` = 1, `data0` = 0 WHERE `entry` = 188173;
 DELETE FROM `spell_target_position` WHERE `id` = 46841;
@@ -108,7 +101,7 @@ DELETE FROM `creature_text` WHERE `entry` IN (22431,22432);
 DELETE FROM `creature_template_aura` WHERE `entry` IN (22506,22507);
 DELETE FROM `smart_scripts` WHERE `entryorguid`= 22507 AND `source_type`= 0;
 
-UPDATE `creature_template` SET `npcflag` = 3, `speed_walk` = 0.4, `speed_run` = 0.4,`unit_flags` = 163840, `ScriptName`= 'npc_barada' WHERE `entry`= 22431;
+UPDATE `creature_template` SET `npcflag` = 3, `speed_walk` = 0.4, `speed_run` = 0.4,`unit_flags` = 163848, `ScriptName`= 'npc_barada' WHERE `entry`= 22431;
 UPDATE `creature_template` SET `npcflag` = 0, `speed_fly` = 0.2, `ScriptName`= 'npc_colonel_jules' WHERE `entry`= 22432;
 UPDATE `creature_template` SET `speed_walk` = 0.4, `speed_run` = 0.4 WHERE `entry` = 22506;
 UPDATE `creature_template` SET `AIName` = 'SmartAI', `unit_flags` = 131072, `speed_fly` = 0.5, `InhabitType` = 4, `flags_extra` = 66 WHERE `entry` = 22507;
@@ -117,11 +110,9 @@ INSERT INTO `creature_template_aura` VALUES
 (22506,39300),
 (22507,39303);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
-(22507, 0, 0, 0, 1, 0, 100, 1, 1, 1, 0, 0, 42, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Darkness Released - Set Invincibility"),
-(22507, 0, 1, 0, 1, 0, 100, 0, 500, 6000, 6000, 8000, 11, 39320, 0, 0, 0, 0, 0, 9, 22431, 0, 200, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Attack OOC"),
-(22507, 0, 2, 0, 0, 0, 100, 0, 500, 6000, 6000, 8000, 11, 39320, 0, 0, 0, 0, 0, 9, 22431, 0, 200, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Attack OOC"),
-(22507, 0, 3, 4, 2, 0, 100, 1, 0, 3, 0, 0, 11, 39307, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Despawn on Death"),
-(22507, 0, 4, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Darkness Released - Cast Despawn on death");
+(22507, 0, 0, 0, 1, 0, 100, 0, 500, 6000, 6000, 8000, 11, 39320, 0, 0, 0, 0, 0, 9, 22431, 0, 200, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Attack OOC"),
+(22507, 0, 1, 0, 0, 0, 100, 0, 500, 6000, 6000, 8000, 11, 39320, 0, 0, 0, 0, 0, 9, 22431, 0, 200, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Attack OOC"),
+(22507, 0, 2, 4, 2, 0, 100, 0, 0, 30, 500, 500, 11, 39307, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Darkness Released - Cast Flying Skull Despawn on Death");
 
 INSERT INTO `creature_text` VALUES 
 -- Barada

@@ -765,8 +765,8 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 OpcodeHandler* handler = opcodeTable[WOW_CLIENT][opcode];
                 if (!handler || handler->status == STATUS_UNHANDLED)
                 {
-                    TC_LOG_ERROR("network.opcode", "No defined handler for opcode 0x%04X sent by player %s, account %u",
-                                 new_pct->GetOpcode(), m_Session->GetPlayerName().c_str(), m_Session->GetAccountId());
+                    //TC_LOG_ERROR("network.opcode", "No defined handler for opcode 0x%04X sent by player %s, account %u",
+                                 //new_pct->GetOpcode(), m_Session->GetPlayerName().c_str(), m_Session->GetAccountId());
                     return 0;
                 }
 

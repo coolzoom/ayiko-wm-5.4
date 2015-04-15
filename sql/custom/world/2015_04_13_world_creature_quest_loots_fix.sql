@@ -304,3 +304,6 @@ INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_
 /* Mogh the Dead fixed */
 UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 51658;
 
+/* Bullmastiff fixed */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 44476;
+

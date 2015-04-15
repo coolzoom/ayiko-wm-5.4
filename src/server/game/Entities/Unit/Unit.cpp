@@ -21454,3 +21454,18 @@ bool Unit::IsOnVehicle(Unit const *vehicle) const
 {
     return m_vehicle && m_vehicle->GetBase() == vehicle;
 }
+
+bool Unit::IsCasterPet()
+{
+    if (!GetOwner() || !IsControlledByPlayer())
+        return false;
+
+    switch (GetEntry())
+    {
+        case 510: // Water Elemental
+        case 416: // Imp
+            return true;
+    }
+
+    return false;
+}

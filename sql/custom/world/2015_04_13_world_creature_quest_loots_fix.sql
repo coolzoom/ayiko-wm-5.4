@@ -320,3 +320,6 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (41949, 26023);
 /* Infested Bear fixed */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 47204;
 
+/* Nerubian Overseer fixed */
+UPDATE `creature_template` SET `minlevel` = 41, `maxlevel` = 41 WHERE `entry` = 16184;
+

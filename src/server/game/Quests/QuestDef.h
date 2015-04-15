@@ -229,6 +229,11 @@ struct QuestLocale
     StringVector QuestTurnTargetName;
 };
 
+struct QuestObjectivesLocale
+{
+    StringVector Description;
+};
+
 typedef std::vector<uint32> VisualEffectVec;
 typedef std::vector<uint8> ObjectiveTypeCountVec;
 

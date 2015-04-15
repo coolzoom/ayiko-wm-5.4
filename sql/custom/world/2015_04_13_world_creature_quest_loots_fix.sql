@@ -291,3 +291,8 @@ DELETE FROM `creature` WHERE `id` = 14634;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
 (14634, 0, 1, 1, 0, 0, -6492, -1152, 309.686, 3.492, 120, 0, 0, 3997, 0, 0, 0, 0, 0);
 
+/* Lunk spawn missing added */
+DELETE FROM `creature` WHERE `id`=47269;
+INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(47269, 0, 1, 1, 11548, 2, -6892.28, -1860.73, 251.118, 2.548, 120, 0, 0, 1990, 0, 0, 0, 0, 0);
+

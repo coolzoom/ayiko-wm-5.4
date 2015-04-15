@@ -232,6 +232,7 @@ enum SpellScriptHookType
     SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT,
     SPELL_SCRIPT_HOOK_OBJECT_TARGET_SELECT,
     SPELL_SCRIPT_HOOK_CHECK_CAST,
+    SPELL_SCRIPT_HOOK_CHECK_AUTO_CAST,
     SPELL_SCRIPT_HOOK_BEFORE_CAST,
     SPELL_SCRIPT_HOOK_ON_CAST,
     SPELL_SCRIPT_HOOK_AFTER_CAST,
@@ -366,6 +367,7 @@ public:
     // example: OnCheckCast += SpellCheckCastFn();
     // where function is SpellCastResult function()
     HookList<CheckCastHandler> OnCheckCast;
+    HookList<CheckCastHandler> OnCheckAutoCast;
     #define SpellCheckCastFn(F) CheckCastHandlerFunction(&F)
 
     // example: OnEffect**** += SpellEffectFn(class::function, EffectIndexSpecifier, EffectNameSpecifier);

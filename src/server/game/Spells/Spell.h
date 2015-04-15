@@ -582,6 +582,7 @@ class Spell
         Unit* GetUnitTarget() { return m_targets.GetUnitTarget() ? m_targets.GetUnitTarget(): unitTarget; }
 
         void SetPeriodicDamageModifier(float newModifier) { m_periodicDamageModifier = newModifier; }
+        void LoadScripts();
     protected:
         bool HasGlobalCooldown() const;
         void TriggerGlobalCooldown();
@@ -724,12 +725,12 @@ class Spell
         void InitEffectExecuteData(uint8 effIndex);
         void CheckEffectExecuteData();
 
-        // Scripting system
-        void LoadScripts();
+        // Scripting system        
         void CallScriptBeforeCastHandlers();
         void CallScriptOnCastHandlers();
         void CallScriptAfterCastHandlers();
         SpellCastResult CallScriptCheckCastHandlers();
+        SpellCastResult CallScriptCheckAutoCastHandlers();
         void PrepareScriptHitHandlers();
         bool CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMode mode);
         void CallScriptBeforeHitHandlers();

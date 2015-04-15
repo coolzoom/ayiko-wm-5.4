@@ -628,28 +628,29 @@ bool Unit::HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName, uint
     return false;
 }
 
-bool Unit::HasCrowdControlAuraType(AuraType type, uint32 excludeAura) const
+bool Unit::HasCrowdControlAuraType(AuraType type, uint32 excludeAura, uint32 dispelType) const
 {
     AuraEffectList const& auras = GetAuraEffectsByType(type);
     for (AuraEffectList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
         if ((!excludeAura || excludeAura != (*itr)->GetSpellInfo()->Id) && //Avoid self interrupt of channeled Crowd Control spells like Seduction
-            ((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_BREAKABLE_BY_DAMAGE || (*itr)->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
+            ((*itr)->GetSpellInfo()->Attributes & SPELL_ATTR0_BREAKABLE_BY_DAMAGE || (*itr)->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE)
+            && (!dispelType || dispelType == (*itr)->GetSpellInfo()->Dispel))
             return true;
     return false;
 }
 
-bool Unit::HasCrowdControlAura(Unit* excludeCasterChannel) const
+bool Unit::HasCrowdControlAura(Unit* excludeCasterChannel, uint32 dispelType) const
 {
     uint32 excludeAura = 0;
     if (Spell* currentChanneledSpell = excludeCasterChannel ? excludeCasterChannel->GetCurrentSpell(CURRENT_CHANNELED_SPELL) : NULL)
         excludeAura = currentChanneledSpell->GetSpellInfo()->Id; //Avoid self interrupt of channeled Crowd Control spells like Seduction
 
-    return (   HasCrowdControlAuraType(SPELL_AURA_MOD_CONFUSE, excludeAura)
-            || HasCrowdControlAuraType(SPELL_AURA_MOD_FEAR, excludeAura)
-            || HasCrowdControlAuraType(SPELL_AURA_MOD_FEAR_2, excludeAura)
-            || HasCrowdControlAuraType(SPELL_AURA_MOD_STUN, excludeAura)
-            || HasCrowdControlAuraType(SPELL_AURA_MOD_ROOT, excludeAura)
-            || HasCrowdControlAuraType(SPELL_AURA_TRANSFORM, excludeAura));
+    return (   HasCrowdControlAuraType(SPELL_AURA_MOD_CONFUSE, excludeAura, dispelType)
+            || HasCrowdControlAuraType(SPELL_AURA_MOD_FEAR, excludeAura, dispelType)
+            || HasCrowdControlAuraType(SPELL_AURA_MOD_FEAR_2, excludeAura, dispelType)
+            || HasCrowdControlAuraType(SPELL_AURA_MOD_STUN, excludeAura, dispelType)
+            || HasCrowdControlAuraType(SPELL_AURA_MOD_ROOT, excludeAura, dispelType)
+            || HasCrowdControlAuraType(SPELL_AURA_TRANSFORM, excludeAura, dispelType));
 }
 
 bool Unit::HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura) const

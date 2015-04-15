@@ -422,6 +422,43 @@ class spell_warl_imp_swarm : public SpellScriptLoader
         }
 };
 
+// Singe Magic
+class spell_warl_singe_magic : public SpellScriptLoader
+{
+    public:
+        spell_warl_singe_magic() : SpellScriptLoader("spell_warl_singe_magic") { }
+
+        class spell_warl_singe_magic_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_singe_magic_SpellScript);
+
+            SpellCastResult CheckAutoCast()
+            {
+                if (!GetCaster())
+                    return SPELL_FAILED_DONT_REPORT;
+
+                Unit* owner = GetCaster()->GetOwner();
+                if (!owner)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                if (!owner->HasCrowdControlAura(NULL, DISPEL_MAGIC))
+                    return SPELL_FAILED_DONT_REPORT;
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckAutoCast += SpellCheckCastFn(spell_warl_singe_magic_SpellScript::CheckAutoCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_singe_magic_SpellScript();
+        }
+};
+
 // Glyph of Imp Swarm - 56242
 class spell_warl_glyph_of_imp_swarm : public SpellScriptLoader
 {
@@ -3080,4 +3117,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_metamorphosis_overrides();
     new spell_warl_haunt();
     new spell_warl_ember_consumers();
+    new spell_warl_singe_magic();
 }

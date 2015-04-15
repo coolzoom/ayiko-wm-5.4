@@ -7658,7 +7658,11 @@ bool Spell::CanAutoCast(Unit* target)
         }
     }
 
-    SpellCastResult result = CheckPetCast(target);
+    SpellCastResult result = CallScriptCheckAutoCastHandlers();
+    if (result != SPELL_CAST_OK)
+        return false;
+
+    result = CheckPetCast(target);
 
     if (result == SPELL_CAST_OK || result == SPELL_FAILED_UNIT_NOT_INFRONT)
     {
@@ -8887,6 +8891,10 @@ void Spell::CheckEffectExecuteData()
 
 void Spell::LoadScripts()
 {
+    // Scripts can already be loaded in pet auto cast AI to access scripthooks
+    if (!m_loadedScripts.empty())
+        return;
+
     sScriptMgr->CreateSpellScripts(m_spellInfo->Id, m_loadedScripts);
     for (std::list<SpellScript*>::iterator itr = m_loadedScripts.begin(); itr != m_loadedScripts.end();)
     {
@@ -8949,6 +8957,23 @@ SpellCastResult Spell::CallScriptCheckCastHandlers()
 
     return SPELL_CAST_OK;
 }
+
+SpellCastResult Spell::CallScriptCheckAutoCastHandlers()
+{
+    for (auto &script : m_loadedScripts)
+    {
+        auto const g = Trinity::makeScriptCallGuard(script, SPELL_SCRIPT_HOOK_CHECK_CAST);
+        for (auto &hook : script->OnCheckAutoCast)
+        {
+            auto const tempResult = hook.Call(script);
+            if (tempResult != SPELL_CAST_OK)
+                return tempResult;
+        }
+    }
+
+    return SPELL_CAST_OK;
+}
+
 
 void Spell::PrepareScriptHitHandlers()
 {

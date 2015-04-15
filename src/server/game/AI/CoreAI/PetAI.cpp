@@ -172,6 +172,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
                 bool spellUsed = false;
+                spell->LoadScripts();
 
                 // Some spells can target enemy or friendly (DK Ghoul's Leap)
                 // Check for enemy first (pet then owner)

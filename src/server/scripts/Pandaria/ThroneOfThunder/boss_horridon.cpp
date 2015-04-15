@@ -641,7 +641,6 @@ public:
             uiMajorCycle    = MAJOR_CYCLE_FIRST;
             uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
 
-            summonPositions = NULL;
             jumpPositions   = NULL;
         }
 
@@ -774,13 +773,13 @@ public:
                             for (uint8 i = 0; i < maxSummonsPerPhase; ++i)
                             {
                                 uint32 uiSummonEntry = Trinity::Containers::SelectRandomContainerElement(entries);
-                                me->SummonCreature(uiSummonEntry, summonPositions[maxSummonsPerPhase]);
+                                me->SummonCreature(uiSummonEntry, summonPositions[urand(0,2)]);
                             }
 
                             if (GameObject *pDoor = GetDoorByPhase((eTrashPhases)uiTrashPhase, me))
                                 pDoor->Use(me);
 
-                            events.ScheduleEvent(EVENT_SUMMON_MINOR, urand(10, 20) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_SUMMON_MINOR, 15000);
                         }
                     break;
 
@@ -890,7 +889,7 @@ public:
     private:
         EventMap                events;
         InstanceScript          *pInstance;
-        const Position*         summonPositions;
+        Position         summonPositions[3];
         const Position*         jumpPositions;
         std::list<Creature*>    jumpers;
         uint32                  uiTrashPhase;
@@ -939,8 +938,6 @@ public:
                 // Creature will automatically reset because it is registered in DB; no need to make them
                 // return to home position or Reset() them.
             }
-
-            //TODO: despawn summoned creatures (summons)
             
             // Boss reset by themselves, but won't revive if dead
             if (Creature *pHorridon = GetHorridon(me))
@@ -969,29 +966,12 @@ public:
             uiMajorCycle    = MAJOR_CYCLE_FIRST;
             uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
 
-            summonPositions = NULL;
             jumpPositions   = NULL;
         }
 
         void FightBegin()
         {
-            uiTrashPhase        = TRASH_PHASE_FARRAKI;
-            uiMinorTrashId      = MOB_SUL_LITHUZ_STONEGAZER;
-            uiMediumTrashId[0]  = MOB_FARRAKI_SKIRMISHER;
-            uiMediumTrashId[1]  = 0;
-            uiMajorTrashId      = MOB_FARRAKI_WASTEWALKER;
-            summonPositions     = farrakiTrashSummonPositions;
-            jumpPositions       = farrakiWastewalkerJumpPositions;
-
-            if (Creature *pJalak = GetJalak(me))
-                pJalak->AI()->Talk(TALK_FARRAKI);
-
-            events.ScheduleEvent(EVENT_SUMMON_MINOR, 5 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_SUMMON_MAJOR, 20 * IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_SUMMON_ZANDALARI_DINOMANCER, MINUTE * IN_MILLISECONDS);
-
-            bHasEmotedForGate = false;
-            uiNextGateTimer = 120000;
+            EnterNextPhase(true);
         }
 
         void FightEnd()
@@ -1015,32 +995,47 @@ public:
             }
         }
 
-        void EnterNextPhase()
+        void EnterNextPhase(bool reset = false)
         {
             uiMajorCycle    = MAJOR_CYCLE_FIRST;
             uiDrakkariCycle = DRAKKARI_CYCLE_FIRST;
 
-            ++uiTrashPhase;
+            if (reset)
+                uiTrashPhase = TRASH_PHASE_FARRAKI;
+            else
+                ++uiTrashPhase;
+
             bHasEmotedForGate = false;
             if (Creature *pJalak = GetJalak(me))
             {
                 switch (uiTrashPhase)
                 {
                     case TRASH_PHASE_FARRAKI:
+                        uiMinorTrashId = MOB_SUL_LITHUZ_STONEGAZER;
+                        uiMediumTrashId[0] = MOB_FARRAKI_SKIRMISHER;
+                        uiMediumTrashId[1] = 0;
+                        uiMajorTrashId = MOB_FARRAKI_WASTEWALKER;
+                        for (int i = 0; i < 3; ++i)
+                            summonPositions[i] = farrakiTrashSummonPositions[i];
+                        jumpPositions = farrakiWastewalkerJumpPositions;
+                        if (Creature *pJalak = GetJalak(me))
+                            pJalak->AI()->Talk(TALK_FARRAKI);
                         break;
 
                     case TRASH_PHASE_GURUBASHI:
                         uiMinorTrashId      = MOB_GURUBASHI_BLOODLORD;
                         uiMajorTrashId      = MOB_GURUBASHI_VENOM_PRIEST;
                         memset(&uiMediumTrashId, 0, sizeof(uiMediumTrashId));
-                        summonPositions     = gurubashiTrashSummonPositions;
+                        for (int i = 0; i < 3; ++i)
+                            summonPositions[i] = gurubashiTrashSummonPositions[i];
                         jumpPositions       = gurubashiVenomPriestJumpPositions;
                         pJalak->AI()->Talk(TALK_GURUBASHI);
                         break;
 
                     case TRASH_PHASE_DRAKKARI:
                         uiMajorTrashId      = MOB_DRAKKARI_FROZEN_WARLORD;
-                        summonPositions     = drakkariTrashSummonPositions;
+                        for (int i = 0; i < 3; ++i)
+                            summonPositions[i] = drakkariTrashSummonPositions[i];
                         jumpPositions       = drakkariFrozenWarlordJumpPositions;
                         pJalak->AI()->Talk(TALK_DRAKKARI);
                         DemoralizeLivingPoison();
@@ -1051,7 +1046,8 @@ public:
                         uiMediumTrashId[0]  = MOB_AMANI_SHI_FLAME_CASTER;
                         uiMediumTrashId[1]  = 0;
                         uiMajorTrashId      = MOB_AMANI_WARBEAR;
-                        summonPositions     = amaniTrashSummonPositions;
+                        for (int i = 0; i < 3; ++i)
+                            summonPositions[i] = amaniTrashSummonPositions[i];
                         jumpPositions       = amaniWarbearJumpPositions;
                         pJalak->AI()->Talk(TALK_AMANI);
                         break;
@@ -1087,7 +1083,7 @@ public:
         void PrepareTransition()
         {
             events.Reset();
-            events.ScheduleEvent(EVENT_TRANSITION, uiNextGateTimer + 4000);
+            events.ScheduleEvent(EVENT_TRANSITION, uiNextGateTimer + 7000);
         }
     };
 
@@ -1363,7 +1359,7 @@ public:
                         DoCast(me->GetVictim(), SPELL_DOUBLE_SWIPE);
                         const_orientation = me->GetOrientation();
                         me->SetFacingTo(const_orientation);
-                        events.ScheduleEvent(EVENT_DOUBLE_SWIPE, urand(12, 18) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_DOUBLE_SWIPE, 12000 + rand() % 8000);
                         break;
 
                     case EVENT_HORRIDON_CHARGE:
@@ -1415,6 +1411,7 @@ public:
                 me->SetReactState(REACT_AGGRESSIVE);
                 break;
             case EVENT_CHARGE:
+                events.RescheduleEvent(EVENT_DOUBLE_SWIPE, 12000 + rand() % 8000);
                 DoCast(SPELL_DOUBLE_SWIPE);
                 const_orientation = me->GetOrientation();
                 me->SetFacingTo(const_orientation);

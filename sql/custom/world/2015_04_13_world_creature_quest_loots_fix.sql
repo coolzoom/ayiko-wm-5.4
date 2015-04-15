@@ -317,3 +317,8 @@ UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42815;
 DELETE FROM `creature` WHERE `id` = 44365;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (44365, 0, 1, 1, 0, 0, 500.622, 1564.54, 128.345, 4.29351, 28800, 0, 0, 1, 0, 0, 0, 0, 0, 0);
 
+/* Muckgill now drop his QI */
+DELETE FROM `creature_loot_template` WHERE `entry`= 47759 AND `item`= 63090;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(47759, 63090, 100, 1, 0, 1, 1);
+

@@ -286,3 +286,8 @@ DELETE FROM `creature` WHERE `id`=48565;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (48565, 0, 0, 0, 1, 1, 0, 0, -7496.44, -2177.98, 165.574, 5.67448, 60, 0, 0, 9812, 0, 0, 0, 0, 0, 0, 0, 0);
 
+/* Lookout Captain Lolo Longstriker spawn missing added */
+DELETE FROM `creature` WHERE `id` = 14634;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+(14634, 0, 1, 1, 0, 0, -6492, -1152, 309.686, 3.492, 120, 0, 0, 3997, 0, 0, 0, 0, 0);
+

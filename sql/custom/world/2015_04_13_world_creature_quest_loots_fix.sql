@@ -316,3 +316,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 /* Quest: The Forsaken Trollbane - Quest starter fix */
 DELETE FROM `creature_queststarter` WHERE `quest` = 26023;
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (41949, 26023);
+
+/* Infested Bear fixed */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 47204;
+

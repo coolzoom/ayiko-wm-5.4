@@ -313,3 +313,7 @@ UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42592;
 /* Ongo'longo fixed */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42815;
 
+/* Lady Sylvanas Windrunner overspawned fixed */
+DELETE FROM `creature` WHERE `id` = 44365;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (44365, 0, 1, 1, 0, 0, 500.622, 1564.54, 128.345, 4.29351, 28800, 0, 0, 1, 0, 0, 0, 0, 0, 0);
+

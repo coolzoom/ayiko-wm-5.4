@@ -4917,6 +4917,23 @@ int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype)
     return modifier;
 }
 
+int32 Unit::GetMaxPositiveAuraModifierWithPassives(AuraType auratype)
+{
+    int32 modifier = 0;
+    int32 passiveModifier = 0;
+
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);
+    for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
+        if ((*i)->GetAmount() > 0 && (*i)->GetSpellInfo()->IsPassive())
+            passiveModifier += (*i)->GetAmount();
+        else if ((*i)->GetAmount() > modifier)
+            modifier = (*i)->GetAmount();
+    }
+
+    return modifier + passiveModifier;
+}
+
 int32 Unit::GetMaxNegativeAuraModifier(AuraType auratype) const
 {
     int32 modifier = 0;
@@ -12953,7 +12970,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     if (auto fatigue = GetAuraEffect(134735, EFFECT_0))
         AddPct(TakenTotalMod, fatigue->GetAmount());
 
-    float maxval = float(GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT));
+    float maxval = float(GetMaxPositiveAuraModifierWithPassives(SPELL_AURA_MOD_HEALING_PCT));
     if (maxval)
         AddPct(TakenTotalMod, maxval);
 

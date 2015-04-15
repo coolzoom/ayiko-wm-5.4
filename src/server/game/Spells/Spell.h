@@ -456,7 +456,7 @@ class Spell
         template<class SEARCHER> void SearchTargets(SEARCHER& searcher, uint32 containerMask, Unit* referer, Position const* pos, float radius);
 
         WorldObject* SearchNearbyTarget(float range, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList = NULL);
-        void SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList);
+        void SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList, bool checkAuraStates = true);
         void SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTargets, WorldObject* target, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectType, ConditionList* condList, bool isChainHeal);
 
         void prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura = NULL, uint32 gcdAtCast = 0, bool clientCasted = false);
@@ -797,7 +797,7 @@ namespace Trinity
         WorldObjectSpellTargetCheck(Unit* caster, Unit* referer, SpellInfo const* spellInfo,
             SpellTargetCheckTypes selectionType, ConditionList* condList);
         ~WorldObjectSpellTargetCheck();
-        bool operator()(WorldObject* target);
+        bool operator()(WorldObject* target, bool checkAuraStates = true);
     };
 
     struct WorldObjectSpellNearbyTargetCheck : public WorldObjectSpellTargetCheck
@@ -813,8 +813,9 @@ namespace Trinity
     {
         float _range;
         Position const* _position;
+        bool _checkAuraStates;
         WorldObjectSpellAreaTargetCheck(float range, Position const* position, Unit* caster,
-            Unit* referer, SpellInfo const* spellInfo, SpellTargetCheckTypes selectionType, ConditionList* condList);
+            Unit* referer, SpellInfo const* spellInfo, SpellTargetCheckTypes selectionType, ConditionList* condList, bool checkAuraStates = true);
         bool operator()(WorldObject* target);
     };
 

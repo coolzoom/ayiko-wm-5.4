@@ -2125,12 +2125,12 @@ WorldObject* Spell::SearchNearbyTarget(float range, SpellTargetObjectTypes objec
     return target;
 }
 
-void Spell::SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList)
+void Spell::SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList, bool checkAuraStates)
 {
     uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList);
     if (!containerTypeMask)
         return;
-    Trinity::WorldObjectSpellAreaTargetCheck check(range, position, m_caster, referer, m_spellInfo, selectionType, condList);
+    Trinity::WorldObjectSpellAreaTargetCheck check(range, position, m_caster, referer, m_spellInfo, selectionType, condList, checkAuraStates);
     Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellAreaTargetCheck> searcher(m_caster, targets, check, containerTypeMask);
     SearchTargets<Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellAreaTargetCheck> > (searcher, containerTypeMask, m_caster, position, range);
 }
@@ -2193,7 +2193,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
         searchRadius *= chainTargets;
 
     std::list<WorldObject*> tempTargets;
-    SearchAreaTargets(tempTargets, searchRadius, target, m_caster, objectType, selectType, condList);
+    SearchAreaTargets(tempTargets, searchRadius, target, m_caster, objectType, selectType, condList, false);
     tempTargets.remove(target);
 
     // remove targets which are always invalid for chain spells
@@ -9332,10 +9332,11 @@ WorldObjectSpellTargetCheck::~WorldObjectSpellTargetCheck()
         delete _condSrcInfo;
 }
 
-bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
+bool WorldObjectSpellTargetCheck::operator()(WorldObject* target, bool checkAuraStates)
 {
-    if (_spellInfo->CheckTarget(_caster, target, true) != SPELL_CAST_OK)
+    if (_spellInfo->CheckTarget(_caster, target, true, checkAuraStates) != SPELL_CAST_OK)
         return false;
+
     Unit* unitTarget = target->ToUnit();
     if (Corpse* corpseTarget = target->ToCorpse())
     {
@@ -9409,8 +9410,8 @@ bool WorldObjectSpellNearbyTargetCheck::operator()(WorldObject* target)
 }
 
 WorldObjectSpellAreaTargetCheck::WorldObjectSpellAreaTargetCheck(float range, Position const* position, Unit* caster,
-    Unit* referer, SpellInfo const* spellInfo, SpellTargetCheckTypes selectionType, ConditionList* condList)
-    : WorldObjectSpellTargetCheck(caster, referer, spellInfo, selectionType, condList), _range(range), _position(position)
+    Unit* referer, SpellInfo const* spellInfo, SpellTargetCheckTypes selectionType, ConditionList* condList, bool checkAuraStates)
+    : WorldObjectSpellTargetCheck(caster, referer, spellInfo, selectionType, condList), _range(range), _position(position), _checkAuraStates(checkAuraStates)
 {
 }
 
@@ -9418,7 +9419,7 @@ bool WorldObjectSpellAreaTargetCheck::operator()(WorldObject* target)
 {
     if (!target->IsWithinDist3d(_position, _range))
         return false;
-    return WorldObjectSpellTargetCheck::operator ()(target);
+    return WorldObjectSpellTargetCheck::operator ()(target, _checkAuraStates);
 }
 
 WorldObjectSpellConeTargetCheck::WorldObjectSpellConeTargetCheck(float coneAngle, float range, Unit* caster,

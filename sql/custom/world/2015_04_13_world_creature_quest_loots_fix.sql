@@ -301,3 +301,6 @@ DELETE FROM `creature` WHERE `id`=47268;
 INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (47268, 0, 1, 1, 35512, 2, -6893.49, -1856.53, 250.762, 5.271, 120, 0, 0, 2138, 0, 0, 0, 0, 0);
 
+/* Mogh the Dead fixed */
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 51658;
+

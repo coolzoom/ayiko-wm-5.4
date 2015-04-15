@@ -322,3 +322,6 @@ DELETE FROM `creature_loot_template` WHERE `entry`= 47759 AND `item`= 63090;
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
 (47759, 63090, 100, 1, 0, 1, 1);
 
+/* Quest: The Forsaken Trollbane - Quest starter fix */
+DELETE FROM `creature_queststarter` WHERE `quest` = 26023;
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES (41949, 26023);

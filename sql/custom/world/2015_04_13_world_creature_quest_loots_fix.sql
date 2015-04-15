@@ -307,3 +307,6 @@ UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` 
 /* Bullmastiff fixed */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 44476;
 
+/* The Direglob fixed */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42592;
+

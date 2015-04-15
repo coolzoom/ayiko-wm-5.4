@@ -296,3 +296,8 @@ DELETE FROM `creature` WHERE `id`=47269;
 INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (47269, 0, 1, 1, 11548, 2, -6892.28, -1860.73, 251.118, 2.548, 120, 0, 0, 1990, 0, 0, 0, 0, 0);
 
+/* Prisanne Dustcropper missing spawn fixed */
+DELETE FROM `creature` WHERE `id`=47268;
+INSERT INTO `creature` (`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
+(47268, 0, 1, 1, 35512, 2, -6893.49, -1856.53, 250.762, 5.271, 120, 0, 0, 2138, 0, 0, 0, 0, 0);
+

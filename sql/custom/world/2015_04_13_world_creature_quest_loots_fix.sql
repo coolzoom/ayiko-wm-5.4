@@ -310,3 +310,6 @@ UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 44476;
 /* The Direglob fixed */
 UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42592;
 
+/* Ongo'longo fixed */
+UPDATE `creature_template` SET `VehicleId` = 0 WHERE `entry` = 42815;
+

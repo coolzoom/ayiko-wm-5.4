@@ -442,7 +442,7 @@ class boss_jikun : public CreatureScript
 					summon->SetInCombatWithZone();
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* pKiller) override
             {
                 RemoveAllAurasAndDespawnSummons();
                 summons.DespawnAll();
@@ -456,15 +456,23 @@ class boss_jikun : public CreatureScript
                 _JustDied();
             }
 
-            void DoAction(int32 const action)
+            void DoAction(const int32 uiAction) override
             {
-                me->GetMotionMaster()->MovePoint(POINT1, IntroMoving[0]);
+                if (uiAction == ACTION_START_INTRO)
+                {
+                    if (introDone)
+                        return;
 
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetVisible(true);
-                me->SetHomePosition(IntroMoving[1]);
+                    me->GetMotionMaster()->MovePoint(POINT1, IntroMoving[0]);
 
-                DoPlaySoundToSet(me, 36213); // pre agro
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetVisible(true);
+                    me->SetHomePosition(IntroMoving[1]);
+
+                    DoPlaySoundToSet(me, 36213); // pre agro
+
+                    introDone = true;
+                }
             }
 
             void MovementInform(uint32 type, uint32 id)

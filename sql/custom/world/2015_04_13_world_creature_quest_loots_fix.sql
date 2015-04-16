@@ -388,3 +388,7 @@ UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `mindmg` = 17, 
 
 /* Jor'kil the Soulripper fixed */
 DELETE FROM `creature_template_aura` WHERE `entry` = 32862;
+
+/* Grizzled Brown Bear fixed */
+UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 17347;
+

@@ -360,3 +360,14 @@ DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=17 AND `SourceGroup`=0
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (17, 0, 82194, 0, 0, 29, 0, 43923, 5, 0, 0, 0, "", "Target implicit Forlorn Spirit");
 
+/* Quest: Powering our Defenses fixed */
+DELETE FROM `creature` WHERE `id` IN (16364,17086);
+UPDATE `quest_template` SET `SpecialFlags` = 0 WHERE `Id` = 8490;
+UPDATE `quest_template` SET `RequiredNpcOrGo1` = 16364, `RequiredNpcOrGoCount1` = 1 WHERE `Id` = 8490;
+UPDATE `creature_template` SET `faction_A` = 2, `faction_H` = 2 WHERE `entry` = 16364;
+UPDATE `creature_text` SET `text` = '%s releases the last of its energies into the nearby runestone, successfully reactivating it.', `type` = 16 WHERE `entry` = 16364;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 17086;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=17086 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(17086, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 11, 16364, 200, 0, 0, 0, 0, 0, "Enraged Wraith - Attack the Infused Crystal on Spawn");
+

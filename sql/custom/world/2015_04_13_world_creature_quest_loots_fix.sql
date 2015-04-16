@@ -360,3 +360,46 @@ DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=17 AND `SourceGroup`=0
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (17, 0, 82194, 0, 0, 29, 0, 43923, 5, 0, 0, 0, "", "Target implicit Forlorn Spirit");
 
+/* Quest: Powering our Defenses fixed */
+DELETE FROM `creature` WHERE `id` IN (16364,17086);
+UPDATE `quest_template` SET `SpecialFlags` = 0 WHERE `Id` = 8490;
+UPDATE `quest_template` SET `RequiredNpcOrGo1` = 16364, `RequiredNpcOrGoCount1` = 1 WHERE `Id` = 8490;
+UPDATE `creature_template` SET `faction_A` = 2, `faction_H` = 2 WHERE `entry` = 16364;
+UPDATE `creature_text` SET `text` = '%s releases the last of its energies into the nearby runestone, successfully reactivating it.', `type` = 16 WHERE `entry` = 16364;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 17086;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=17086 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(17086, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 11, 16364, 200, 0, 0, 0, 0, 0, "Enraged Wraith - Attack the Infused Crystal on Spawn");
+
+/* Duskwing fixed */
+UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 11897;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 11897;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=11897 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(11897, 0, 0, 0, 8, 0, 100, 0, 85431, 0, 1000, 1000, 49, 0, 0, 0, 0, 0, 0, 21, 200, 0, 0, 0, 0, 0, 0, "Duskwing - Attack when called");
+
+/* Warlord Thresh'jin now drops his QI */
+DELETE FROM `creature_loot_template` WHERE (`entry`=10822) AND (`item`=61315);
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(10822, 61315, -100, 1, 0, 1, 1);
+
+/* Mistwing Cliffdweller fixed */
+UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `mindmg` = 17, `maxdmg` = 22 WHERE `entry` = 36304;
+
+/* Jor'kil the Soulripper fixed */
+DELETE FROM `creature_template_aura` WHERE `entry` = 32862;
+
+/* Grizzled Brown Bear fixed */
+UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 17347;
+
+/* Stephanos fixed */
+DELETE FROM `creature` WHERE `id`=17555;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
+(17555, 530, 1, 1, 0, 0, -3864.677002, -11642.542969, -137.646942, 2.268079, 300, 0, 0, 14193, 2790, 0, 0, 0, 0, 0);
+
+/* Jadefire & Jaedenar fixed */
+UPDATE `creature_template` SET `minlevel` = 45, `maxlevel` = 46 WHERE `entry` IN (7106,7107,7108,7110,7111,7112,7113,7125);
+
+/* Plains Pridemane fixed */
+UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0 WHERE `entry` = 37207;
+

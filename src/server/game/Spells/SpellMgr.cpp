@@ -3681,6 +3681,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AreaGroupId = 0;
                 break;
                 // Throne of Thunder end
+            case 136909:
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                break;
 #if 1 // Gilneas
                 case 68087:
                 case 80281:

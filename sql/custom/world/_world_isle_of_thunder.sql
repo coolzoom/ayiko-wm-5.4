@@ -628,7 +628,7 @@ REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconN
 (217752, 5, 13509, 'Garde-périmètre, poteau de Kun-Lai', '', '', '', 0, 0, 1.35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1),
 (217758, 10, 13584, 'Sunreaver Perimeter Ward', '', 'Destruction', '', 0, 0, 0.4, 0, 0, 0, 0, 0, 0, 0, 32634, 0, 0, 136610, 1, 0, 0, 24585, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 1);
 
-DELETE FROM `spell_area` WHERE spell=59073 AND area=5842;
+DELETE FROM `spell_area` WHERE spell=59073 AND AREA=5842;
 REPLACE INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES 
 (59073, 5842, 32680, 0, 0, 0, 2, 1, 66, 11),
 (59073, 5842, 32681, 0, 0, 0, 2, 1, 66, 11);
@@ -19826,3 +19826,11 @@ INSERT INTO `creature_classlevelstats` (`level`, `class`, `basehp0`, `basehp1`, 
 (255, 4, 507072, 507072, 507072, 507072, 507072, 0, 1),
 (255, 2, 536137, 536137, 536137, 536713, 536137, 6502, 1),
 (255, 1, 536137, 536137, 536137, 536137, 536137, 0, 1);
+
+DELETE FROM `spell_script_names` WHERE entry = 136909;
+INSERT INTO `spell_script_names` VALUES
+(136909, 'spell_incantation_of_gura');
+
+DELETE FROM `conditions` WHERE SourceEntry = 136909;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+('13','1','136909','0','0','31','0','3','69241','0','0','0','','Incantation of Gura - target Gura the Reclaimed');

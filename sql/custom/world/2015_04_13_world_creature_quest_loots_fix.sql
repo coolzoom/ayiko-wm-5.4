@@ -382,3 +382,6 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `creature_loot_template` WHERE (`entry`=10822) AND (`item`=61315);
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
 (10822, 61315, -100, 1, 0, 1, 1);
+
+/* Mistwing Cliffdweller fixed */
+UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `mindmg` = 17, `maxdmg` = 22 WHERE `entry` = 36304;

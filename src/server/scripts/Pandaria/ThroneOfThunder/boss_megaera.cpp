@@ -2440,7 +2440,7 @@ public:
 
             if (Unit* pCaster = GetCaster())
             {
-                uint32 max_targets = pCaster->GetMap()->Is25ManRaid() ? 3 : 1;
+                uint32 max_targets = /*pCaster->GetMap()->Is25ManRaid() ? 3 :*/ 1;
 
                 if (targets.size() > max_targets)
                     Trinity::Containers::RandomResizeList(targets, max_targets);

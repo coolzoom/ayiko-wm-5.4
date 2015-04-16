@@ -38,8 +38,6 @@ enum Spells
 
     SPELL_CONCEALING_FOG        = 137973, // Dummy on eff 0 for attackable state (body + back head).
 
-    SPELL_WATER_WALK            = 143333, // Spell used to let the heads stand above water.
-
     // Rampage - When a head dies.
     SPELL_RAMPAGE               = 139458, // Periodic dummy on eff 0 for damage increase on the specific spells (+25% for each extra available head of type).
 
@@ -307,6 +305,7 @@ class boss_megaera : public CreatureScript
 
             std::list<Creature*> GetActiveHeadList()
             {
+
                 std::list<Creature*> heads;
                 GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.first, 200.f);
                 GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.second, 200.f);
@@ -556,7 +555,7 @@ class boss_megaera : public CreatureScript
             // Selection of the three starting heads (from those available according to difficulty).
             bool SpawnStartingHeads()
             {
-                if (instance->GetData(TYPE_BELLS_RUNG) < 0 /*3*/)
+                if (instance->GetData(TYPE_BELLS_RUNG) < 3)
                     return false;
 
                 FillPairVector();
@@ -586,14 +585,16 @@ class boss_megaera : public CreatureScript
                 if (Creature* fiHead = SpawnNewHead(NPC_VENOMOUS_HEAD, false))
                 {
                     me->AddAura(SPELL_EMERGE, fiHead);
-                    fiHead->AddAura(SPELL_WATER_WALK, fiHead);
+                    fiHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    fiHead->SendMovementWaterWalking();
                     fiHead->SetReactState(REACT_DEFENSIVE);
 			    }
 
                 if (Creature* secHead = SpawnNewHead(NPC_FROZEN_HEAD, false))
                 {
                     me->AddAura(SPELL_EMERGE, secHead);
-                    secHead->AddAura(SPELL_WATER_WALK, secHead);
+                    secHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    secHead->SendMovementWaterWalking();
                     secHead->SetReactState(REACT_DEFENSIVE);
 			    }
 
@@ -601,7 +602,8 @@ class boss_megaera : public CreatureScript
                 if (Creature* concealing = SpawnNewHead(me->GetMap()->IsHeroic() ? NPC_ARCANE_HEAD : NPC_FLAMING_HEAD, true))
                 {
                     me->AddAura(SPELL_EMERGE, concealing);
-                    concealing->AddAura(SPELL_WATER_WALK, concealing);
+                    concealing->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    concealing->SendMovementWaterWalking();
                     concealing->SetReactState(REACT_DEFENSIVE);
                 }
 
@@ -688,7 +690,8 @@ class boss_megaera : public CreatureScript
                         else if (Aura* pAura = backHead->AddAura(SPELL_EMERGE, backHead))
                             pAura->SetDuration(2000);
 
-                        backHead->AddAura(SPELL_WATER_WALK, backHead);
+                        backHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                        backHead->SendMovementWaterWalking();
                         backHead->SetReactState(REACT_DEFENSIVE);
 
                         DoZoneInCombat(backHead, 200.f);
@@ -966,6 +969,9 @@ class boss_megaera : public CreatureScript
                 if (headKills < 6 && (summon->GetEntry() == NPC_FLAMING_HEAD || summon->GetEntry() == NPC_FROZEN_HEAD || 
                     summon->GetEntry() == NPC_VENOMOUS_HEAD || me->GetMap()->IsHeroic() && summon->GetEntry() == NPC_ARCANE_HEAD))
                 {
+                    summon->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    summon->SendMovementWaterWalking();
+
                     if (instance)
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, summon); // Remove
 
@@ -1035,8 +1041,6 @@ class boss_megaera : public CreatureScript
                     instance->SetBossState(DATA_MEGAERA, DONE);
                     instance->DoRespawnGameObject(instance->GetData64(GOB_MEGAERA_CHEST), 86400);
                 }
-
-                _JustDied();
 
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                 {
@@ -2469,7 +2473,8 @@ public:
                     if (pAcidRain->HasAura(SPELL_ACID_RAIN_VISUAL, GetCaster()->GetGUID()))
                     {
                         pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
-                        pAcidRain->DespawnOrUnsummon();
+                        pAcidRain->DespawnOrUnsummon(5000);
+                        pAcidRain->RemoveAurasDueToSpell(SPELL_ACID_RAIN_VISUAL);
                         break;
                     }
                 }

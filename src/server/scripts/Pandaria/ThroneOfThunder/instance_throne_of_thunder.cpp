@@ -134,7 +134,7 @@ public:
 
         bool SetBossState(uint32 uiId, EncounterState eState) override
         {
-            TC_LOG_ERROR("scripts", "SetBossState called %u %u %u", uiId, (uint32)eState, instance->GetInstanceId());
+            TC_LOG_ERROR("scripts", "SetBossState called type%u, state %u, instance id %u", uiId, (uint32)eState, instance->GetInstanceId());
             if (!InstanceScript::SetBossState(uiId, eState))
                 return false;
 
@@ -434,8 +434,12 @@ public:
                 >> m_auiEncounter[14] >> m_auiEncounter[15];
             for (int i = 0; i < MAX_TYPES; ++i)
             {
-                if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
-                    m_auiEncounter[i] = NOT_STARTED;
+                // For storage purposes
+                if (i != TYPE_BELLS_RUNG)
+                {
+                    if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
+                        m_auiEncounter[i] = NOT_STARTED;
+                }
 
                 if (m_auiEncounter[i] == DONE)
                 {

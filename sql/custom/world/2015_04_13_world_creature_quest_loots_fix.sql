@@ -385,3 +385,6 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 
 /* Mistwing Cliffdweller fixed */
 UPDATE `creature_template` SET `minlevel` = 12, `maxlevel` = 13, `mindmg` = 17, `maxdmg` = 22 WHERE `entry` = 36304;
+
+/* Jor'kil the Soulripper fixed */
+DELETE FROM `creature_template_aura` WHERE `entry` = 32862;

@@ -355,3 +355,8 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (41163, 0, 0, 0, 0, 0, 100, 0, 2000, 4500, 14000, 22000, 11, 84297, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Corrosive Saliva"),
 (41163, 0, 1, 0, 0, 0, 100, 0, 7000, 9000, 18000, 27000, 11, 84298, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, "Cast Optic Link");
 
+/* Quest: Soothing Spirits fixed */
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=17 AND `SourceGroup`=0 AND `SourceEntry`=82194);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(17, 0, 82194, 0, 0, 29, 0, 43923, 5, 0, 0, 0, "", "Target implicit Forlorn Spirit");
+

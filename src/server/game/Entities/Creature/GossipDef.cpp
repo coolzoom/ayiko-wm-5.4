@@ -202,8 +202,8 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         Quest const* quest = sObjectMgr->GetQuestTemplate(questID);
         std::string title = quest->GetTitle();
 
-        int locale = _session->GetSessionDbLocaleIndex();
-        if (locale >= 0)
+        LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+        if (locale >= LOCALE_enUS)
             if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questID))
                 ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
@@ -220,8 +220,8 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
         Quest const* quest = sObjectMgr->GetQuestTemplate(questID);
         std::string title = quest->GetTitle();
 
-        int locale = _session->GetSessionDbLocaleIndex();
-        if (locale >= 0)
+        LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+        if (locale >= LOCALE_enUS)
             if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questID))
                 ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
@@ -282,8 +282,8 @@ void PlayerMenu::SendPointOfInterest(uint32 poiId) const
     }
 
     std::string iconText = poi->icon_name;
-    int32 locale = _session->GetSessionDbLocaleIndex();
-    if (locale >= 0)
+    LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= LOCALE_enUS)
         if (PointOfInterestLocale const* localeData = sObjectMgr->GetPointOfInterestLocale(poiId))
             ObjectMgr::GetLocaleString(localeData->IconName, locale, iconText);
 
@@ -426,8 +426,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     std::string questTurnTextWindow  = quest->GetQuestTurnTextWindow();
     std::string questTurnTargetName  = quest->GetQuestTurnTargetName();
 
-    int32 locale = _session->GetSessionDbLocaleIndex();
-    if (locale >= 0)
+    LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= LOCALE_enUS)
     {
         if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
         {
@@ -612,12 +612,8 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
     std::string questTurnTargetName = quest->GetQuestTurnTargetName();
 
-    /*std::string questObjectiveText[QUEST_OBJECTIVES_COUNT];
-    for (uint32 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        questObjectiveText[i] = quest->ObjectiveText[i];*/
-
-    int32 locale = _session->GetSessionDbLocaleIndex();
-    if (locale >= 0)
+    LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= LOCALE_enUS)
     {
         if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
         {
@@ -630,10 +626,6 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
             ObjectMgr::GetLocaleString(localeData->QuestGiverTargetName, locale, questGiverTargetName);
             ObjectMgr::GetLocaleString(localeData->QuestTurnTextWindow, locale, questTurnTextWindow);
             ObjectMgr::GetLocaleString(localeData->QuestTurnTargetName, locale, questTurnTargetName);
-
-            // TODO SKYBRO: Fix objective locale text
-            /*for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-                ObjectMgr::GetLocaleString(localeData->ObjectiveText[i], locale, questObjectiveText[i]);*/
         }
     }
 
@@ -654,14 +646,20 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     ByteBuffer objData;
     for (auto const &questObjective : quest->m_questObjectives)
     {
-        data.WriteBits(questObjective->Description.size(), 8);
+        std::string description = questObjective->Description;
+        if (locale >= LOCALE_enUS)
+        {
+            if (QuestObjectivesLocale const* questObjectivesLocaleData = sObjectMgr->GetQuestObjectivesLocale(questObjective->Id))
+                ObjectMgr::GetLocaleString(questObjectivesLocaleData->Description, locale, description);
+        }
+        data.WriteBits(description.size(), 8);
         data.WriteBits(questObjective->VisualEffects.size(), 22);
 
         objData << uint32(questObjective->Id);
         objData << uint32(questObjective->ObjectId);
         objData << uint32(questObjective->Flags);
         objData << int32(questObjective->Amount);
-        objData.WriteString(questObjective->Description);
+        objData.WriteString(description);
         objData << uint8(questObjective->Index);
         objData << uint8(questObjective->Type);
 
@@ -787,8 +785,8 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGUID, b
     std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
     std::string questTurnTargetName = quest->GetQuestTurnTargetName();
 
-    int locale = _session->GetSessionDbLocaleIndex();
-    if (locale >= 0)
+    LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= LOCALE_enUS)
     {
         if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
         {
@@ -936,8 +934,8 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGUID, 
         return;
     }
 
-    int32 locale = _session->GetSessionDbLocaleIndex();
-    if (locale >= 0)
+    LocaleConstant locale = _session->GetSessionDbLocaleIndex();
+    if (locale >= LOCALE_enUS)
     {
         if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(quest->GetQuestId()))
         {

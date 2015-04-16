@@ -164,6 +164,7 @@ typedef std::unordered_map<uint32, CreatureLocale> CreatureLocaleContainer;
 typedef std::unordered_map<uint32, GameObjectLocale> GameObjectLocaleContainer;
 typedef std::unordered_map<uint32, ItemLocale> ItemLocaleContainer;
 typedef std::unordered_map<uint32, QuestLocale> QuestLocaleContainer;
+typedef std::unordered_map<uint32, QuestObjectivesLocale> QuestObjectivesLocaleContainer;
 typedef std::unordered_map<uint32, NpcTextLocale> NpcTextLocaleContainer;
 typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleContainer;
 typedef std::unordered_map<int32, TrinityStringLocale> TrinityStringLocaleContainer;
@@ -646,6 +647,7 @@ class ObjectMgr
 
         void LoadQuests();
         void LoadQuestObjectives();
+        void LoadQuestObjectivesLocale();
         void LoadQuestObjectiveVisualEffects();
 
         void LoadQuestRelations();
@@ -895,6 +897,12 @@ class ObjectMgr
         {
             QuestLocaleContainer::const_iterator itr = _questLocaleStore.find(entry);
             if (itr == _questLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        QuestObjectivesLocale const* GetQuestObjectivesLocale(uint32 entry) const
+        {
+            QuestObjectivesLocaleContainer::const_iterator itr = _questObjectivesLocaleStore.find(entry);
+            if (itr == _questObjectivesLocaleStore.end()) return NULL;
             return &itr->second;
         }
         NpcTextLocale const* GetNpcTextLocale(uint32 entry) const
@@ -1243,6 +1251,7 @@ class ObjectMgr
         ItemTemplateContainer _itemTemplateStore;
         ItemLocaleContainer _itemLocaleStore;
         QuestLocaleContainer _questLocaleStore;
+        QuestObjectivesLocaleContainer _questObjectivesLocaleStore;
         NpcTextLocaleContainer _npcTextLocaleStore;
         PageTextLocaleContainer _pageTextLocaleStore;
         TrinityStringLocaleContainer _trinityStringLocaleStore;

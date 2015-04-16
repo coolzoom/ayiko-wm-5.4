@@ -50,7 +50,8 @@ enum SaveData
 enum InstanceEvents : uint32
 {
     EVENT_NONE,
-    EVENT_JINROKH_DOOR
+    EVENT_JINROKH_DOOR,
+    EVENT_MOGU_BELLS
 };
 
 enum GlobalToTSpells : uint32
@@ -139,7 +140,9 @@ enum ObjectsIds
     GOB_MOGU_STATUE_4                       = 218678,
 
     GOB_JIKUN_FEATHER                       = 218543,
-    GOB_MEGAERA_CHEST                       = 218805
+    GOB_MEGAERA_CHEST                       = 218805,
+
+    GOB_MOGU_BELL                           = 218723
 };
 
 #endif

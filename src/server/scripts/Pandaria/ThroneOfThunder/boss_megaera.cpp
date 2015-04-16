@@ -189,7 +189,8 @@ enum Timers
 enum Actions
 {
     ACTION_SET_IN_COMBAT         = 1,
-    ACTION_MEGAERAS_RAGE
+    ACTION_MEGAERAS_RAGE,
+    ACTION_DELAY_EVENTS          
 };
 
 enum HeadPositions
@@ -295,6 +296,7 @@ class boss_megaera : public CreatureScript
             bool isRampaging;
             std::vector<std::pair<HeadPair*, bool>> pairv;
             std::pair<uint32, uint32> activeHeadEntries;
+            std::list<uint64> headGuids;
 
             uint32 remainingHead;
             uint32 killedHeads[4];
@@ -333,6 +335,8 @@ class boss_megaera : public CreatureScript
                     if (i < 4)
                         killedHeads[i] = 0;
                 }
+
+                headGuids.clear();
             }
 
             // Used to add Hydra Frenzy to all heads of a type and heal them.
@@ -954,7 +958,10 @@ class boss_megaera : public CreatureScript
 
                 // The heads cannot move.
                 if (summon->GetEntry() == NPC_FLAMING_HEAD || summon->GetEntry() == NPC_FROZEN_HEAD || summon->GetEntry() == NPC_VENOMOUS_HEAD || summon->GetEntry() == NPC_ARCANE_HEAD)
+                {
+                    headGuids.push_back(summon->GetGUID());
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                }
 
                 // Take care of putting the newly - spawned heads to fight while in combat.
 				if (me->IsInCombat())
@@ -1045,7 +1052,7 @@ class boss_megaera : public CreatureScript
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                 {
                     if (Unit* pHead = ObjectAccessor::GetCreature(*me, *itr))
-                        pHead->Kill(pHead);
+                        me->Kill(pHead);
                 }
             }
 
@@ -1100,6 +1107,15 @@ class boss_megaera : public CreatureScript
                                 AddSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
                                 if (me->GetMap()->IsHeroic())
                                     AddSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
+
+                                for (std::list<uint64>::const_iterator itr = headGuids.cbegin(); itr != headGuids.cend(); ++itr)
+                                {
+                                    if (Creature* pHead = ObjectAccessor::GetCreature(*me, *itr))
+                                    {
+                                        if (pHead->IsAlive() && pHead->AI())
+                                            pHead->AI()->DoAction(ACTION_DELAY_EVENTS);
+                                    }
+                                }
                             }
 
                             // Have each of the specific heads cast the spell (in order).
@@ -1205,6 +1221,12 @@ class npc_flaming_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override
@@ -1331,6 +1353,12 @@ class npc_frozen_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override
@@ -1515,6 +1543,12 @@ class npc_venomous_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
+            }
+
             void JustSummoned(Creature* pSummoned) override
             {
                 if (pSummoned)
@@ -1639,6 +1673,12 @@ class npc_arcane_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override

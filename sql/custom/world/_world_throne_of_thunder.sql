@@ -2965,6 +2965,7 @@ UPDATE creature_template SET ScriptName = "npc_flaming_head_megaera" WHERE entry
 UPDATE creature_template SET ScriptName = "npc_frozen_head_megaera" WHERE entry = 70235;
 UPDATE creature_template SET ScriptName = "npc_venomous_head_megaera" WHERE entry = 70247;
 UPDATE creature_template SET ScriptName = "npc_arcane_head_megaera" WHERE entry = 70252;
+UPDATE creature_template SET modelid1 = 11686, modelid2 = 0 WHERE entry = 68553;
 
 REPLACE INTO spell_script_names VALUES
 (137973, 'spell_concealing_fog_megaera'),

@@ -695,6 +695,9 @@ public:
         {
             if (pGo->GetInstanceScript())
             {
+                if (pGo->GetInstanceScript()->GetData(TYPE_BELLS_RUNG) > 2)
+                    return;
+
                 pGo->GetInstanceScript()->SetData(TYPE_BELLS_RUNG, (pGo->GetInstanceScript()->GetData(TYPE_BELLS_RUNG)) + 1);
 
                 if (Creature* pTalk = GetClosestCreatureWithEntry(pGo, 68553, 5.f))

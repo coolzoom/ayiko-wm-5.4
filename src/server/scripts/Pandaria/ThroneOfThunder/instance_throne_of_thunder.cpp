@@ -5,15 +5,15 @@
 DoorData const doorData[] =
 {
     { GOB_JIN_ROKH_ENTRANCE, DATA_JINROKH, DOOR_TYPE_ROOM, BOUNDARY_NONE },
-    { GOB_JIN_ROKH_EXIT, DATA_JINROKH, DOOR_TYPE_PASSAGE, },
-    { GOB_HORRIDON_ENTRANCE, DATA_HORRIDON, DOOR_TYPE_ROOM, },
-    { GOB_HORRIDON_EXIT, DATA_HORRIDON, DOOR_TYPE_PASSAGE, },
-    { GOB_COUNCIL_ENTRANCE1, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
-    { GOB_COUNCIL_ENTRANCE2, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, },
-    { GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, },
-    { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE },
-    { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_SPAWN_HOLE },
-    { GOB_MEGAERA_EXIT, DATA_MEGAERA, DOOR_TYPE_PASSAGE}
+    { GOB_JIN_ROKH_EXIT, DATA_JINROKH, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GOB_HORRIDON_ENTRANCE, DATA_HORRIDON, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { GOB_HORRIDON_EXIT, DATA_HORRIDON, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GOB_COUNCIL_ENTRANCE1, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { GOB_COUNCIL_ENTRANCE2, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_ROOM, BOUNDARY_NONE },
+    { GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_SPAWN_HOLE, BOUNDARY_NONE },
+    { GOB_MEGAERA_EXIT, DATA_MEGAERA, DOOR_TYPE_PASSAGE, BOUNDARY_NONE }
 };
 
 typedef std::unordered_map<uint32, uint64> EntryGuidMap;
@@ -39,6 +39,7 @@ public:
 
         uint32 m_auiEncounter[MAX_TYPES];
         std::string strSaveData;
+        std::list<uint64> m_lMoguBellGuids;
 
         instance_throne_of_thunder_InstanceScript(Map* map) : InstanceScript(map) {}
 
@@ -126,6 +127,9 @@ public:
                 case 218807:
                 case 218808:
                     megaeraChestGuid = pGo->GetGUID();
+                    break;
+                case GOB_MOGU_BELL:
+                    m_lMoguBellGuids.push_back(pGo->GetGUID());
                     break;
                 default:
                     break;
@@ -397,6 +401,16 @@ public:
                     case EVENT_JINROKH_DOOR:
                         HandleGameObject(GetData64(GOB_JIN_ROKH_PREDOOR), true);
                         break;
+                    case EVENT_MOGU_BELLS:
+                        for (std::list<uint64>::const_iterator itr = m_lMoguBellGuids.cbegin(); itr != m_lMoguBellGuids.cend(); ++itr)
+                        {                          
+                            if (GameObject* pGo = instance->GetGameObject(*itr))
+                            {
+                                HandleGameObject(0, true, pGo);
+                                pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -450,6 +464,9 @@ public:
                     {
                     case TYPE_JINROKH_INTRO:
                         m_mEvents.ScheduleEvent(EVENT_JINROKH_DOOR, 100);
+                        break;
+                    case TYPE_BELLS_RUNG:
+                        m_mEvents.ScheduleEvent(EVENT_MOGU_BELLS, 100);
                         break;
                     }
                 }

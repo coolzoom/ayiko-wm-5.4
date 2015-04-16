@@ -19429,9 +19429,10 @@ UPDATE `gameobject` SET phaseMask=3 WHERE zoneId=5842 AND phaseMask IN(1, 65535)
 UPDATE `gameobject` SET phaseMask=2 WHERE id IN(218463, 218462);
 DELETE FROM `creature_questender` WHERE id=64566 AND quest=32678;
 UPDATE `gameobject` SET position_x=1928.39, position_y=4222.1, position_z=132.486, orientation=2.8239 WHERE id=218463;
-UPDATE `quest_template` SET prevQuestId=0 WHERE Id=32681;
-UPDATE `quest_template` SET NextQuestId=0, NextQuestIdChain=0 WHERE id=32679;
-UPDATE `quest_template` SET prevQuestId=0 WHERE id=32680;
+UPDATE `quest_template` SET prevQuestId=32679 WHERE Id=32681;
+UPDATE `quest_template` SET NextQuestIdChain=32681 WHERE id=32679;
+UPDATE `quest_template` SET prevQuestId=32678 WHERE id=32680;
+UPDATE `quest_template` SET NextQuestIdChain=32680 WHERE id=32678;
 UPDATE `quest_objective` SET objectId=69265 WHERE questId=32526;
 UPDATE `quest_objective` SET objectId=69894 WHERE questId=32533;
 UPDATE `creature_template` SET ScriptName="npc_sunreaver_construct" WHERE entry=50358;
@@ -19453,7 +19454,10 @@ UPDATE `creature_template` SET ScriptName="npc_molthor" WHERE entry=70003;
 UPDATE `creature_template` SET ScriptName="npc_thunder_zandalaris" WHERE entry=70096;
 UPDATE `creature_template` SET ScriptName="npc_thunder_pterodactyls" WHERE entry=70141;
 UPDATE `creature_template` SET ScriptName="npc_rasha" WHERE entry=70530;
-
+DELETE FROM `creature_queststarter` WHERE quest=32679;
+INSERT INTO `creature_queststarter` (id, quest) VALUES
+(64610, 32679);
+UPDATE `creature` SET npcflag=0 WHERE id=64610;
 
 /******************************** OTHERS QUERIES ************************************/
 DELETE FROM `creature_text` WHERE entry IN(70358, 70360);
@@ -19826,3 +19830,4 @@ INSERT INTO `creature_classlevelstats` (`level`, `class`, `basehp0`, `basehp1`, 
 (255, 4, 507072, 507072, 507072, 507072, 507072, 0, 1),
 (255, 2, 536137, 536137, 536137, 536713, 536137, 6502, 1),
 (255, 1, 536137, 536137, 536137, 536137, 536137, 0, 1);
+

@@ -400,3 +400,6 @@ INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equip
 /* Jadefire & Jaedenar fixed */
 UPDATE `creature_template` SET `minlevel` = 45, `maxlevel` = 46 WHERE `entry` IN (7106,7107,7108,7110,7111,7112,7113,7125);
 
+/* Plains Pridemane fixed */
+UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0 WHERE `entry` = 37207;
+

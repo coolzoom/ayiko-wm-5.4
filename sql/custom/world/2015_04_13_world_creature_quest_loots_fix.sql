@@ -335,3 +335,8 @@ INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `
 /* Black Ravager fixed */
 UPDATE `creature_template` SET `minlevel` = 22, `maxlevel` = 23 WHERE `entry` = 628;
 
+/* The Evalcharr fixed */
+UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 8660;
+DELETE FROM `creature` WHERE `id` = 8660;
+INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES (8660, 1, 1, 1, 0, 1, 3527.01, -4122.61, 106.783, 2.18153, 64800, 50, 0, 674, 0, 1, 0, 0, 0, 0);
+

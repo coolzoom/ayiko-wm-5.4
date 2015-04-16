@@ -397,3 +397,6 @@ DELETE FROM `creature` WHERE `id`=17555;
 INSERT INTO `creature` (`id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `dynamicflags`) VALUES 
 (17555, 530, 1, 1, 0, 0, -3864.677002, -11642.542969, -137.646942, 2.268079, 300, 0, 0, 14193, 2790, 0, 0, 0, 0, 0);
 
+/* Jadefire & Jaedenar fixed */
+UPDATE `creature_template` SET `minlevel` = 45, `maxlevel` = 46 WHERE `entry` IN (7106,7107,7108,7110,7111,7112,7113,7125);
+

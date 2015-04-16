@@ -84,7 +84,6 @@ enum AccountTypes
 #define MAX_ACCOUNT_TUTORIAL_VALUES 8
 
 typedef std::vector<std::string> StringVector;
-LocaleConstant GetLocaleByName(const std::string& name);
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some other platforms)
 #ifdef max

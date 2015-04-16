@@ -371,3 +371,10 @@ DELETE FROM `smart_scripts` WHERE (`entryorguid`=17086 AND `source_type`=0);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
 (17086, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 11, 16364, 200, 0, 0, 0, 0, 0, "Enraged Wraith - Attack the Infused Crystal on Spawn");
 
+/* Duskwing fixed */
+UPDATE `creature_template` SET `InhabitType` = 4 WHERE `entry` = 11897;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 11897;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=11897 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(11897, 0, 0, 0, 8, 0, 100, 0, 85431, 0, 1000, 1000, 49, 0, 0, 0, 0, 0, 0, 21, 200, 0, 0, 0, 0, 0, 0, "Duskwing - Attack when called");
+

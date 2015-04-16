@@ -2979,7 +2979,8 @@ REPLACE INTO spell_script_names VALUES
 (139832, 'spell_megaera_submerged'),
 (139845, 'spell_acid_rain_summon'),
 (139848, 'spell_acid_rain_missile'),
-(139850, 'spell_acid_rain_damage');
+(139850, 'spell_acid_rain_damage'),
+(140630, 'spell_siphon_life_tot');
 
 DELETE FROM spell_areatrigger_template WHERE Entry IN (853);
 INSERT INTO spell_areatrigger_template (Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName) VALUES

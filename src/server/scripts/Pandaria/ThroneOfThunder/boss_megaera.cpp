@@ -38,8 +38,6 @@ enum Spells
 
     SPELL_CONCEALING_FOG        = 137973, // Dummy on eff 0 for attackable state (body + back head).
 
-    SPELL_WATER_WALK            = 143333, // Spell used to let the heads stand above water.
-
     // Rampage - When a head dies.
     SPELL_RAMPAGE               = 139458, // Periodic dummy on eff 0 for damage increase on the specific spells (+25% for each extra available head of type).
 
@@ -191,7 +189,8 @@ enum Timers
 enum Actions
 {
     ACTION_SET_IN_COMBAT         = 1,
-    ACTION_MEGAERAS_RAGE
+    ACTION_MEGAERAS_RAGE,
+    ACTION_DELAY_EVENTS          
 };
 
 enum HeadPositions
@@ -297,6 +296,7 @@ class boss_megaera : public CreatureScript
             bool isRampaging;
             std::vector<std::pair<HeadPair*, bool>> pairv;
             std::pair<uint32, uint32> activeHeadEntries;
+            std::list<uint64> headGuids;
 
             uint32 remainingHead;
             uint32 killedHeads[4];
@@ -307,6 +307,7 @@ class boss_megaera : public CreatureScript
 
             std::list<Creature*> GetActiveHeadList()
             {
+
                 std::list<Creature*> heads;
                 GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.first, 200.f);
                 GetCreatureListWithEntryInGrid(heads, me, activeHeadEntries.second, 200.f);
@@ -334,6 +335,8 @@ class boss_megaera : public CreatureScript
                     if (i < 4)
                         killedHeads[i] = 0;
                 }
+
+                headGuids.clear();
             }
 
             // Used to add Hydra Frenzy to all heads of a type and heal them.
@@ -556,7 +559,7 @@ class boss_megaera : public CreatureScript
             // Selection of the three starting heads (from those available according to difficulty).
             bool SpawnStartingHeads()
             {
-                if (instance->GetData(TYPE_BELLS_RUNG) < 0 /*3*/)
+                if (instance->GetData(TYPE_BELLS_RUNG) < 3)
                     return false;
 
                 FillPairVector();
@@ -586,14 +589,16 @@ class boss_megaera : public CreatureScript
                 if (Creature* fiHead = SpawnNewHead(NPC_VENOMOUS_HEAD, false))
                 {
                     me->AddAura(SPELL_EMERGE, fiHead);
-                    fiHead->AddAura(SPELL_WATER_WALK, fiHead);
+                    fiHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    fiHead->SendMovementWaterWalking();
                     fiHead->SetReactState(REACT_DEFENSIVE);
 			    }
 
                 if (Creature* secHead = SpawnNewHead(NPC_FROZEN_HEAD, false))
                 {
                     me->AddAura(SPELL_EMERGE, secHead);
-                    secHead->AddAura(SPELL_WATER_WALK, secHead);
+                    secHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    secHead->SendMovementWaterWalking();
                     secHead->SetReactState(REACT_DEFENSIVE);
 			    }
 
@@ -601,7 +606,8 @@ class boss_megaera : public CreatureScript
                 if (Creature* concealing = SpawnNewHead(me->GetMap()->IsHeroic() ? NPC_ARCANE_HEAD : NPC_FLAMING_HEAD, true))
                 {
                     me->AddAura(SPELL_EMERGE, concealing);
-                    concealing->AddAura(SPELL_WATER_WALK, concealing);
+                    concealing->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    concealing->SendMovementWaterWalking();
                     concealing->SetReactState(REACT_DEFENSIVE);
                 }
 
@@ -688,7 +694,8 @@ class boss_megaera : public CreatureScript
                         else if (Aura* pAura = backHead->AddAura(SPELL_EMERGE, backHead))
                             pAura->SetDuration(2000);
 
-                        backHead->AddAura(SPELL_WATER_WALK, backHead);
+                        backHead->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                        backHead->SendMovementWaterWalking();
                         backHead->SetReactState(REACT_DEFENSIVE);
 
                         DoZoneInCombat(backHead, 200.f);
@@ -951,7 +958,10 @@ class boss_megaera : public CreatureScript
 
                 // The heads cannot move.
                 if (summon->GetEntry() == NPC_FLAMING_HEAD || summon->GetEntry() == NPC_FROZEN_HEAD || summon->GetEntry() == NPC_VENOMOUS_HEAD || summon->GetEntry() == NPC_ARCANE_HEAD)
+                {
+                    headGuids.push_back(summon->GetGUID());
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                }
 
                 // Take care of putting the newly - spawned heads to fight while in combat.
 				if (me->IsInCombat())
@@ -966,6 +976,9 @@ class boss_megaera : public CreatureScript
                 if (headKills < 6 && (summon->GetEntry() == NPC_FLAMING_HEAD || summon->GetEntry() == NPC_FROZEN_HEAD || 
                     summon->GetEntry() == NPC_VENOMOUS_HEAD || me->GetMap()->IsHeroic() && summon->GetEntry() == NPC_ARCANE_HEAD))
                 {
+                    summon->AddUnitMovementFlag(MOVEMENTFLAG_WATERWALKING);
+                    summon->SendMovementWaterWalking();
+
                     if (instance)
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, summon); // Remove
 
@@ -1036,12 +1049,10 @@ class boss_megaera : public CreatureScript
                     instance->DoRespawnGameObject(instance->GetData64(GOB_MEGAERA_CHEST), 86400);
                 }
 
-                _JustDied();
-
                 for (SummonList::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                 {
                     if (Unit* pHead = ObjectAccessor::GetCreature(*me, *itr))
-                        pHead->Kill(pHead);
+                        me->Kill(pHead);
                 }
             }
 
@@ -1096,6 +1107,15 @@ class boss_megaera : public CreatureScript
                                 AddSummonAura(SPELL_RAMPAGE, NPC_VENOMOUS_HEAD);
                                 if (me->GetMap()->IsHeroic())
                                     AddSummonAura(SPELL_RAMPAGE, NPC_ARCANE_HEAD);
+
+                                for (std::list<uint64>::const_iterator itr = headGuids.cbegin(); itr != headGuids.cend(); ++itr)
+                                {
+                                    if (Creature* pHead = ObjectAccessor::GetCreature(*me, *itr))
+                                    {
+                                        if (pHead->IsAlive() && pHead->AI())
+                                            pHead->AI()->DoAction(ACTION_DELAY_EVENTS);
+                                    }
+                                }
                             }
 
                             // Have each of the specific heads cast the spell (in order).
@@ -1201,6 +1221,12 @@ class npc_flaming_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override
@@ -1327,6 +1353,12 @@ class npc_frozen_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override
@@ -1511,6 +1543,12 @@ class npc_venomous_head_megaera : public CreatureScript
                 events.Reset();
             }
 
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
+            }
+
             void JustSummoned(Creature* pSummoned) override
             {
                 if (pSummoned)
@@ -1635,6 +1673,12 @@ class npc_arcane_head_megaera : public CreatureScript
             void Reset()
             {
                 events.Reset();
+            }
+
+            void DoAction(const int32 iAction) override
+            {
+                if (iAction == ACTION_DELAY_EVENTS)
+                    events.DelayEvents(20000);
             }
 
             void JustSummoned(Creature* pSummoned) override
@@ -2396,7 +2440,7 @@ public:
 
             if (Unit* pCaster = GetCaster())
             {
-                uint32 max_targets = pCaster->GetMap()->Is25ManRaid() ? 3 : 1;
+                uint32 max_targets = /*pCaster->GetMap()->Is25ManRaid() ? 3 :*/ 1;
 
                 if (targets.size() > max_targets)
                     Trinity::Containers::RandomResizeList(targets, max_targets);
@@ -2469,7 +2513,8 @@ public:
                     if (pAcidRain->HasAura(SPELL_ACID_RAIN_VISUAL, GetCaster()->GetGUID()))
                     {
                         pAcidRain->CastSpell(pAcidRain, SPELL_ACID_RAIN_DAMAGE, true);
-                        pAcidRain->DespawnOrUnsummon();
+                        pAcidRain->DespawnOrUnsummon(5000);
+                        pAcidRain->RemoveAurasDueToSpell(SPELL_ACID_RAIN_VISUAL);
                         break;
                     }
                 }

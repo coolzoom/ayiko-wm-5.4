@@ -1,4 +1,5 @@
 #include "throne_of_thunder.h"
+#include "CreatureTextMgr.h"
 
 /* 3/14-2015 Emre */
 
@@ -641,6 +642,75 @@ public:
     }
 };
 
+class inRangePredicate
+{
+private:
+    Unit* caster;
+public:
+    inRangePredicate(Unit* _caster) : caster(_caster) {}
+
+    bool operator()(WorldObject* target) const
+    {
+        return target->GetExactDist2d(caster) < 15.1f;
+    }
+};
+
+class spell_siphon_life_tot : public SpellScriptLoader
+{
+public:
+    spell_siphon_life_tot() : SpellScriptLoader("spell_siphon_life_tot") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void SelectTargets(std::list<WorldObject*>&targets)
+        {
+            targets.remove_if(inRangePredicate(GetCaster()));
+        }
+
+        void Register()
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_impl::SelectTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
+
+class go_ancient_mogu_bell : public GameObjectScript
+{
+public:
+    go_ancient_mogu_bell() : GameObjectScript("go_ancient_mogu_bell")
+    {
+
+    }
+
+    void OnGameObjectStateChanged(GameObject* pGo, uint32 state) override
+    {
+        if (state == GO_STATE_ACTIVE)
+        {
+            if (pGo->GetInstanceScript())
+            {
+                if (pGo->GetInstanceScript()->GetData(TYPE_BELLS_RUNG) > 2)
+                    return;
+
+                pGo->GetInstanceScript()->SetData(TYPE_BELLS_RUNG, (pGo->GetInstanceScript()->GetData(TYPE_BELLS_RUNG)) + 1);
+
+                if (Creature* pTalk = GetClosestCreatureWithEntry(pGo, 68553, 5.f))
+                {
+                    if (pTalk->AI())
+                        pTalk->AI()->Talk(pTalk->GetInstanceScript()->GetData(TYPE_BELLS_RUNG) - 1, 0, false, TEXT_RANGE_AREA);
+
+                }
+            }
+        }
+    }
+};
+
 void AddSC_throne_of_thunder()
 {
     new npc_zandalari_spearshaper();
@@ -652,4 +722,6 @@ void AddSC_throne_of_thunder()
     //new spell_storm_weapon_proc();
     new spell_storm_weapon_aura();
     new spell_eruption();
+    new spell_siphon_life_tot();
+    new go_ancient_mogu_bell();
 }

@@ -1163,6 +1163,42 @@ public:
     }
 };
 
+class spell_incantation_of_gura : public SpellScriptLoader
+{
+public:
+    spell_incantation_of_gura() : SpellScriptLoader("spell_incantation_of_gura") {}
+
+    class spell_impl : public SpellScript
+    {
+        PrepareSpellScript(spell_impl);
+
+        void HandleEffectHitTarget(SpellEffIndex /*eff_idx*/)
+        {
+            Creature* pCreature = GetHitCreature();
+            Unit* pCaster = GetCaster();
+
+            if (!pCreature || !pCaster)
+                return;
+
+            pCreature->RemoveAllAuras();
+            
+            if (pCreature->AI())
+                pCreature->AI()->AttackStart(pCaster);
+
+            pCreature->CastSpell(pCreature, 123625, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_impl::HandleEffectHitTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_impl();
+    }
+};
 
 void AddSC_isle_of_thunder()
 {
@@ -1182,4 +1218,6 @@ void AddSC_isle_of_thunder()
     new npc_rasha();
     new npc_thunder_zandalaris();
     new npc_spirit_of_warlord_teng();
+
+    new spell_incantation_of_gura();
 }

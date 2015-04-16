@@ -2965,6 +2965,7 @@ UPDATE creature_template SET ScriptName = "npc_flaming_head_megaera" WHERE entry
 UPDATE creature_template SET ScriptName = "npc_frozen_head_megaera" WHERE entry = 70235;
 UPDATE creature_template SET ScriptName = "npc_venomous_head_megaera" WHERE entry = 70247;
 UPDATE creature_template SET ScriptName = "npc_arcane_head_megaera" WHERE entry = 70252;
+UPDATE creature_template SET modelid1 = 11686, modelid2 = 0 WHERE entry = 68553;
 
 REPLACE INTO spell_script_names VALUES
 (137973, 'spell_concealing_fog_megaera'),
@@ -2979,7 +2980,8 @@ REPLACE INTO spell_script_names VALUES
 (139832, 'spell_megaera_submerged'),
 (139845, 'spell_acid_rain_summon'),
 (139848, 'spell_acid_rain_missile'),
-(139850, 'spell_acid_rain_damage');
+(139850, 'spell_acid_rain_damage'),
+(140630, 'spell_siphon_life_tot');
 
 DELETE FROM spell_areatrigger_template WHERE Entry IN (853);
 INSERT INTO spell_areatrigger_template (Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName) VALUES
@@ -3077,7 +3079,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 -- 10H=(10N+25%)
 
 -- Immunity and bind bosses
-UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759 WHERE entry IN 
+UPDATE creature_template SET flags_extra = flags_extra | 1, mechanic_immune_mask = 667893759, InhabitType = 7 WHERE entry IN 
 (70212,3170212,3270212,3370212,3470212,3570212,70235,3170235,3270235,3370235,3470235,3570235,70247,3170247,3270247,3370247,3470247,3570247,70252,3170252,3270252,3370252,3470252,3570252);
 
 -- Difficulty entries bosses and Trash Mobs
@@ -3591,7 +3593,10 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMa
 -- (@CGUID+600, 70235, 1098, 0, 0, 248, 1, 0, 0, 6419.33, 4504.38, -209.609, 2.3032,  604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 -- (@CGUID+601, 70212, 1098, 0, 0, 248, 1, 0, 0, 6457.67, 4470.42, -209.609, 2.00024, 604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
 -- (@CGUID+602, 70252, 1098, 0, 0,  99, 1, 0, 0, 6475.09, 4490.12, -210.033, 2.42966, 604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
-(@CGUID+603, 68065, 1098, 0, 0, 248, 1, 0, 0, 6467.56, 4483.96, -210.032, 2.50183, 604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
+(@CGUID+603, 68065, 1098, 0, 0, 248, 1, 0, 0, 6467.56, 4483.96, -210.032, 2.50183, 604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+619, 68553, 1098, 0, 0, 248, 1, 0, 0, 6285.99, 4923.5, -161.133, 5.26395,  604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+620, 68553, 1098, 0, 0, 248, 1, 0, 0, 6106.54, 4670.81, -172.214, 0.220267,604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL),
+(@CGUID+621, 68553, 1098, 0, 0, 248, 1, 0, 0, 6496.56, 4740.43, -172.019, 0.044118,604800, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, NULL);
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
@@ -3653,17 +3658,20 @@ INSERT INTO creature_template_aura VALUES
 /*---------------------------------------------------------------------------------------------------------------*/
 
 -- Creature Speeches
-DELETE FROM creature_text WHERE entry = 68065;
+DELETE FROM creature_text WHERE entry IN (68065, 68553);
 INSERT INTO creature_text VALUES
-(68065,0,0,'Megaera begins to |cFFFF0000|Hspell:137175|h[Rampage]|h|r!',41,0,100,0,0,0,'Megaera'),
-(68065,1,0,"Megaera's rage subsides.",41,0,100,0,0,0,'Megaera');
+(68065, 0, 0,'Megaera begins to |cFFFF0000|Hspell:137175|h[Rampage]|h|r!',41,0,100,0,0,0,'Megaera'),
+(68065, 1, 0,"Megaera's rage subsides.",41,0,100,0,0,0,'Megaera'),
+(68553, 0, 0, 'The cavern trembles violently!', 41, 0, 100, 0, 0, 36511, 'SLG Generic MoP (Large AOI) to Player'),
+(68553, 1, 0, 'An ancient beast stirs within the mists!', 41, 0, 100, 0, 0, 36512,'SLG Generic MoP (Large AOI) to Player'),
+(68553, 2, 0, '|cFFF00000Megaera|r rises from the mists!', 41, 0, 100, 0, 0, 36513, 'SLG Generic MoP (Large AOI) to Player');
 /*---------------------------------------------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------------------------------------------*/
 -- Gameobjects templates
 REPLACE INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `WDBVerified`) VALUES 
 (218721, 0, 13620, 'Geyser', '', '', '', 1375, 32, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
-(218723, 0, 13677, 'Ancient Mogu Bell', '', '', '', 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 18291),
+(218723, 0, 13677, 'Ancient Mogu Bell', '', '', '', 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_ancient_mogu_bell', 18291),
 (218746, 0, 13710, 'Hydra Exit', '', '', '', 1375, 32, 0.619047, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 17658),
 (218805, 3, 10317, 'Cache of Ancient Treasures', '', '', '', 35, 0, 3.5, 0, 0, 0, 0, 0, 0, 57, 218805, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 18019),
 (218806, 3, 10317, 'Cache of Ancient Treasures', '', '', '', 35, 0, 3.5, 0, 0, 0, 0, 0, 0, 57, 218806, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 18019),

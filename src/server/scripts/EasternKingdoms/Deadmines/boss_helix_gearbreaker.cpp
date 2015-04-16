@@ -145,7 +145,7 @@ public:
             JustReachedHome();
         }
 
-        void Reset()
+        void Reset() override
         {
             if (Creature* oaf = Unit::GetCreature(*me, oafGUID))
             {
@@ -162,7 +162,7 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void JustReachedHome()
+        void JustReachedHome() override
         {
             if (Creature* oaf = me->SummonCreature(NPC_LUMBERING_OAF, OafSpawnPos))
             {
@@ -171,13 +171,13 @@ public:
             }
         }
 
-        void EnterEvadeMode()
+        void EnterEvadeMode() override
         {
             me->ExitVehicle();
             BossAI::EnterEvadeMode();
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 Talk(HELIX_YELL_KILL_PLAYER);
@@ -193,7 +193,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
             Talk(HELIX_YELL_START);
@@ -209,7 +209,7 @@ public:
                 events.ScheduleEvent(EVENT_SUMMON_HELIX_CREW, 5000);
         }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature* summoned) override
         {
             summons.Summon(summoned);
 
@@ -217,7 +217,7 @@ public:
                 summoned->SetInCombatWithZone();
         }
 
-        void DoAction(int32 action)
+        void DoAction(const int32 action) override
         {
             switch (action)
             {
@@ -264,7 +264,7 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -276,7 +276,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage)
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (!OafDied && me->GetHealthPct() < 20.0f)
             {
@@ -302,7 +302,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (!UpdatePlayerVictim())
                 return;
@@ -428,7 +428,7 @@ class npc_helix_oaf : public CreatureScript
 
             EventMap events;
 
-            void Reset()
+            void Reset() override
             {
                 if (Vehicle* vehicle = me->GetVehicleKit())
                     vehicle->RemoveAllPassengers();
@@ -436,7 +436,7 @@ class npc_helix_oaf : public CreatureScript
                 events.Reset();
             }
 
-            void PassengerBoarded(Unit* /*who*/, int8 seatId, bool apply)
+            void PassengerBoarded(Unit* /*who*/, int8 seatId, bool apply) override
             {
                 if (seatId == 1)
                 {
@@ -477,7 +477,7 @@ class npc_helix_oaf : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 type, uint32 id)
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != POINT_MOTION_TYPE)
                     return;
@@ -486,7 +486,7 @@ class npc_helix_oaf : public CreatureScript
                     events.ScheduleEvent(EVENT_OAF_SMASH_CHANGE_ANGLE, 350);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* /*killer*/) override
             {
                 if (me->IsSummon())
                     if (Creature* summoner = me->ToTempSummon()->GetSummonerCreatureBase())
@@ -496,7 +496,7 @@ class npc_helix_oaf : public CreatureScript
                 Talk(OAF_YELL_DIED);
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit* victim) override
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     if (me->IsSummon())
@@ -505,7 +505,7 @@ class npc_helix_oaf : public CreatureScript
                                 summoner->AI()->Talk(HELIX_YELL_KILL_PLAYER);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;
@@ -572,7 +572,7 @@ class npc_chest_bomb : public CreatureScript
                 canBoom = false;
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) override
             {
                 events.ScheduleEvent(EVENT_ARMING_YELLOW, 1000);
             }
@@ -589,7 +589,7 @@ class npc_chest_bomb : public CreatureScript
                 return NULL;
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
                 events.Update(diff);
 
@@ -664,12 +664,12 @@ class npc_helix_crew : public CreatureScript
                 Reset();
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) override
             {
                 events.ScheduleEvent(EVENT_THROW_BOMB, urand(2000, 7000));
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(const uint32 diff) override
             {
                 if (!UpdateVictim())
                     return;

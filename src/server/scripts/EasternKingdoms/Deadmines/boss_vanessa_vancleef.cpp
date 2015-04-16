@@ -201,7 +201,7 @@ public:
         bool died;
         bool canCheck;
 
-        void Reset()
+        void Reset() override
         {
             _Reset();
             died = false;
@@ -213,13 +213,13 @@ public:
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 Talk(VANESSA_YELL_KILL_PLAYER);
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) override
         {
             _EnterCombat();
             Talk(VANESSA_YELL_START);
@@ -232,7 +232,7 @@ public:
             events.ScheduleEvent(EVENT_DEFLECTION, urand(10000, 20000));
         }
 
-        void DamageTaken(Unit* done_by, uint32 &damage)
+        void DamageTaken(Unit* done_by, uint32 &damage) override
         {
             if (me->GetHealthPct() <= eventHealthPct && canCheck)
             {
@@ -281,7 +281,7 @@ public:
             }
         }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature* summoned) override
         {
             switch (summoned->GetEntry())
             {
@@ -303,13 +303,13 @@ public:
             summoned->SetInCombatWithZone();
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
             instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -532,7 +532,7 @@ public:
         uint64 anchorGUID;
         uint8 ropeId;
 
-        void SetData(uint32 data, uint32 value)
+        void SetData(uint32 data, uint32 value) override
         {
             if (data == DATA_ROPE_ID)
             {
@@ -588,7 +588,7 @@ public:
             events.ScheduleEvent(EVENT_DONE_MOVE, me->GetSplineDuration());
         }
 
-        void DoAction(int32 action)
+        void DoAction(const int32 action)  override
         {
             if (action == ACTION_DESPAWN_ROPE)
                 if (Vehicle* vehicle = me->GetVehicleKit())
@@ -601,7 +601,7 @@ public:
                     }
         }
 
-        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply)
+        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) override
         {
             if (apply)
             {
@@ -610,7 +610,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             events.Update(diff);
 
@@ -655,19 +655,19 @@ public:
         EventMap events;
         bool Enrage;
 
-        void Reset()
+        void Reset() override
         {
             events.Reset();
             Enrage = false;
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) override
         {
             me->CastSpell(who, SPELL_CHARGE, false);
             events.ScheduleEvent(EVENT_BLOODBATH, urand(3000, 10000));
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/)
+        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/) override
         {
             if (me->GetHealthPct() <= 25.0f && !Enrage && !me->IsInEvadeMode())
             {
@@ -676,12 +676,12 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) override
         {
             events.Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff)  override
         {
             if (!UpdateVictim())
                 return;
@@ -719,21 +719,21 @@ public:
         EventMap events;
         bool Enrage;
 
-        void Reset()
+        void Reset() override
         {
             me->AddAura(SPELL_CAMOUFLAGE, me);
             events.Reset();
             Enrage = false;
         }
 
-        void EnterCombat(Unit* who)
+        void EnterCombat(Unit* who) override
         {
             me->AddThreat(who, 100500.0f);
             events.ScheduleEvent(EVENT_SHADOWSTEP, 1000);
             events.ScheduleEvent(EVENT_WHIRLING_BLADES, urand(3000, 5000));
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/)
+        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/) override
         {
             if (me->GetHealthPct() <= 30.0f && !Enrage && !me->IsInEvadeMode())
             {
@@ -742,12 +742,12 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/)  override
         {
             events.Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -795,19 +795,19 @@ public:
         EventMap events;
         bool Enrage;
 
-        void Reset()
+        void Reset() override
         {
             events.Reset();
             Enrage = false;
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void EnterCombat(Unit* /*who*/) override
         {
             events.ScheduleEvent(EVENT_BLOODBOLT, urand(3000, 5000));
             events.ScheduleEvent(EVENT_BLOODWASH, urand(5000, 10000));
         }
 
-        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/)
+        void DamageTaken(Unit* /*done_by*/, uint32 & /*damage*/) override
         {
             if (me->GetHealthPct() <= 30.0f && !Enrage && !me->IsInEvadeMode())
             {
@@ -816,12 +816,12 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/)
+        void JustDied(Unit* /*killer*/) override
         {
             events.Reset();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(const uint32 diff) override
         {
             if (!UpdateVictim())
                 return;

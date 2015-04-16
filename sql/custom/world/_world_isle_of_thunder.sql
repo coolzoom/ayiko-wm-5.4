@@ -19831,3 +19831,15 @@ INSERT INTO `creature_classlevelstats` (`level`, `class`, `basehp0`, `basehp1`, 
 (255, 2, 536137, 536137, 536137, 536713, 536137, 6502, 1),
 (255, 1, 536137, 536137, 536137, 536137, 536137, 0, 1);
 
+DELETE FROM `creature_text` WHERE entry=69099
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES 
+(69099, 0, 0, "Can you feel a chill wind blow? The storm is coming...", 14, 0, 100, 0, 0, 35730, "Nalak - Aggro"),
+(69099, 1, 0, "I am but...the darkness...before the storm...", 14, 0, 100, 0, 0, 35731, "Nalak - Death"),
+(69099, 2, 0, "I am born of thunder!", 14, 0, 100, 0, 0, 35732, "Nalak - Intro"),
+(69099, 3, 0, "The sky weeps for your demise!", 14, 0, 20, 0, 0, 35733, "Nalak - Slay"),
+(69099, 4, 0, "The clouds arc with vengeance!", 14, 0, 100, 0, 0, 35734, "Nalak - Stormcloud"),
+(69099, 5, 0, "The air crackles with anger!", 14, 0, 100, 0, 0, 35735, "Nalak - Lightning Tether");
+
+DELETE FROM `creature_template_aura` WHERE entry=69241;
+INSERT INTO `creature_template_aura` (`entry`, `aura`) VALUES 
+(69241, 94222);

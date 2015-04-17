@@ -463,3 +463,6 @@ INSERT INTO `quest_template` (`Id`, `Method`, `Level`, `MinLevel`, `MaxLevel`, `
 /* Gnome Pilots fix */
 UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 35205;
 
+/* Orhan Ogreblade fixed */
+UPDATE `creature_template` SET `exp` = 4, `unit_class` = 2, `Health_mod` = 19.959 WHERE `entry` = 39656;
+

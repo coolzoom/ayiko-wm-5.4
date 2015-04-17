@@ -425,3 +425,8 @@ DELETE FROM `creature` WHERE `id`=2535;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (2535, 0, 5287, 302, 1, 1, 0, 0, -13810.9, -242.684, 0.770163, 5.75297, 60, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
 
+/* King Mukla wrong spawns fixed */
+DELETE FROM `creature` WHERE `id`=1559;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(1559, 0, 5287, 297, 1, 1, 0, 0, -14718.3, -387.585, 8.36553, 0.683469, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+

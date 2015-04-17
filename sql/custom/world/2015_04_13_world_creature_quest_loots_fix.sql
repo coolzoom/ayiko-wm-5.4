@@ -451,3 +451,6 @@ INSERT INTO `gameobject` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`
 (301110, 0, 0, 0, 1, 1, 1757.16, 217.329, 50.5776, 1.60807, 0, 0, 0.720163, 0.693805, 300, 0, 1),
 (301110, 0, 0, 0, 1, 1, 1759.76, 261.048, 50.5798, 4.81721, 0, 0, 0.669093, -0.743179, 300, 0, 1);
 
+/* Gryphon Master Talonaxe (Quest chain order) fix */
+UPDATE `quest_template` SET `ExclusiveGroup` = -26546 WHERE `Id` IN (26546,26547);
+

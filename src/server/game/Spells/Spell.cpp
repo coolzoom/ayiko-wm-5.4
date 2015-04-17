@@ -3873,6 +3873,7 @@ void Spell::HandleGenericAfterCast()
         switch ((*j)->GetSpellInfo()->Id)
         {
             case 125195: // Tigereye brew, handled in script
+            case 114851: // Blood Charges, handled in script
                 j++;
                 break;
             default:

@@ -1279,6 +1279,75 @@ class spell_dk_anti_magic_shell_raid : public SpellScriptLoader
         }
 };
 
+// 50462 - Anti-Magic Shell (on raid member)
+class spell_dk_deaths_advance: public SpellScriptLoader
+{
+    public:
+        spell_dk_deaths_advance() : SpellScriptLoader("spell_dk_deaths_advance") { }
+
+        class spell_dk_deaths_advance_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_dk_deaths_advance_AuraScript);
+
+            uint32 absorbPct;
+
+            bool Load()
+            {
+                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+                return true;
+            }
+
+            void CalculateEffect(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->HasAura(90259))
+                    amount = 0;
+            }
+
+            void Register()
+            {
+                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_deaths_advance_AuraScript::CalculateEffect, EFFECT_0, SPELL_AURA_MOD_SPEED_NOT_STACK);
+                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_deaths_advance_AuraScript::CalculateEffect, EFFECT_1, SPELL_AURA_MOD_MINIMUM_SPEED);
+                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_deaths_advance_AuraScript::CalculateEffect, EFFECT_1, SPELL_AURA_MOD_SPEED_NOT_STACK);
+                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_deaths_advance_AuraScript::CalculateEffect, EFFECT_0, SPELL_AURA_MOD_MINIMUM_SPEED);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_dk_deaths_advance_AuraScript();
+        }
+
+        class spell_dk_deaths_advance_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dk_deaths_advance_SpellScript);
+
+            SpellCastResult CheckClass()
+            {
+                if (GetSpellInfo()->Id == 96268)
+                    return SPELL_CAST_OK;
+
+                if (GetCaster()->HasAura(90259))
+                    return SPELL_FAILED_DONT_REPORT;
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_dk_deaths_advance_SpellScript::CheckClass);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dk_deaths_advance_SpellScript();
+        }
+};
+
 // 48707 - Anti-Magic Shell (on self)
 class spell_dk_anti_magic_shell_self : public SpellScriptLoader
 {
@@ -2015,4 +2084,5 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_glyph_of_horn_of_winter();
     new spell_dk_soul_reaper_effect();
     new spell_dk_asphyxiate();
+    new spell_dk_deaths_advance();
 }

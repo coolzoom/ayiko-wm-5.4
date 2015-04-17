@@ -2563,6 +2563,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else
                     target->RemoveAurasDueToSpell(54817);
             }
+            break;
+        }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            if (!caster)
+                break;
+
+            switch (GetSpellInfo()->Id)
+            {
+                case 90259:
+                {
+                    uint32 DA[2] = { 96268, 124285 };
+                    for (uint8 i = 0; i < 2; i++)
+                        if (Aura* aura = caster->GetAura(DA[i]))
+                            aura->RecalculateAmountOfEffects();
+                    break;
+                }
+            }
+            break;
         }
         default:
             break;

@@ -5033,8 +5033,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].BasePoints = 0;
                     break;
                 case 90259: // Glyph of Frost Pillar (Root Aura)
-                    spellInfo->Effects[0].MiscValue = 0;
-                    spellInfo->Effects[0].MiscValueB = 0;
+                    spellInfo->Effects[1].BasePoints = -70;
+                    break;
                     break;
                 case 49821: // Mind Sear
                     spellInfo->Effects[0].TargetA = TARGET_DEST_CHANNEL_TARGET;

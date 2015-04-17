@@ -6168,6 +6168,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 86213: // Soul Swap Exhale
                     spellInfo->spellPower.CostBasePercentage = 0;
                     break;
+                case 144757: // Chromatic Mantle enchant
+                    spellInfo->AttributesEx11 &= ~ SPELL_ATTR11_SCALING_FROM_ITEM;
+                    break;
                 default:
                     break;
             }

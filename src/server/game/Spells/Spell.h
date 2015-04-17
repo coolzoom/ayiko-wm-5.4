@@ -459,7 +459,7 @@ class Spell
         void SearchAreaTargets(std::list<WorldObject*>& targets, float range, Position const* position, Unit* referer, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, ConditionList* condList, bool checkAuraStates = true);
         void SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTargets, WorldObject* target, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectType, ConditionList* condList, bool isChainHeal);
 
-        void prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura = NULL, uint32 gcdAtCast = 0, bool clientCasted = false);
+        void prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura = NULL, uint32 gcdAtCast = 0);
         void cancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
@@ -781,7 +781,6 @@ class Spell
         SpellPowerEntry const* m_spellPowerData;
 
         bool m_redirected;
-        bool m_isClientCasted;
 };
 
 namespace Trinity

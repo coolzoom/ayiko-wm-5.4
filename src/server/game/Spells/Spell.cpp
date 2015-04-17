@@ -586,7 +586,6 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
     m_hasDispelled = false;
 
     m_redirected = false;
-    m_isClientCasted = false;
 
     // Determine if spell can be reflected back to the caster
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
@@ -3350,14 +3349,12 @@ bool Spell::UpdateChanneledTargetList()
     return channelTargetEffectMask == 0;
 }
 
-void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura, uint32 gcdAtCast, bool clientCast)
+void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggeredByAura, uint32 gcdAtCast)
 {
     if (m_CastItem)
         m_castItemGUID = m_CastItem->GetGUID();
     else
         m_castItemGUID = 0;
-
-    m_isClientCasted = clientCast;
 
     InitExplicitTargets(*targets);
 
@@ -3389,7 +3386,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
 
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
-    if (gcdAtCast && gcdAtCast <= MAX_SPELL_QUEUE_GCD && !m_CastItem)
+    if (gcdAtCast && gcdAtCast <= MAX_SPELL_QUEUE_GCD)
     {
         if (m_caster->ToPlayer()->m_queuedSpell)
         {
@@ -3540,7 +3537,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const *triggered
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && result == SPELL_CAST_OK)
             TriggerGlobalCooldown();
 
-        if (!m_casttime && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
+        if (!m_casttime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
     }
 }
@@ -3786,8 +3783,7 @@ void Spell::cast(bool skipCheck)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
-        if (!m_isClientCasted)
-            TakeCastItem();
+        TakeCastItem();
 
         // Okay, maps created, now prepare flags
         m_immediateHandled = false;
@@ -3966,8 +3962,7 @@ void Spell::handle_immediate()
     _handle_finish_phase();
 
     // Remove used for cast item if need (it can be already NULL after TakeReagents call
-    if (!m_isClientCasted)
-        TakeCastItem();
+    TakeCastItem();
 
     // handle ammo consumption for thrown weapons
     if (m_spellInfo->IsRangedWeaponSpell() && m_spellInfo->IsChanneled())

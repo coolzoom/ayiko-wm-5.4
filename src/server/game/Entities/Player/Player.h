@@ -1508,6 +1508,8 @@ class Player final : public Unit, public GridObject<Player>
         QuestStatus GetQuestStatus(uint32 quest_id) const;
         QuestStatus GetQuestStatus(Quest const *qInfo) const;
         void SetQuestStatus(uint32 quest_id, QuestStatus status);
+        void RemoveActiveQuest(uint32 quest_id);
+        void RemoveRewardedQuest(uint32 quest_id);
 
         void SetDailyQuestStatus(uint32 quest_id);
         void SetWeeklyQuestStatus(uint32 quest_id);
@@ -3142,8 +3144,6 @@ class Player final : public Unit, public GridObject<Player>
         uint32 m_logonSendTimer;        
 
     private:
-        void RemoveActiveQuest(uint32 quest_id);
-        void RemoveRewardedQuest(uint32 quest_id);
 
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;

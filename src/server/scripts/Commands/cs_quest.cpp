@@ -134,10 +134,12 @@ public:
 
                 // we ignore unequippable quest items in this case, its' still be equipped
                 player->TakeQuestSourceItem(logQuest, false);
+
             }
         }
 
-        player->SetQuestStatus(entry, QUEST_STATUS_NONE);
+        player->RemoveActiveQuest(entry);
+        player->RemoveRewardedQuest(entry);
 
         handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
         return true;

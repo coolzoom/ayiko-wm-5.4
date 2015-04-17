@@ -437,3 +437,17 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (15941, 0, 0, 0, 8, 0, 100, 0, 27907, 0, 14000, 14000, 33, 15941, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Apprentice Ralen - Gives Kill Credit on Spellhit"),
 (15945, 0, 0, 0, 8, 0, 100, 0, 27907, 0, 14000, 14000, 33, 15945, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Apprentice Meledor - Gives Kill Credit on Spellhit");
 
+/* Quest: Moat Monster made doable */
+DELETE FROM `creature` WHERE `id` = 53590;
+UPDATE `creature_template` SET `faction_A` = 35, `faction_H` = 35, `AIName` = 'SmartAI' WHERE `entry` = 53590;
+DELETE FROM `smart_scripts` WHERE (`entryorguid`=53590 AND `source_type`=0);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(53590, 0, 0, 0, 8, 0, 100, 0, 36651, 0, 1000, 1000, 33, 53592, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Moat Monster - Gives Credit on Spell Hit");
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` = 99508;
+INSERT INTO `spell_linked_spell` VALUES
+(99508,36651,0,'');
+DELETE FROM `gameobject` WHERE `id`=301110;
+INSERT INTO `gameobject` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
+(301110, 0, 0, 0, 1, 1, 1757.16, 217.329, 50.5776, 1.60807, 0, 0, 0.720163, 0.693805, 300, 0, 1),
+(301110, 0, 0, 0, 1, 1, 1759.76, 261.048, 50.5798, 4.81721, 0, 0, 0.669093, -0.743179, 300, 0, 1);
+

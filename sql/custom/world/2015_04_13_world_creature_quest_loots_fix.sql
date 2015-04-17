@@ -430,3 +430,10 @@ DELETE FROM `creature` WHERE `id`=1559;
 INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
 (1559, 0, 5287, 297, 1, 1, 0, 0, -14718.3, -387.585, 8.36553, 0.683469, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
 
+/* Quest: Swift Discipline fixed */
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (15941,15945);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (15941,15945) AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(15941, 0, 0, 0, 8, 0, 100, 0, 27907, 0, 14000, 14000, 33, 15941, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Apprentice Ralen - Gives Kill Credit on Spellhit"),
+(15945, 0, 0, 0, 8, 0, 100, 0, 27907, 0, 14000, 14000, 33, 15945, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, "Apprentice Meledor - Gives Kill Credit on Spellhit");
+

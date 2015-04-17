@@ -420,3 +420,8 @@ INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`mo
 (42155, 0, 11, 205, 1, 1, 0, 0, -2628.59, -2425.2, 79.3355, 4.01426, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
 (42155, 0, 11, 205, 1, 1, 0, 0, -2632.87, -2399.92, 88.3979, 4.41568, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
 
+/* Maury "Club Foot" Wilkins wrong spawns fixed */
+DELETE FROM `creature` WHERE `id`=2535;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(2535, 0, 5287, 302, 1, 1, 0, 0, -13810.9, -242.684, 0.770163, 5.75297, 60, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+

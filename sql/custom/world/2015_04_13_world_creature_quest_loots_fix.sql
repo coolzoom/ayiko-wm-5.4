@@ -466,3 +466,14 @@ UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 35205;
 /* Orhan Ogreblade fixed */
 UPDATE `creature_template` SET `exp` = 4, `unit_class` = 2, `Health_mod` = 19.959 WHERE `entry` = 39656;
 
+/* Vi'el fixed */
+UPDATE `creature_template` SET `gossip_menu_id` = 0 WHERE `entry` = 16015;
+DELETE FROM `npc_vendor` WHERE `entry` = 16015;
+INSERT INTO `npc_vendor` VALUES 
+('16015', '0', '8846', '4', '3600', '0', '1'),
+('16015', '0', '14256', '1', '3600', '0', '1'),
+('16015', '0', '21939', '0', '0', '0', '1'),
+('16015', '0', '63388', '0', '0', '0', '1'),
+('16015', '0', '64670', '0', '0', '0', '1'),
+('16015', '0', '79249', '0', '0', '0', '1');
+

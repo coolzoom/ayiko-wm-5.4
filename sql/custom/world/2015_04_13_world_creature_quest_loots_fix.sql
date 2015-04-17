@@ -403,3 +403,6 @@ UPDATE `creature_template` SET `minlevel` = 45, `maxlevel` = 46 WHERE `entry` IN
 /* Plains Pridemane fixed */
 UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0 WHERE `entry` = 37207;
 
+/* Kohor fixed */
+UPDATE `creature_template` SET `modelid2` = 0, `modelid3` = 0, `modelid4` = 0 WHERE `entry` = 35632;
+

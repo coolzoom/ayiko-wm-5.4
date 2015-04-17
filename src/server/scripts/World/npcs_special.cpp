@@ -4133,7 +4133,7 @@ class npc_past_self : public CreatureScript
                                         for (uint8 i = 0; i < aura->GetSpellInfo()->Effects.size(); ++i)
                                             if (AuraEffect * effect = aura->GetEffect(i))
                                             {
-                                                effect->SetAmount((itr)->m_damage[i]);
+                                                effect->ChangeAmount((itr)->m_damage[i]);
 
                                                 if ((itr)->m_fixedAmount[i])
                                                     effect->GetFixedDamageInfo().SetFixedDamage((itr)->m_fixedAmount[i]);

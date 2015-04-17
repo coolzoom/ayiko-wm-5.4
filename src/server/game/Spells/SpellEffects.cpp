@@ -3516,7 +3516,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         case 77130: // Purify Spirit
             if (auto const aurEff = m_caster->GetAuraEffect(55445, 0))
             {
-                int32 bp = int32(unitTarget->CountPctFromMaxHealth(aurEff->GetAmount()));
+                int32 bp = int32(m_caster->CountPctFromMaxHealth(aurEff->GetAmount()));
                 m_caster->CastCustomSpell(unitTarget, 86961, &bp, 0, 0, true);
             }
             break;

@@ -407,3 +407,16 @@ UPDATE `creature_template` SET `unit_flags` = 67108864, `dynamicflags` = 0 WHERE
 /* Kohor fixed */
 UPDATE `creature_template` SET `modelid2` = 0, `modelid3` = 0, `modelid4` = 0 WHERE `entry` = 35632;
 
+/* Twilight Rifleman fixed */
+UPDATE `creature_template` SET `unit_flags` = 0, `dynamicflags` = 0 WHERE `entry` = 42155;
+DELETE FROM `creature` WHERE `id`=42155;
+INSERT INTO `creature` (`id`,`map`,`zoneId`,`areaId`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`npcflag2`,`unit_flags`,`unit_flags2`,`dynamicflags`,`isActive`) VALUES
+(42155, 0, 11, 205, 1, 1, 0, 0, -2620.62, -2442.37, 81.3753, 2.61799, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2619.98, -2468.88, 79.3109, 3.97935, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2564.48, -2461.09, 84.7558, 1.48353, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2597.14, -2437.75, 80.4496, 2.67035, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2608.11, -2427.49, 80.3677, 0.471239, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2589.44, -2409.56, 84.1975, 3.76991, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2628.59, -2425.2, 79.3355, 4.01426, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+(42155, 0, 11, 205, 1, 1, 0, 0, -2632.87, -2399.92, 88.3979, 4.41568, 120, 7.786, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+

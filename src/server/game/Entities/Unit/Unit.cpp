@@ -8940,13 +8940,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
 
 // Used in case when access to whole aura is needed
 // All procs should be handled like this...
-bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown, bool * handled)
+bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, SpellInfo const* procSpell, uint32 /*procFlag*/, uint32 procEx, uint32 cooldown, bool * handled)
 {
     SpellInfo const* dummySpell = triggeredByAura->GetSpellInfo();
     uint32 const fakeCooldownId = std::numeric_limits<uint32>::max() - dummySpell->Id;
 
     if (cooldown && GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasSpellCooldown(fakeCooldownId))
+    {
+        switch (dummySpell->Id)
+        {
+            case 49222: // Bone Shield
+                *handled = true;
+                break;
+        }
         return false;
+    }
 
     if (cooldown && GetTypeId() == TYPEID_UNIT && ToCreature()->HasSpellCooldown(fakeCooldownId))
         return false;
@@ -9125,6 +9133,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura *triggeredByAura, Sp
                 case 49222:
                 {
                     *handled = true;
+                    if (procEx & PROC_EX_ABSORB)
+                        return false;
+
                     break;
                 }
                 // Hungering Cold aura drop

@@ -72,7 +72,7 @@ public:
             _JustDied();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 

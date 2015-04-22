@@ -93,7 +93,7 @@ class boss_commander_sarannis : public CreatureScript
                 BossAI::JustSummoned(summon);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 if (!UpdateVictim())
                     return;

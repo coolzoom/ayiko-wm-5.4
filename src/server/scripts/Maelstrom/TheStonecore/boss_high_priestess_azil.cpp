@@ -156,7 +156,7 @@ class boss_azil : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!forceGrip && !UpdateVictim())
                 return;
@@ -390,7 +390,7 @@ class npc_gravity_well_azil : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!active)
             {

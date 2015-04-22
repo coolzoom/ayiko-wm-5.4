@@ -136,7 +136,7 @@ public:
             events.ScheduleEvent(EVENT_ENTER_FLY, 1000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -222,7 +222,7 @@ public:
             events.ScheduleEvent(EVENT_ENTER_FLY, 1000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -298,13 +298,13 @@ public:
             ASSERT(me->IsSummon());
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_TALK_INTRO)
                 events.ScheduleEvent(EVENT_TALK_1, 0);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -354,13 +354,13 @@ public:
             ASSERT(me->IsSummon());
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_TALK_INTRO_2)
                 events.ScheduleEvent(EVENT_TALK_5, 0);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -500,7 +500,7 @@ class npc_boden_the_imposing : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (eventStarted)
                 {
@@ -623,7 +623,7 @@ class npc_pebble : public CreatureScript
                 Owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
             }
 
-            void UpdateAI(uint32 /*diff*/)
+            void UpdateAI(uint32 const /*diff*/)
             {
                 if (Owner && Owner->GetQuestStatus(QUEST_CLINGY) == QUEST_STATUS_INCOMPLETE)
                 {
@@ -770,7 +770,7 @@ public:
             player = summoner->ToPlayer();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!uiExplode)
                 return;
@@ -891,7 +891,7 @@ class npc_opalescent_guardian : public CreatureScript
                 SetFollowComplete();
             }
 
-            void UpdateFollowerAI(uint32 /*uiDiff*/)
+            void UpdateFollowerAI(uint32 const /*uiDiff*/)
             {
                 if (!UpdateVictim())
                     return;
@@ -1022,7 +1022,7 @@ class npc_war_guardian : public CreatureScript
                 uiThunderClapTimer  =   urand(12000, 15000);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (!UpdateVictim())
                     return;

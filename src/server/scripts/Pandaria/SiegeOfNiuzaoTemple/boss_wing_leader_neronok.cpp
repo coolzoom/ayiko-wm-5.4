@@ -172,7 +172,7 @@ class boss_wing_leader_neronok : public CreatureScript
             _EnterCombat();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;

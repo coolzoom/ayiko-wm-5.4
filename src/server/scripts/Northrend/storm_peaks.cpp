@@ -852,7 +852,7 @@ class npc_hyldsmeet_protodrake_static : public CreatureScript
             summon->SetReactState(REACT_AGGRESSIVE);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!init)
             {
@@ -913,7 +913,7 @@ class npc_hyldsmeet_protodrake : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (cycleTimer)
             {

@@ -823,7 +823,7 @@ class npc_barada : public CreatureScript
 				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 				}
 			
-				void DoAction(int32 action) override
+				void DoAction(int32 const action) override
 				 {
 				if (action == ACTION_START_EVENT)
 					 {
@@ -862,7 +862,7 @@ class npc_barada : public CreatureScript
 					}
 				}
 			
-				void UpdateAI(uint32 diff) override
+				void UpdateAI(uint32 const diff) override
 				 {
 				events.Update(diff);
 				
@@ -1068,7 +1068,7 @@ class npc_colonel_jules : public CreatureScript
 				wpreached = false;
 				}
 			
-				void DoAction(int32 action) override
+				void DoAction(int32 const action) override
 				 {
 				switch (action)
 					{
@@ -1137,7 +1137,7 @@ class npc_colonel_jules : public CreatureScript
 					}
 				}
 			
-				void UpdateAI(uint32 diff) override
+				void UpdateAI(uint32 const diff) override
 				 {
 				if (wpreached)
 					{

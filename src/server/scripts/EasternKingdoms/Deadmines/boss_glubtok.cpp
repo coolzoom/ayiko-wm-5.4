@@ -280,7 +280,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdatePlayerVictim())
                 return;
@@ -419,7 +419,7 @@ public:
             events.ScheduleEvent(EVENT_INSTALL_WALL_LEVEL_ONE, 100);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 

@@ -213,7 +213,7 @@ public:
             Talk(SAY_NALAK_DEATH);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -312,7 +312,7 @@ public:
             uiHaywireTimer = 3*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -363,7 +363,7 @@ public:
             uiVengefulSpiritTimer = 8*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -431,7 +431,7 @@ public:
             me->CastSpell(me->GetVictim(), SPELL_LEAPING_REND);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -489,7 +489,7 @@ public:
             uiEvolutionTimer = 16*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -552,7 +552,7 @@ public:
             uiCrystallineShieldTimer = 8*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -610,7 +610,7 @@ public:
             uiPoundTimer = 8*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -675,7 +675,7 @@ public:
             uiShadowBoltVolleyTimer = 6*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -738,7 +738,7 @@ public:
             uiMassiveStompTimer = 10*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -797,7 +797,7 @@ public:
             me->CastSpell(me->GetVictim(), SPELL_STORM_BOLT);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -852,7 +852,7 @@ public:
             uiThunderCrushTimer = 8*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -917,7 +917,7 @@ public:
             uiMarkOfBloodTimer = 12*IN_MILLISECONDS;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -1000,7 +1000,7 @@ public:
             
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -1131,7 +1131,7 @@ public:
                 me->CastSpell(me, SPELL_TENG_GHOST_VISUAL_2);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;

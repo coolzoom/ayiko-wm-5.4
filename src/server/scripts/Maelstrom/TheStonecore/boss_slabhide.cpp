@@ -84,7 +84,7 @@ class boss_slabhide : public CreatureScript
             _Reset();
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (!me->IsAlive())
                 return;
@@ -146,7 +146,7 @@ class boss_slabhide : public CreatureScript
             BossAI::JustSummoned(summon);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -266,7 +266,7 @@ class npc_stalactite_stalker : public CreatureScript
             // FIXME MERGE me->SendMovementFlagUpdate();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!visual)
             {
@@ -317,7 +317,7 @@ class npc_lava_fissure : public CreatureScript
             activeTimer = IsHeroic() ? 3000 : 5000;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!active)
             {

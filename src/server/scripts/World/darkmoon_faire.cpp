@@ -620,7 +620,7 @@ public:
             me->DespawnOrUnsummon(3000);
         }
 
-        void UpdateAI(uint32 diff) override {}
+        void UpdateAI(uint32 const diff) override {}
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -1190,7 +1190,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) override {}
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (checkAmountOfSpawnsTimer <= diff)
             {
@@ -1358,7 +1358,7 @@ class npc_darkmoon_faire_tonk_target : public CreatureScript
                     targetSlotId = data;
             }
 
-            void UpdateAI(uint32 diff) override { }
+            void UpdateAI(uint32 const diff) override { }
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -1414,7 +1414,7 @@ class npc_darkmoon_faire_tonk : public CreatureScript
                 stopBattlingAfterDeathDelay = 3000;
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 if (stopBattlingAfterDeathDelay)
                 {
@@ -1466,7 +1466,7 @@ class npc_darkmoon_faire_enemy_tonk : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 if (recentlyShotSomeoneTimer)
                 {
@@ -1655,7 +1655,7 @@ class npc_darkmoon_faire_target_controller : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) override { }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 if (spawnNewTargetTimer <= diff)
                 {
@@ -1721,7 +1721,7 @@ class npc_darkmoon_faire_target_bunny : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff) override { }
+            void UpdateAI(uint32 const diff) override { }
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -1752,7 +1752,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) override {}
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (checkForGameEventTimer <= diff)
             {
@@ -1880,7 +1880,7 @@ public:
             finishedGuzzlingTheKegTimer = 3000;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -1975,7 +1975,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) override {}
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (checkForBombsAwayAuraTimer <= diff)
             {

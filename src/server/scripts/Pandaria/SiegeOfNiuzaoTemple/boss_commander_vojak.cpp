@@ -870,7 +870,7 @@ class boss_commander_vojak : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!moving)
                 if (!UpdateVictimWithGaze() || !UpdateVictim())

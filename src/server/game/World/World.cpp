@@ -2158,14 +2158,6 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Caching taxi nodes for levelup...");
     Trinity::PlayerTaxi::CacheLevelupNodes();
 
-    {
-        TC_LOG_INFO("server.loading", "Starting web auction broker agent...");
-
-        std::string endpoint = sConfigMgr->GetStringDefault("AuctionBrokerEndpoint", "tcp://*:8100");
-        if (m_auctionBroker.bind(endpoint.c_str()) != 0)
-            exit(1);
-    }
-
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     TC_LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));

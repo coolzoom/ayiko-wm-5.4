@@ -85,7 +85,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -135,7 +135,7 @@ public:
             events.ScheduleEvent(EVENT_SHADOW_BOLT, 1 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -203,7 +203,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -247,7 +247,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -310,7 +310,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -414,7 +414,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -490,7 +490,7 @@ public:
             events.ScheduleEvent(EVENT_START_SWIMING, 3 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -550,7 +550,7 @@ public:
             events.ScheduleEvent(EVENT_START_SWIMING, 5 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -988,7 +988,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
             npc_escortAI::UpdateAI(diff);
@@ -1128,7 +1128,7 @@ public:
             events.ScheduleEvent(EVENT_HEX, 12 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -1226,7 +1226,7 @@ public:
                 damage = 0;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -1289,7 +1289,7 @@ public:
                 damage = 0;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -1686,7 +1686,7 @@ public:
                 owner->RemoveAura(SPELL_ORC_SCOUT);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -1758,7 +1758,7 @@ public:
             events.ScheduleEvent(EVENT_SINISTER_STRIKE, 3 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -1854,7 +1854,7 @@ public:
             events.ScheduleEvent(EVENT_JUMP, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2054,7 +2054,7 @@ public:
             events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2130,7 +2130,7 @@ public:
                     killer->ToPlayer()->KilledMonsterCredit(NPC_THRALL_CREDIT);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -2226,7 +2226,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2278,7 +2278,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override // HACK! Need to fix spell_chain, when spell_chain hits stalker, stalker casts spell spell_fire,but chain spells not works with 38 target :(
+        void UpdateAI(uint32 const diff) override // HACK! Need to fix spell_chain, when spell_chain hits stalker, stalker casts spell spell_fire,but chain spells not works with 38 target :(
         {
             events.Update(diff);
 
@@ -2364,7 +2364,7 @@ public:
 
         EventMap events;
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             if(actionId == ACTION_DONE)
             {
@@ -2408,7 +2408,7 @@ public:
             events.ScheduleEvent(EVENT_CYCLIC_PATH, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             VehicleAI::UpdateAI(diff);
             events.Update(diff);
@@ -2554,7 +2554,7 @@ public:
             events.ScheduleEvent(EVENT_TALK_2, 7.4 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2646,7 +2646,7 @@ public:
             events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             VehicleAI::UpdateAI(diff);
             events.Update(diff);
@@ -2791,7 +2791,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2833,7 +2833,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -2882,7 +2882,7 @@ public:
             events.ScheduleEvent(EVENT_WOUND, urand(12, 20) * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -2972,7 +2972,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -3170,7 +3170,7 @@ public:
 
         EventMap events;
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             if(actionId == ACTION_EGG_FOUNTAIN)
                 events.ScheduleEvent(EVENT_TALK_1, 4 * IN_MILLISECONDS);
@@ -3200,7 +3200,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -3320,7 +3320,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(uint32 eventId = comsmeticEvents.ExecuteEvent())
             {
@@ -3403,7 +3403,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -3483,7 +3483,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -3578,7 +3578,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -3623,7 +3623,7 @@ public:
             events.ScheduleEvent(EVENT_VICIOUS_BITE, 5 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
                 return;
@@ -3720,7 +3720,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             npc_escortAI::UpdateAI(diff);
             events.Update(diff);
@@ -3799,7 +3799,7 @@ public:
 
         EventMap events;
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             switch(actionId)
             {
@@ -3826,7 +3826,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -4319,7 +4319,7 @@ public:
             summon->SetVisible(false);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -4453,7 +4453,7 @@ public:
                     player->CastSpell(killer, SPELL_KILL_CREDIT, false);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -4528,7 +4528,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -4635,7 +4635,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -4711,7 +4711,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             npc_escortAI::UpdateAI(diff);
             events.Update(diff);
@@ -4962,7 +4962,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -5237,7 +5237,7 @@ public:
             combatEvents.ScheduleEvent(EVENT_FROST_SHOCK, 3 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -5310,7 +5310,7 @@ public:
             combatEvents.ScheduleEvent(EVENT_LIGHTNING_BOLT, 3 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -5380,7 +5380,7 @@ public:
             combatEvents.ScheduleEvent(EVENT_SEARING_TOTEM, 3 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -5468,7 +5468,7 @@ public:
             me->CastSpell((Unit*)NULL, SPELL_KILL_CREDIT, false);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -5890,7 +5890,7 @@ public:
                         sassy->AI()->Talk(textId, me->ToTempSummon()->GetSummonerGUID(), true);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6025,7 +6025,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6093,7 +6093,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6194,7 +6194,7 @@ public:
             events.ScheduleEvent(EVENT_ZONE_CHECK, 1 * IN_MILLISECONDS);
         }
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             switch(actionId)
             {
@@ -6218,7 +6218,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6460,7 +6460,7 @@ public:
             events.ScheduleEvent(EVENT_JUMP, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6626,7 +6626,7 @@ public:
                 Talk(TALK_KAJA_COLA_HIT, me->ToTempSummon()->GetSummonerGUID(), true);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6740,7 +6740,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6794,7 +6794,7 @@ public:
                 Talk(TALK_KAJA_COLA_HIT, me->ToTempSummon()->GetSummonerGUID(), true);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -6879,7 +6879,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -6972,7 +6972,7 @@ public:
               }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -7209,7 +7209,7 @@ public:
             combatEvents.ScheduleEvent(EVENT_SAW_BLADE, urand(6, 8) * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if(!UpdateVictim())
             {
@@ -7339,7 +7339,7 @@ public:
             events.ScheduleEvent(EVENT_EXPLOSION_2, 1 * IN_MILLISECONDS);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -7419,7 +7419,7 @@ public:
             events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -7477,7 +7477,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -7656,7 +7656,7 @@ public:
                 AttackStart(target);
         };
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             if (actionId == 1)
             {
@@ -7718,7 +7718,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (uint32 eventId = comsmeticEvents.ExecuteEvent())
             {
@@ -7847,7 +7847,7 @@ public:
                 AttackStart(target);
         };
 
-        void DoAction(int32 actionId) override
+        void DoAction(int32 const actionId) override
         {
             if (actionId == 1)
             {
@@ -7891,7 +7891,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
 
             if (uint32 eventId = comsmeticEvents.ExecuteEvent())
@@ -7984,7 +7984,7 @@ public:
             Reset();
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 
@@ -8376,7 +8376,7 @@ public:
             events.ScheduleEvent(EVENT_DONE, me->GetSplineDuration());
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             events.Update(diff);
 

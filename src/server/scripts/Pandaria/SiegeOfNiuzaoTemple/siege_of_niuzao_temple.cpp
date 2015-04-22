@@ -389,6 +389,8 @@ class npc_mantid_soldier_catapult : public CreatureScript
                 return catapultGUID;
                 catapultGUID = 1;
             }
+
+            return 0;
         }
 
         void SetGUID(uint64 guid, int32 data) override

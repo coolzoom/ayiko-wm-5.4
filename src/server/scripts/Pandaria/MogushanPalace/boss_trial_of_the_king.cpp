@@ -1528,7 +1528,7 @@ public:
             return true;
         }
 
-        void OnPeriodic(AuraEffect const */*aurEff*/)
+        void OnPeriodic(AuraEffect const * /*aurEff*/)
         {
             ++m_uiAuraTicks;
         }
@@ -1641,7 +1641,7 @@ public:
             return true;
         }
 
-        void HandleAuraRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void HandleAuraRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* pCaster = GetCaster())
             {
@@ -1739,7 +1739,7 @@ public:
             return true;
         }
 
-        void HandleOnRemove(AuraEffect const */*aurEff*/, AuraEffectHandleModes /*mode*/)
+        void HandleOnRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (GetCaster() && GetCaster()->HasUnitState(UNIT_STATE_CANNOT_TURN))
                 GetCaster()->ClearUnitState(UNIT_STATE_CANNOT_TURN);

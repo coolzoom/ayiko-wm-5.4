@@ -1611,7 +1611,7 @@ public:
                     }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 _events.Update(diff);
 

@@ -75,9 +75,9 @@ public:
 
         static ChatCommand serverDiffCommandTable[] =
         {
-            { "last",     rbac::RBAC_PERM_COMMAND_SERVER_DIFF_LAST,     false, &HandleServerDiffLastCommand,            "", NULL },
-            { "average",  rbac::RBAC_PERM_COMMAND_SERVER_DIFF_AVERAGE,  false, &HandleServerDiffAverageCommand,         "", NULL },
-            { "interval", rbac::RBAC_PERM_COMMAND_SERVER_DIFF_INTERVAL, false, &HandleServerDiffIntervalCommand,        "", NULL },
+            { "last",     rbac::RBAC_PERM_COMMAND_SERVER_DIFF_LAST,     true, &HandleServerDiffLastCommand,            "", NULL },
+            { "average",  rbac::RBAC_PERM_COMMAND_SERVER_DIFF_AVERAGE,  true, &HandleServerDiffAverageCommand,         "", NULL },
+            { "interval", rbac::RBAC_PERM_COMMAND_SERVER_DIFF_INTERVAL, true, &HandleServerDiffIntervalCommand,        "", NULL },
             { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 

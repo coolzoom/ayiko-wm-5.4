@@ -1336,7 +1336,7 @@ public:
 
         EventMap events;
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -1378,7 +1378,7 @@ public:
             events.ScheduleEvent(EVENT_SPIRIT_STRIKE, urand(3000, 7000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1437,7 +1437,7 @@ public:
             events.ScheduleEvent(EVENT_HELIX_RIDE, urand(2000, 7000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (Intro)
             {
@@ -1549,7 +1549,7 @@ public:
 
         EventMap events;
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -1628,7 +1628,7 @@ public:
             events.ScheduleEvent(EVENT_SPIRIT_STRIKE, urand(3000, 7000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1714,7 +1714,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1798,7 +1798,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1890,7 +1890,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -2073,7 +2073,7 @@ public:
                     ResetVehicle();
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             events.Update(diff);
 
@@ -2477,7 +2477,7 @@ public:
             }
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_FREE)
             {
@@ -2489,7 +2489,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -2571,7 +2571,7 @@ public:
             }
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_START_RUN)
             {
@@ -2594,7 +2594,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             SmoothEscortAI::UpdateAI(diff);
         }

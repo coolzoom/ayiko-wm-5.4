@@ -82,7 +82,7 @@ class boss_corborus : public CreatureScript
             BossAI::JustSummoned(summon);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -249,7 +249,7 @@ class npc_crystal_shard : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!spawned)
             {

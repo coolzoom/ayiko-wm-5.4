@@ -221,7 +221,7 @@ public:
             return 0;
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_ENERGIZE)
             {
@@ -340,7 +340,7 @@ public:
                         caster->CastSpell(target, SPELL_ELECTRIC_CHARGE, false);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
             {
@@ -596,7 +596,7 @@ public:
                 target->CastSpell(me, SPELL_FIXATE_TAUNT, true);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (Event)
             {
@@ -719,7 +719,7 @@ public:
             me->CastSpell(me, SPELL_EXPLOSIVE_SUICIDE, false);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -815,7 +815,7 @@ public:
             me->CastSpell(me, SPELL_EXPLOSIVE_SUICIDE, false);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

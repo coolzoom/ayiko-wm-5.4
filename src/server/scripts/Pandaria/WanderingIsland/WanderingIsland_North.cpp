@@ -173,7 +173,7 @@ public:
             resetTimer = 5000;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -985,7 +985,7 @@ class boss_li_fei : public CreatureScript
 public:
     boss_li_fei() : CreatureScript("boss_li_fei") {}
 
-    bool OnQuestAccept(Player */*player*/, Creature */*creature*/, Quest const */*quest*/)
+    bool OnQuestAccept(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/)
     {
         // TODO: there is some kick spell casted on retail at quest accept
         return true;
@@ -1023,7 +1023,7 @@ class boss_li_fei_fight : public CreatureScript
         // Li Fei does not aggro himself
         void MoveInLineOfSight(Unit *) { }
 
-        void DamageTaken(Unit */*attacker*/, uint32 &damage)
+        void DamageTaken(Unit* /*attacker*/, uint32 &damage)
         {
             if (!me->HealthBelowPctDamaged(10, damage))
                 return;

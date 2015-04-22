@@ -218,7 +218,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!eventInProgress)
                 return;
@@ -404,7 +404,7 @@ public:
             events.ScheduleEvent(EVENT_WEB, urand(5000, 8000));
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 const diff) override
         {
             if (!UpdateVictim())
                 return;

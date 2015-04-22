@@ -83,7 +83,7 @@ class boss_ozruk : public CreatureScript
                 Talk(SAY_SLAY);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

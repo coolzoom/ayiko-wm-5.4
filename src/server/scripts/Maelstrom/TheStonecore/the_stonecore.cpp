@@ -56,7 +56,7 @@ class npc_stonecore_berserker : public CreatureScript
             events.ScheduleEvent(EVENT_CHARGE, 100);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -158,7 +158,7 @@ class npc_stonecore_earthshaper : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -315,7 +315,7 @@ class npc_crystalspawn_giant : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -422,7 +422,7 @@ class npc_crystal_shard_trash : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 )
+        void UpdateAI(uint32 const )
         {
             UpdateVictim();
         }
@@ -465,7 +465,7 @@ class npc_stonecore_bruiser : public CreatureScript
             events.ScheduleEvent(EVENT_SHOCKWAVE, urand(5000, 7000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -550,7 +550,7 @@ class npc_stonecore_magmalord : public CreatureScript
             events.ScheduleEvent(EVENT_MAGMA_ERUPTION, urand(3000, 5000));
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -626,7 +626,7 @@ class npc_rock_borer : public CreatureScript
             rockboreTimer = urand(5000, 7000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
@@ -777,7 +777,7 @@ class npc_stonecore_millhouse_manastorm : public CreatureScript
             events.ScheduleEvent(EVENT_SHADOWFURY, urand(7000, 10000));
         }
 
-        void DoAction(int32 action)
+        void DoAction(int32 const action)
         {
             if (action == ACTION_MILLHOUSE_DEMISE && stage > 2)
             {
@@ -811,7 +811,7 @@ class npc_stonecore_millhouse_manastorm : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!isAdvancing && !UpdateVictim())
                 return;
@@ -1033,7 +1033,7 @@ class npc_stalactite_trigger_trash : public CreatureScript
             }
         }
 
-        //void UpdateAI(uint32 diff)
+        //void UpdateAI(uint32 const diff)
         //{
         //    if (!slabhideEmoteCooldown)
         //        return;
@@ -1093,7 +1093,7 @@ class npc_stonecore_sentry : public CreatureScript
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;

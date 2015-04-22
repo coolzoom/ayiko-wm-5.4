@@ -3858,7 +3858,7 @@ class npc_wild_mushroom : public CreatureScript
                     dynObj->Remove();
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 const diff)
             {
                 if (invisTimer > 0)
                 {
@@ -4349,7 +4349,7 @@ public:
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
         
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             Unit* owner = me->GetOwner();
             if (!owner || !owner->IsAlive())
@@ -4459,7 +4459,7 @@ class npc_void_tendril : public CreatureScript
             {
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 const diff) override
             {
                 if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                     me->DespawnOrUnsummon();
@@ -4581,7 +4581,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) {}
+        void UpdateAI(uint32 const diff) {}
         void EnterCombat(Unit* /*who*/) {}
         void AttackStart(Unit* /*who*/) {}
         void EnterEvadeMode() {}

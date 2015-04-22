@@ -485,7 +485,7 @@ enum AuraType
     SPELL_AURA_425                                          = 425,  // 5.4.0 unused
     SPELL_AURA_426                                          = 426,  // 5.4.0 unk aura (NYI) Brawl queue
     SPELL_AURA_427                                          = 427,  // 5.4.0 unk aura (NYI) Spell 91318
-    SPELL_AURA_428                                          = 428,  // 5.4.0 unk aura (NYI) used for cart in silvershard mines ?
+    SPELL_AURA_LINKED_2                                     = 428,  // 5.4.0 unk aura (NYI) used for cart in silvershard mines ?
     SPELL_AURA_MOD_PET_DAMAGE_DONE                          = 429,  // Koz: WowHead-> Mod Pet Damage %
     SPELL_AURA_430                                          = 430,  // 5.4.0 unk aura (NYI)
     SPELL_AURA_431                                          = 431,  // 5.4.0 unk aura (NYI) Contested Territory 142869

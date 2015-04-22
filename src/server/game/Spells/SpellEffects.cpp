@@ -910,6 +910,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     if (m_spellInfo->Id == 131474)
         m_caster->CastSpell(m_caster, 131476, true);
 
+    if (m_spellInfo->Id == 97388 && m_caster->ToPlayer() && m_caster->ToPlayer()->GetBattleground())
+        m_caster->ToPlayer()->GetBattleground()->EventPlayerClickedOnFlag(m_caster->ToPlayer(), unitTarget);
+
     // selection by spell family
     switch (m_spellInfo->SpellFamilyName)
     {

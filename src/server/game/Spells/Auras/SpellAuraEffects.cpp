@@ -541,7 +541,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleAreaTrigger,                               //395 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_396
     &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
-    &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398
+    &AuraEffect::HandleAuraModEffectImmunity,                     //398 SPELL_AURA_398
     &AuraEffect::HandleNULL,                                      //399 SPELL_AURA_399
     &AuraEffect::HandleNULL,                                      //400 SPELL_AURA_400
     &AuraEffect::HandleNULL,                                      //401 SPELL_AURA_401
@@ -571,7 +571,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //425 SPELL_AURA_425
     &AuraEffect::HandleNULL,                                      //426 SPELL_AURA_426
     &AuraEffect::HandleNULL,                                      //427 SPELL_AURA_427
-    &AuraEffect::HandleNULL,                                      //428 SPELL_AURA_428
+    &AuraEffect::HandleAuraLinked,                                //428 SPELL_AURA_428
     &AuraEffect::HandleNULL,                                      //429 SPELL_AURA_429
     &AuraEffect::HandleNULL,                                      //430 SPELL_AURA_430
     &AuraEffect::HandleNULL,                                      //431 SPELL_AURA_431

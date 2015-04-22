@@ -946,7 +946,7 @@ void WorldSession::HandlePlayerLogin(CharLoginQueryHolder *charHolder, AuthLogin
     LoadAccountData(charHolder->GetPreparedResult(CHAR_LOGIN_QUERY_LOAD_ACCOUNT_DATA), PER_CHARACTER_CACHE_MASK);
     SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
 
-    bool battlePayEnabled = true;
+    bool battlePayEnabled = false;
     bool sessionTimeAlert = false;
     bool europaStatus = true;
 

@@ -192,8 +192,9 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_KT       = 13,
     BATTLEGROUND_QUEUE_CTF3     = 14,
     BATTLEGROUND_QUEUE_SSM      = 15,
-    BATTLEGROUND_QUEUE_TV       = 16,
-    BATTLEGROUND_QUEUE_RATED    = 17,
+    BATTLEGROUND_QUEUE_DG       = 16,
+    BATTLEGROUND_QUEUE_TV       = 17,
+    BATTLEGROUND_QUEUE_RATED    = 18,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -227,7 +228,10 @@ enum ScoreType
     SCORE_CARTS_HELPED          = 20,
     //TK
     SCORE_ORB_HANDLES           = 21,
-    SCORE_ORB_SCORE             = 22
+    SCORE_ORB_SCORE             = 22,
+    //DG
+    SCORE_CART_CAPTURES         = 23,
+    SCORE_CART_RETURNS          = 24
 };
 
 enum BattlegroundType
@@ -256,7 +260,8 @@ enum BattlegroundStartingEvents
     BG_STARTING_EVENT_1     = 0x01,
     BG_STARTING_EVENT_2     = 0x02,
     BG_STARTING_EVENT_3     = 0x04,
-    BG_STARTING_EVENT_4     = 0x08
+    BG_STARTING_EVENT_4     = 0x08,
+    BG_STARTING_EVENT_5     = 0x10
 };
 
 enum BattlegroundStartingEventsIds
@@ -348,6 +353,7 @@ class Battleground
         virtual void Reset();                               // resets all common properties for battlegrounds, must be implemented and called in BG subclass
         virtual void StartingEventCloseDoors() {}
         virtual void StartingEventOpenDoors() {}
+        virtual void StartingEventDespawnDoors() {}
         virtual void ResetBGSubclass()                      // must be implemented in BG subclass
         {
         }
@@ -546,8 +552,10 @@ class Battleground
         virtual void HandleKillUnit(Creature* /*unit*/, Player* /*killer*/);
 
         // Battleground events
+        virtual bool CanSeeSpellClick(Player const* /*clicker*/, Unit const* /*clicked*/) { return false; }
         virtual void EventPlayerDroppedFlag(Player* /*player*/) {}
         virtual void EventPlayerClickedOnFlag(Player* /*player*/, GameObject* /*target_obj*/) {}
+        virtual void EventPlayerClickedOnFlag(Player* /*player*/, Unit* /*target_unit*/) {}
         void EventPlayerLoggedIn(Player* player);
         void EventPlayerLoggedOut(Player* player);
         virtual void EventPlayerDamagedGO(Player* /*player*/, GameObject* /*go*/, uint32 /*eventType*/) {}
@@ -608,6 +616,8 @@ class Battleground
 
         virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
         virtual bool CanActivateGO(int32 /*entry*/, uint32 /*team*/) const { return true; }
+
+        virtual uint32 GetPrematureWinner();
 
     protected:
         void BuildArenaOpponentSpecializations(WorldPacket* data, uint32 team);

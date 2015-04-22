@@ -29,16 +29,12 @@
 
 BattlegroundKT::BattlegroundKT()
 {
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_KT_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_KT_START_HALF_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_KT_HAS_BEGUN;
-
     m_ReputationCapture = 0;
     m_HonorWinKills = 0;
     m_HonorEndKills = 0;
 
     m_EndTimer = 0;
+    m_RemoveColTimer = BG_KT_REMOVE_COL_TIME;
     m_UpdatePointsTimer = BG_KT_POINTS_UPDATE_TIME;
     m_LastCapturedOrbTeam = TEAM_NONE;
 }
@@ -65,6 +61,8 @@ void BattlegroundKT::PostUpdateImpl(uint32 diff)
                 // if 0 => tie
                 EndBattleground(m_LastCapturedOrbTeam);
             }
+
+            return;
         }
         else
         {
@@ -75,6 +73,14 @@ void BattlegroundKT::PostUpdateImpl(uint32 diff)
             if (minutesLeft != minutesLeftPrev)
                 UpdateWorldState(BG_KT_TIME_REMAINING, minutesLeft);
         }
+
+        if (m_RemoveColTimer <= diff) // remove door collision 2 seconds after the doors have been opened.. blizz-like
+        {
+            DelObject(BG_KT_OBJECT_A_DOOR_COL);
+            DelObject(BG_KT_OBJECT_H_DOOR_COL);
+        }
+        else
+            m_RemoveColTimer -= diff;
 
         if (m_UpdatePointsTimer <= diff)
         {
@@ -115,11 +121,16 @@ void BattlegroundKT::StartingEventOpenDoors()
     DoorOpen(BG_KT_OBJECT_H_DOOR);
 
     for (uint8 i = 0; i < 4; ++i)
+    {
         SpawnBGObject(BG_KT_OBJECT_ORB_1 + i, RESPAWN_IMMEDIATELY);
+        if (Creature* aura = GetBGCreature(BG_KT_CREATURE_ORB_AURA_1 + i))
+            aura->AddAura(BG_KT_ORBS_AURA[i], aura);
+    }
 
     SpawnBGObject(BG_KT_OBJECT_BERSERK_1, RESPAWN_IMMEDIATELY);
     SpawnBGObject(BG_KT_OBJECT_BERSERK_2, RESPAWN_IMMEDIATELY);
 
+    SendWarningToAll(LANG_BG_KT_ORBS_SPAWNED);
     // Players that join battleground after start are not eligible to get achievement.
     StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, BG_KT_EVENT_START_BATTLE);
 }
@@ -140,6 +151,9 @@ void BattlegroundKT::EventPlayerClickedOnOrb(Player* source, GameObject* target_
         return;
 
     if (!source->IsWithinDistInMap(target_obj, 10))
+        return;
+
+    if (source->GetCurrentSpell(CURRENT_GENERIC_SPELL))
         return;
 
     uint32 index = target_obj->GetEntry() - BG_KT_OBJECT_ORB_1_ENTRY;
@@ -166,7 +180,7 @@ void BattlegroundKT::EventPlayerClickedOnOrb(Player* source, GameObject* target_
     if (Creature* aura = GetBGCreature(BG_KT_CREATURE_ORB_AURA_1 + index))
         aura->RemoveAllAuras();
 
-    PSendMessageToAll(LANG_BG_KT_PICKEDUP, source->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, source, target_obj->GetName().c_str());
+    SendMessage2ToAll(LANG_BG_KT_PICKEDUP, source->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE: CHAT_MSG_BG_SYSTEM_HORDE, source, BG_KT_ORBS_NAMES[index]);
     source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
@@ -199,16 +213,12 @@ void BattlegroundKT::EventPlayerDroppedOrb(Player* source, uint64 guid, uint32 t
 
     m_OrbKeepers[index] = 0;
     SpawnBGObject(BG_KT_OBJECT_ORB_1 + index, RESPAWN_IMMEDIATELY);
-
     if (Creature* aura = GetBGCreature(BG_KT_CREATURE_ORB_AURA_1 + index))
         aura->AddAura(BG_KT_ORBS_AURA[index], aura);
 
     UpdateWorldState(BG_KT_ICON_A, 0);
-    GameObject * orb = GetBGObject(BG_KT_OBJECT_ORB_1 + index);
-    PSendMessageToAll(LANG_BG_KT_DROPPED, playerTeam == ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, source, orb ? orb->GetName().c_str() : nullptr);
-
-    if (source)
-        source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    SendWarningToAll(LANG_BG_KT_O_PLACED, GetTrinityString(BG_KT_ORBS_NAMES[index]));
+    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
 void BattlegroundKT::RemovePlayer(Player* player, uint64 guid, uint32 team)
@@ -243,6 +253,7 @@ void BattlegroundKT::HandleAreaTrigger(Player* source, uint32 trigger)
     switch(trigger)
     {
         case 7734: // Out-In trigger
+        case 7733:
         {
             if (m_playersZone.find(sourceGuid) == m_playersZone.end())
                 return;
@@ -264,7 +275,17 @@ void BattlegroundKT::HandleAreaTrigger(Player* source, uint32 trigger)
                 m_playersZone[sourceGuid] = KT_ZONE_IN;
             break;
         }
+        case 7843: // orb radius
+        case 7842: // orb radius
+        case 7845: // middle trigger - has 2 locations
+        case 7841: // orb radius
+        case 7840: // orb radius
+        case 7844: // middle trigger - has 2 locations
+        case 8378: // starting
+        case 8377: // starting
+            break;
         default:
+            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
             break;
     }
 }
@@ -273,7 +294,9 @@ bool BattlegroundKT::SetupBattleground()
 {
     // Doors
     if (   !AddObject(BG_KT_OBJECT_A_DOOR, BG_KT_OBJECT_DOOR_ENTRY, BG_KT_DoorPositions[0][0], BG_KT_DoorPositions[0][1], BG_KT_DoorPositions[0][2], BG_KT_DoorPositions[0][3], 0, 0, sin(BG_KT_DoorPositions[0][3]/2), cos(BG_KT_DoorPositions[0][3]/2), RESPAWN_IMMEDIATELY)
-        || !AddObject(BG_KT_OBJECT_H_DOOR, BG_KT_OBJECT_DOOR_ENTRY, BG_KT_DoorPositions[1][0], BG_KT_DoorPositions[1][1], BG_KT_DoorPositions[1][2], BG_KT_DoorPositions[1][3], 0, 0, sin(BG_KT_DoorPositions[1][3]/2), cos(BG_KT_DoorPositions[1][3]/2), RESPAWN_IMMEDIATELY))
+        || !AddObject(BG_KT_OBJECT_H_DOOR, BG_KT_OBJECT_DOOR_ENTRY, BG_KT_DoorPositions[1][0], BG_KT_DoorPositions[1][1], BG_KT_DoorPositions[1][2], BG_KT_DoorPositions[1][3], 0, 0, sin(BG_KT_DoorPositions[1][3]/2), cos(BG_KT_DoorPositions[1][3]/2), RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_KT_OBJECT_A_DOOR_COL, BG_KT_OBJECT_DOOR_COL, BG_KT_DoorColPositions[0][0], BG_KT_DoorColPositions[0][1], BG_KT_DoorColPositions[0][2], BG_KT_DoorColPositions[0][3], 0, 0, sin(BG_KT_DoorColPositions[0][3]/2), cos(BG_KT_DoorColPositions[0][3]/2), RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_KT_OBJECT_H_DOOR_COL, BG_KT_OBJECT_DOOR_COL, BG_KT_DoorColPositions[1][0], BG_KT_DoorColPositions[1][1], BG_KT_DoorColPositions[1][2], BG_KT_DoorColPositions[1][3], 0, 0, sin(BG_KT_DoorColPositions[1][3]/2), cos(BG_KT_DoorColPositions[1][3]/2), RESPAWN_IMMEDIATELY))
         return false;
 
     if (   !AddSpiritGuide(BG_KT_CREATURE_SPIRIT_1, BG_KT_SpiritPositions[0][0], BG_KT_SpiritPositions[0][1], BG_KT_SpiritPositions[0][2], BG_KT_SpiritPositions[0][3], ALLIANCE)

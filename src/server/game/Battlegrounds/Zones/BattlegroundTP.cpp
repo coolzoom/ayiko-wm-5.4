@@ -51,11 +51,6 @@ BattlegroundTP::BattlegroundTP()
     BgObjects.resize(BG_TP_OBJECT_MAX);
     BgCreatures.resize(BG_CREATURES_MAX_TP);
 
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_TP_START_TWO_MINUTES;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_TP_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_TP_START_HALF_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_TP_HAS_BEGUN;
-
     m_BothFlagsKept = false;
     m_FlagDebuffState = 0;
     m_FlagSpellForceTimer = 0;

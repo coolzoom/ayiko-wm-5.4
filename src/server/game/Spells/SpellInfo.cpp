@@ -1757,6 +1757,27 @@ SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 a
             Battleground* bg = player->GetBattleground();
             return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
+        // Deepwind Gorge
+        case 52595:
+        case 97388:
+        case 140876:
+        case 141551:
+        case 141210:
+        case 141555:
+        {
+            if (!player)
+                return SPELL_FAILED_REQUIRES_AREA;
+
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            if (!mapEntry)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            if (!mapEntry->IsBattleground() || map_id != 1105)
+                return SPELL_FAILED_INCORRECT_AREA;
+
+            Battleground* bg = player->GetBattleground();
+            return bg && bg->GetStatus() == STATUS_IN_PROGRESS ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
     }
 
     // aura limitations

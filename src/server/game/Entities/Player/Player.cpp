@@ -10498,10 +10498,14 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 1377:
             NumberOfFields = 13;
             break;
+        case 6665:
+            NumberOfFields = 30;
+            break;
         case 2597:
             NumberOfFields = 81;
             break;
         case 3277:
+        case 5031:
             NumberOfFields = 14;
             break;
         case 3358:
@@ -10509,6 +10513,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             NumberOfFields = 38;
             break;
         case 3483:
+        case 5449:
             NumberOfFields = 25;
             break;
         case 3518:
@@ -10542,6 +10547,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
         case 5833:
             NumberOfFields = 7;
+            break;
+        case 6126:
+            NumberOfFields = 21;
             break;
         default:
             NumberOfFields = 10;
@@ -11115,6 +11123,14 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_BFG)
                 bg->FillInitialWorldStates(data);
             break;
+        // Deepwind Gorge
+        case 6665:
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_DG)
+                bg->FillInitialWorldStates(data);
+        // Silvershard Mines
+        case 6126:
+            if (bg && bg->GetTypeID(true) == BATTLEGROUND_SSM)
+                bg->FillInitialWorldStates(data);
         // Halls of Reflection
         case 4820:
             if (instance && mapid == 668)
@@ -29248,7 +29264,7 @@ void Player::SendMovementSetCollisionHeight(float height)
     data << float(height);
     data << uint32(sWorld->GetGameTime());  // Packet counter
     data.WriteByteSeq<6, 3, 2>(guid);
-    data << float(mountDisplayInfo ? mountDisplayInfo->scale : 1.0f);
+    data << float(1.0f);
     data.WriteByteSeq<0, 5, 4>(guid);
 
     SendDirectMessage(&data);

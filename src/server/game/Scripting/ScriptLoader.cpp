@@ -740,6 +740,8 @@ void AddSC_WanderingIsland_West();
 void AddSC_WanderingIsland_South();
 
 // battlegrounds
+void AddSC_BattlegroundDGScripts();
+void AddSC_BattlegroundSSMScripts();
 
 // outdoor pvp
 void AddSC_outdoorpvp_hp();
@@ -1531,6 +1533,8 @@ void AddOutdoorPvPScripts()
 void AddBattlegroundScripts()
 {
 #ifdef SCRIPTS
+    AddSC_BattlegroundDGScripts();
+    AddSC_BattlegroundSSMScripts();
 #endif
 }
 

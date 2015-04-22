@@ -29,6 +29,7 @@ enum BG_KT_NPC
 #define BG_KT_ORB_POINTS_MAX        1600
 #define BG_KT_POINTS_UPDATE_TIME    (5*IN_MILLISECONDS)
 #define BG_KT_TIME_LIMIT            (25*MINUTE*IN_MILLISECONDS)
+#define BG_KT_REMOVE_COL_TIME       (6.5*IN_MILLISECONDS)
 #define BG_KT_EVENT_START_BATTLE    8563
 
 enum BG_KT_Objects
@@ -41,7 +42,9 @@ enum BG_KT_Objects
     BG_KT_OBJECT_ORB_4          = 5,
     BG_KT_OBJECT_BERSERK_1      = 6,
     BG_KT_OBJECT_BERSERK_2      = 7,
-    BG_KT_OBJECT_MAX            = 8
+    BG_KT_OBJECT_A_DOOR_COL     = 7,
+    BG_KT_OBJECT_H_DOOR_COL     = 8,
+    BG_KT_OBJECT_MAX            = 9
 };
 
 enum BG_KT_Creatures
@@ -66,7 +69,9 @@ enum BG_KT_Objets_Entry
     BG_KT_OBJECT_ORB_3_ENTRY    = 212093,
     BG_KT_OBJECT_ORB_4_ENTRY    = 212094,
     BG_KT_OBJECT_BERSERK_1_ENTRY= 179905,
-    BG_KT_OBJECT_BERSERK_2_ENTRY= 179907
+    BG_KT_OBJECT_BERSERK_2_ENTRY= 179907,
+
+    BG_KT_OBJECT_DOOR_COL       = 180322
 };
 
 enum BG_KT_Sound
@@ -79,15 +84,15 @@ enum BG_KT_Sound
 
 enum BG_KT_SpellId
 {
-    BG_KT_SPELL_ORB_PICKED_UP_1 = 121175,   // PURPLE
-    BG_KT_SPELL_ORB_PICKED_UP_2 = 121177,   // ORANGE
-    BG_KT_SPELL_ORB_PICKED_UP_3 = 121176,   // GREEN
-    BG_KT_SPELL_ORB_PICKED_UP_4 = 121164,   // BLUE
+    BG_KT_SPELL_ORB_PICKED_UP_1 = 121176,   
+    BG_KT_SPELL_ORB_PICKED_UP_2 = 121175,   
+    BG_KT_SPELL_ORB_PICKED_UP_3 = 121177,   
+    BG_KT_SPELL_ORB_PICKED_UP_4 = 121164,   
 
-    BG_KT_SPELL_ORB_AURA_1      = 121219,   // PURPLE
-    BG_KT_SPELL_ORB_AURA_2      = 121221,   // ORANGE
-    BG_KT_SPELL_ORB_AURA_3      = 121220,   // GREEN
-    BG_KT_SPELL_ORB_AURA_4      = 121217,   // BLUE
+    BG_KT_SPELL_ORB_AURA_1      = 121220,
+    BG_KT_SPELL_ORB_AURA_2      = 121219,
+    BG_KT_SPELL_ORB_AURA_3      = 121221,
+    BG_KT_SPELL_ORB_AURA_4      = 121217,
 
     BG_KT_ALLIANCE_INSIGNIA     = 131527,
     BG_KT_HORDE_INSIGNIA        = 131528
@@ -142,22 +147,28 @@ enum BG_TK_Events
 
 const float BG_KT_DoorPositions[2][4] =
 {
-    {1783.84f, 1100.66f, 20.60f, 1.625020f},
-    {1780.15f, 1570.22f, 24.59f, 4.711630f}
+    { 1783.84f, 1100.66f, 20.60f, 1.625020f },
+    { 1780.15f, 1570.22f, 24.59f, 4.711630f }
+};
+
+const float BG_KT_DoorColPositions[2][4] =
+{
+    { 1783.84f, 1096.66f, 21.60f, 1.625020f },
+    { 1780.15f, 1573.22f, 22.59f, 4.711630f }
 };
 
 const float BG_KT_OrbPositions[MAX_ORBS][4] =
 {
-    {1850.26f, 1416.77f, 13.5709f, 1.56061f}, // Purple
-    {1850.29f, 1250.31f, 13.5708f, 4.70848f}, // Orange
-    {1716.78f, 1416.64f, 13.5709f, 1.57239f}, // Green
-    {1716.83f, 1249.93f, 13.5706f, 4.71397f} // Blue
+    { 1716.78f, 1416.64f, 13.5709f, 1.57239f }, // GREEN
+    { 1850.26f, 1416.77f, 13.5709f, 1.56061f }, // PURPLE
+    { 1850.29f, 1250.31f, 13.5708f, 4.70848f }, // ORANGE
+    { 1716.83f, 1249.93f, 13.5706f, 4.71397f }  // BLUE
 };
 
 const float BG_KT_SpiritPositions[MAX_ORBS][4] =
 {
-    {1892.61f, 1151.69f, 14.7160f, 2.523528f},
-    {1672.40f, 1524.10f, 16.7387f, 6.032206f},
+    { 1892.61f, 1151.69f, 14.7160f, 2.523528f },
+    { 1672.40f, 1524.10f, 16.7387f, 6.032206f }
 };
 
 const uint32 BG_KT_ORBS_SPELLS[MAX_ORBS] =
@@ -174,6 +185,14 @@ const uint32 BG_KT_ORBS_AURA[MAX_ORBS] =
     BG_KT_SPELL_ORB_AURA_2,
     BG_KT_SPELL_ORB_AURA_3,
     BG_KT_SPELL_ORB_AURA_4
+};
+
+const uint32 BG_KT_ORBS_NAMES[MAX_ORBS] =
+{
+    LANG_BG_KT_ORB_GREEN,
+    LANG_BG_KT_ORB_PURPLE,
+    LANG_BG_KT_ORB_ORANGE,
+    LANG_BG_KT_ORB_BLUE
 };
 
 //tick point according to which zone, last is for HK
@@ -195,7 +214,8 @@ class BattlegroundKT : public Battleground
         virtual void StartingEventOpenDoors();
 
         /* Battleground Events */
-        virtual void EventPlayerDroppedOrb(Player* source, uint64 guid, uint32 team);
+        virtual void EventPlayerDroppedFlag(Player* player) { EventPlayerDroppedOrb(player, player->GetGUID(), player->GetTeam()); };
+        void EventPlayerDroppedOrb(Player* source, uint64 guid, uint32 team);
 
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) { EventPlayerClickedOnOrb(source, target_obj); }
         void EventPlayerClickedOnOrb(Player* source, GameObject* target_obj);
@@ -231,6 +251,7 @@ class BattlegroundKT : public Battleground
         uint32 m_HonorEndKills;
         uint32 m_EndTimer;
         uint32 m_UpdatePointsTimer;
+        uint32 m_RemoveColTimer;
         Team   m_LastCapturedOrbTeam;
 };
 

@@ -742,6 +742,10 @@ enum TrinityStrings
 //  LANG_BG_EY_START_TWO_MINUTES        = 755, - defined above
 
     // Room for BG/ARENA                = 773-784, 788-799 not used
+    LANG_BATTLEGROUND_START_2_MINUTES   = 773,
+    LANG_BATTLEGROUND_START_1_MINUTE    = 774,
+    LANG_BATTLEGROUND_START_30_SECONDS  = 775,
+    LANG_BATTLEGROUND_HAS_BEGUN         = 776,
     LANG_ARENA_TESTING                  = 785,
     LANG_AUTO_ANN                       = 786,
     LANG_ANNOUNCE_COLOR_GM              = 787,
@@ -1063,14 +1067,60 @@ enum TrinityStrings
     LANG_BG_SM_A_NEAR_VICTORY           = 1344,
     LANG_BG_SM_H_NEAR_VICTORY           = 1345,
 
+    // free 1345-1353
+
+    //Deepwind Gorge
+    LANG_BG_DG_ALLY                     = 1353,
+    LANG_BG_DG_HORDE                    = 1354,
+    LANG_BG_DG_NODE_SOUTH_MINE          = 1355,
+    LANG_BG_DG_NODE_CENTER              = 1356,
+    LANG_BG_DG_NODE_NORTH_MINE          = 1357,
+    LANG_BG_DG_NODE_TAKEN               = 1358,
+    LANG_BG_DG_NODE_DEFENDED            = 1359,
+    LANG_BG_DG_NODE_ASSAULTED           = 1360,
+    LANG_BG_DG_NODE_CLAIMED             = 1361,
+
+    LANG_BG_DG_CAPTURED_HORDE_CART      = 1362,
+    LANG_BG_DG_CAPTURED_ALLIANCE_CART   = 1363,
+    LANG_BG_DG_DROPPED_HORDE_CART       = 1364,
+    LANG_BG_DG_DROPPED_ALLIANCE_CART    = 1365,
+    LANG_BG_DG_RETURNED_HORDE_CART      = 1366,
+    LANG_BG_DG_RETURNED_ALLIANCE_CART   = 1367,
+    LANG_BG_DG_PICKEDUP_HORDE_CART      = 1368,
+    LANG_BG_DG_PICKEDUP_ALLIANCE_CART   = 1369,
+    LANG_BG_DG_CART_PLACED              = 1370,
+    LANG_BG_DG_ALLIANCE_FLAG_RESPAWNED  = 1371,
+    LANG_BG_DG_HORDE_FLAG_RESPAWNED     = 1372,
+
+    LANG_BG_DG_ALLIANCE_NEAR_VICTORY    = 1373,
+    LANG_BG_DG_HORDE_NEAR_VICTORY       = 1374,
+
     // Temple of Kotmogu
-    LANG_BG_KT_START_ONE_MINUTE         = 1346,
-    LANG_BG_KT_START_HALF_MINUTE        = 1347,
-    LANG_BG_KT_HAS_BEGUN                = 1348,
-    LANG_BG_KT_DROPPED                  = 1349,
-    LANG_BG_KT_PICKEDUP                 = 1350,
-    LANG_BG_KT_O_PLACED                 = 1351,
-    // FREE IDS                           1352-1999
+    LANG_BG_KT_START_ONE_MINUTE         = 1375,
+    LANG_BG_KT_START_HALF_MINUTE        = 1376,
+    LANG_BG_KT_HAS_BEGUN                = 1377,
+    LANG_BG_KT_DROPPED                  = 1378,
+    LANG_BG_KT_PICKEDUP                 = 1379,
+    LANG_BG_KT_O_PLACED                 = 1380,
+    LANG_BG_KT_ORB_PURPLE               = 1381,
+    LANG_BG_KT_ORB_ORANGE               = 1382,
+    LANG_BG_KT_ORB_GREEN                = 1383,
+    LANG_BG_KT_ORB_BLUE                 = 1384,
+    LANG_BG_KT_ORBS_SPAWNED             = 1385,
+
+    //Silver
+    LANG_BG_SSM_ALLIANCE_CONTROLLED_MINE_CART = 1404,
+    LANG_BG_SSM_HORDE_CONTROLLED_MINE_CART    = 1405,
+    LANG_BG_SSM_MINE_CART_SPAWNED             = 1406,
+    LANG_BG_SSM_ALLIANCE_CAPTURED_MINE_CART   = 1407,
+    LANG_BG_SSM_HORDE_CAPTURED_MINE_CART      = 1408,
+    LANG_BG_SSM_EAST_DIRECTION_CHANGED        = 1409,
+    LANG_BG_SSM_NORTH_DIRECTION_CHANGED       = 1410,
+
+    LANG_BG_SSM_A_NEAR_VICTORY                = 1411,
+    LANG_BG_SSM_H_NEAR_VICTORY                = 1412,
+
+    // FREE IDS                           1375-1999
 
     // Ticket Strings 2000-2029
     LANG_COMMAND_TICKETNEW              = 2000,

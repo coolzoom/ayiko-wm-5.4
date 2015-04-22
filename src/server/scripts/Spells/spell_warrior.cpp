@@ -799,17 +799,9 @@ class spell_warr_heroic_leap : public SpellScriptLoader
                 return SPELL_CAST_OK;
             }
 
-            void HandleAfterCast()
-            {
-                // Item - Warrior PvP Set 4P Bonus
-                if (GetCaster()->HasAura(WARRIOR_SPELL_ITEM_PVP_SET_4P_BONUS))
-                    GetCaster()->CastSpell(GetCaster(), WARRIOR_SPELL_HEROIC_LEAP_SPEED, true);
-            }
-
             void Register()
             {
                 OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckElevation);
-                AfterCast += SpellCastFn(spell_warr_heroic_leap_SpellScript::HandleAfterCast);
             }
         };
 
@@ -862,10 +854,18 @@ class spell_warr_heroic_leap_damage : public SpellScriptLoader
                     SetHitDamage(damage);
                 }
             }
+            
+            void HandleOnCast()
+            {
+                // Item - Warrior PvP Set 4P Bonus
+                if (GetCaster()->HasAura(WARRIOR_SPELL_ITEM_PVP_SET_4P_BONUS))
+                    GetCaster()->CastSpell(GetCaster(), WARRIOR_SPELL_HEROIC_LEAP_SPEED, true);
+            }
 
             void Register()
             {
                 OnHit += SpellHitFn(spell_warr_heroic_leap_damage_SpellScript::HandleOnHit);
+                OnCast += SpellCastFn(spell_warr_heroic_leap_damage_SpellScript::HandleOnCast);
             }
         };
 

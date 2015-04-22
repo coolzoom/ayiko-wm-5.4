@@ -186,10 +186,10 @@ Battleground::Battleground()
     StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_30S;
     StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
     //we must set to some default existing values
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_WS_START_TWO_MINUTES;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
+    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BATTLEGROUND_START_2_MINUTES;
+    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BATTLEGROUND_START_1_MINUTE;
+    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BATTLEGROUND_START_30_SECONDS;
+    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BATTLEGROUND_HAS_BEGUN;
 }
 
 Battleground::~Battleground()
@@ -264,6 +264,12 @@ void Battleground::Update(uint32 diff)
             break;
         case STATUS_IN_PROGRESS:
             _ProcessOfflineQueue();
+            if (GetElapsedTime() >= (1 * MINUTE * IN_MILLISECONDS + 2 * IN_MILLISECONDS) && !(m_Events & BG_STARTING_EVENT_5))
+            {
+                m_Events |= BG_STARTING_EVENT_5;
+                StartingEventDespawnDoors();
+            }
+
             // after 20 minutes without one team losing, the arena closes with no winner and no rating change
             if (isArena())
             {
@@ -439,6 +445,17 @@ void Battleground::_ProcessRessurect(uint32 diff)
     }
 }
 
+uint32 Battleground::GetPrematureWinner()
+{
+    uint32 winner = 0;
+    if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
+        winner = ALLIANCE;
+    else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
+        winner = HORDE;
+
+    return winner;
+}
+
 void Battleground::_ProcessProgress(uint32 diff)
 {
     // *********************************************************
@@ -452,14 +469,7 @@ void Battleground::_ProcessProgress(uint32 diff)
     }
     else if (m_PrematureCountDownTimer < diff)
     {
-        // time's up!
-        uint32 winner = 0;
-        if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
-            winner = ALLIANCE;
-        else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
-            winner = HORDE;
-
-        EndBattleground(winner);
+        EndBattleground(GetPrematureWinner());
         m_PrematureCountDown = false;
     }
     else if (!sBattlegroundMgr->isTesting())
@@ -1657,6 +1667,15 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
 
 // Some doors aren't despawned so we cannot handle their closing in gameobject::update()
 // It would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
+void Battleground::DoorDespawn(uint32 type)
+{
+    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
+        DelObject(type);
+    else
+        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
+        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
+}
+
 void Battleground::DoorClose(uint32 type)
 {
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
@@ -1671,17 +1690,6 @@ void Battleground::DoorClose(uint32 type)
     else
         TC_LOG_ERROR("bg.battleground", "Battleground::DoorClose: door gameobject (type: %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
             type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
-}
-
-void Battleground::DoorDespawn(uint32 type)
-{
-    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
-    {
-        DelObject(type);
-    }
-    else
-        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
-        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
 }
 
 void Battleground::DoorOpen(uint32 type)

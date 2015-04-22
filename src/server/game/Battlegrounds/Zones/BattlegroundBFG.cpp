@@ -40,11 +40,6 @@ BattlegroundBFG::BattlegroundBFG()
     m_BuffChange = true;
     BgObjects.resize(GILNEAS_BG_OBJECT_MAX);
     BgCreatures.resize(GILNEAS_BG_ALL_NODES_COUNT + 3); // +3 for aura triggers
-
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_BFG_START_TWO_MINUTES;
-    StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_BFG_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_BFG_START_HALF_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_BFG_HAS_BEGUN;
 }
 
 BattlegroundBFG::~BattlegroundBFG() { }

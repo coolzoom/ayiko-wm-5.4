@@ -15,6 +15,12 @@ elseif( MSVC )
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+  add_subdirectory(acelite)
+  add_subdirectory(recastnavigation)
+  
+  if(SERVERS)
+    add_subdirectory(gsoap)
+  endif()
   if(TOOLS)
     add_subdirectory(bzip2)
   endif()

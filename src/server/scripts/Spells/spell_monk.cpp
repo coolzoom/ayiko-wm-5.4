@@ -440,12 +440,12 @@ class spell_monk_transcendence_transfer : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (auto player = GetCaster()->ToPlayer())
-                    if (auto pet = player->GetPet())
+                    if (Unit* pet = player->GetFirstMinionByEntry(54569))
                     {
                         if (player->GetDistance(pet) > 40.f)
                             return;
-                        if (pet->AI())
-                            pet->AI()->DoAction(1);
+                        if (pet->ToCreature()->AI())
+                            pet->ToCreature()->AI()->DoAction(1);
                     }
             }
 

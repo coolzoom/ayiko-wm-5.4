@@ -459,14 +459,13 @@ void PetAI::DoAttack(Unit* target, bool chase)
 
     if (chase)
     {
-        float dist = me->IsCasterPet() ? 30.0f : 0.0f;
         if (me->Attack(target, true))
         {
             me->GetCharmInfo()->SetIsAtStay(false);
             me->GetCharmInfo()->SetIsFollowing(false);
             me->GetCharmInfo()->SetIsReturning(false);
             me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveChase(target, dist);
+            me->GetMotionMaster()->MoveChase(target);
         }
     }
     else // (Stay && ((Aggressive || Defensive) && In Melee Range)))

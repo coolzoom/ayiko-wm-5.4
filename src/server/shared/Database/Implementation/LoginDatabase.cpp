@@ -96,15 +96,19 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(LOGIN_DEL_ACCOUNT, "DELETE FROM account WHERE id = ?");
     conn.prepareStatement(LOGIN_GET_EMAIL_BY_ID, "SELECT email FROM account WHERE id = ?");
 
-    conn.prepareStatement(LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS, "SELECT permissionId, granted FROM rbac_account_permissions WHERE accountId = ? AND (realmId = ? OR realmId = -1) ORDER BY permissionId, realmId");
-    conn.prepareStatement(LOGIN_INS_RBAC_ACCOUNT_PERMISSION, "INSERT INTO rbac_account_permissions (accountId, permissionId, granted, realmId) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE granted = VALUES(granted)");
-    conn.prepareStatement(LOGIN_DEL_RBAC_ACCOUNT_PERMISSION, "DELETE FROM rbac_account_permissions WHERE accountId = ? AND permissionId = ? AND (realmId = ? OR realmId = -1)");
-
     conn.prepareStatement(LOGIN_SEL_ACCOUNT_ACHIEVEMENTS, "SELECT first_guid, achievement, date FROM account_achievement WHERE account = ?");
     conn.prepareStatement(LOGIN_SEL_ACCOUNT_CRITERIAPROGRESS, "SELECT criteria, counter, date FROM account_achievement_progress WHERE account = ?");
     conn.prepareStatement(LOGIN_SEL_ACCOUNT_SPELL, "SELECT spell, active, disabled FROM account_spell WHERE accountId = ?");
     conn.prepareStatement(LOGIN_INS_ACCOUNT_SPELL, "INSERT INTO account_spell (accountId, spell, active, disabled) VALUES (?, ?, ?, ?)");
     conn.prepareStatement(LOGIN_DEL_ACCOUNT_SPELL_BY_SPELL, "DELETE FROM account_spell WHERE accountId = ? AND spell = ?");
+
+    conn.prepareStatement(LOGIN_SEL_ACCOUNT_BATTLE_PETS, "SELECT id, species, nickname, timestamp, level, xp, health, quality, breed, flags FROM account_battle_pet WHERE accountId = ?");
+    conn.prepareStatement(LOGIN_INS_ACCOUNT_BATTLE_PET, "INSERT INTO account_battle_pet (accountId, id, species, nickname, timestamp, level, xp, health, quality, breed, flags) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    conn.prepareStatement(LOGIN_DEL_ACCOUNT_BATTLE_PET, "DELETE FROM account_battle_pet WHERE accountId = ? AND id = ?");
+
+    conn.prepareStatement(LOGIN_SEL_ACCOUNT_BATTLE_PET_SLOTS, "SELECT slot1, slot2, slot3, flags FROM account_battle_pet_slot WHERE accountId = ?");
+    conn.prepareStatement(LOGIN_INS_ACCOUNT_BATTLE_PET_SLOTS, "INSERT INTO account_battle_pet_slot (accountId, slot1, slot2, slot3, flags) VALUES (?, ?, ?, ?, ?)");
+    conn.prepareStatement(LOGIN_DEL_ACCOUNT_BATTLE_PET_SLOTS, "DELETE FROM account_battle_pet_slot WHERE accountId = ?");
 }
 
 } // namespace LoginDatabaseConnection

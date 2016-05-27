@@ -2224,6 +2224,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         caster->CastSpell(caster, 5420, true);
                         caster->CastSpell(caster, 81097, true);
                         caster->CastSpell(caster, 81098, true);
+                        if (!caster->HasAura(117679))
+                            caster->CastSpell(caster, 117679, true);
                     }
                     else
                     {
@@ -2233,6 +2235,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
                 }
+                case 117679:
+                    if (caster && !apply)
+                        caster->RemoveAurasDueToSpell(33891);
+                    break;
                 case 5229:  // Enrage
                     if (target->HasAura(70726)) // Item - Druid T10 Feral 4P Bonus
                         if (apply)

@@ -51,6 +51,7 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "ObjectVisitors.hpp"
+#include "BattlePetSpawnMgr.h"
 // apply implementation of the singletons
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
@@ -1457,6 +1458,8 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap)
     if (addToMap && !GetMap()->AddToMap(this))
         return false;
 
+    sBattlePetSpawnMgr->OnAddToOrRemoveFromMap(this);
+
     return true;
 }
 
@@ -1713,7 +1716,7 @@ void Creature::setDeathState(DeathState s)
         if (m_formation && m_formation->getLeader() == this)
             m_formation->FormationReset(true);
 
-        if ((CanFly() || IsFlying()))
+        if (((CanFly() || IsFlying())) && !canWaterWalk())
             i_motionMaster.MoveFall();
 
         Unit::setDeathState(CORPSE);
@@ -1798,6 +1801,8 @@ void Creature::Respawn(bool force)
             SetNativeDisplayId(displayID);
             SetByteValue(UNIT_FIELD_BYTES_0, 3, minfo->gender);
         }
+
+        sBattlePetSpawnMgr->OnRespawn(this);
 
         GetMotionMaster()->InitDefault();
 

@@ -2002,6 +2002,54 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     me->SetControlled(e.action.setRoot.root ? true : false, UNIT_STATE_ROOT);
                 break;
             }
+        case SMART_ACTION_PHASE_SHIFT:
+            {
+                uint32 mapId[SMART_ACTION_PARAM_COUNT];
+                mapId[0] = e.action.phaseshift.swap1;
+                mapId[1] = e.action.phaseshift.swap2;
+                mapId[2] = e.action.phaseshift.swap3;
+                mapId[3] = e.action.phaseshift.swap5;
+                mapId[4] = e.action.phaseshift.swap5;
+                mapId[5] = e.action.phaseshift.swap6;
+
+                uint32 temp[SMART_ACTION_PARAM_COUNT];
+                uint32 count = 0;
+                for (uint8 i = 0; i < SMART_ACTION_PARAM_COUNT; i++)
+                {
+                    if (mapId[i] >= 0)
+                    {
+                        temp[count] = mapId[i];
+                        ++count;
+                    }
+                }
+
+                if (count == 0)
+                    break;
+
+                ObjectList* targets = GetTargets(e, unit);
+
+                if (targets)
+                {
+                    for (ObjectList::iterator iter = targets->begin(); iter != targets->end(); ++iter)
+                    {
+                        if (IsPlayer(*iter))
+                        {
+                            PhaseShiftSet terrainswap;
+                            PhaseShiftSet phaseId;
+                            PhaseShiftSet worldMapAreaSwaps;
+                            terrainswap.insert((uint32)mapId[0]);
+                            terrainswap.insert((uint32)mapId[1]);
+                            terrainswap.insert((uint32)mapId[2]);
+                            terrainswap.insert((uint32)mapId[3]);
+                            terrainswap.insert((uint32)mapId[4]);
+                            terrainswap.insert((uint32)mapId[5]);
+                            (*iter)->ToPlayer()->GetSession()->SendSetPhaseShift(phaseId, terrainswap, worldMapAreaSwaps);
+                        }
+                    }
+                }
+
+                break;
+        }
         default:
             TC_LOG_ERROR("sql.sql", "SmartScript::ProcessAction: Entry %d SourceType %u, Event %u, Unhandled Action type %u", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
             break;

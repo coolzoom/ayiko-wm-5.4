@@ -695,7 +695,7 @@ Player::Player(WorldSession* session)
     //m_pad = 0;
 
     // players always accept
-    if (session && !GetSession()->HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS))
+    if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         SetAcceptWhispers(true);
 
     m_curSelection = 0;
@@ -1055,7 +1055,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         ? sWorld->getIntConfig(CONFIG_START_PLAYER_LEVEL)
         : sWorld->getIntConfig(CONFIG_START_HEROIC_PLAYER_LEVEL);
 
-    if (m_session->HasPermission(rbac::RBAC_PERM_USE_START_GM_LEVEL))
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
         uint32 gm_level = sWorld->getIntConfig(CONFIG_START_GM_LEVEL);
         if (gm_level > start_level)
@@ -2003,7 +2003,7 @@ void Player::Update(uint32 p_time)
     if (pet && !pet->isPossessed() && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()))
         RemovePet(PET_REMOVE_DISMISS, PET_REMOVE_FLAG_RETURN_REAGENT | PET_REMOVE_FLAG_RESET_CURRENT);
 
-    if (m_logonSendTimer < p_time)
+    /*if (m_logonSendTimer < p_time)
     {
         if (GetSession()->HasPermission(rbac::RBAC_PERM_BROADCAST_LOGON_CHANGE))
         {
@@ -2016,7 +2016,7 @@ void Player::Update(uint32 p_time)
         m_logonSendTimer = 30 * IN_MILLISECONDS;
     }
     else
-        m_logonSendTimer -= p_time; 
+        m_logonSendTimer -= p_time; */
 	
     if (m_forcedLogoutEventStage)
     {
@@ -2356,7 +2356,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return false;
     }
 
-    if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_DISABLE_MAP) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
+    if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()) && DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, mapid, this))
     {
         TC_LOG_ERROR("maps", "Player (GUID: %u, name: %s) tried to enter a forbidden map %u", GetGUIDLow(), GetName().c_str(), mapid);
         SendTransferAborted(mapid, TRANSFER_ABORT_MAP_NOT_ALLOWED);
@@ -2444,6 +2444,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (pet && !pet->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityRange()))
                 UnsummonPetTemporaryIfAny();
         }
+
+        // temporarily unsummon battle pet if teleport range is further than visibility range
+        if (TempSummon* tempSummon = GetBattlePetMgr().GetCurrentSummon())
+            if (!tempSummon->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityRange()))
+                GetBattlePetMgr().UnSummonCurrentBattlePet(true);
 
         if (!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
@@ -2557,6 +2562,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove pet on map change
             if (pet)
                 UnsummonPetTemporaryIfAny();
+
+            // temporarily unsummon battle pet for teleport
+            GetBattlePetMgr().UnSummonCurrentBattlePet(true);
 
             // remove all dyn objects and AreaTrigger
             RemoveAllDynObjects();
@@ -2733,10 +2741,12 @@ void Player::RemoveFromWorld()
     // cleanup
     if (IsInWorld())
     {
-        ///- Release charmed creatures, unsummon totems and remove pets/guardians
+        ///- Release charmed creatures, unsummon totems and remove pets, guardians and battle pets
         StopCastingCharm();
         StopCastingBindSight();
         UnsummonPetTemporaryIfAny();
+        GetBattlePetMgr().UnSummonCurrentBattlePet(true);
+
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
@@ -3269,7 +3279,7 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
                     return NULL;
 
     // not too far
-    if (!creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
+    if (!creature->IsWithinDistInMap(this, npcflagmask & UNIT_NPC_FLAG_PETBATTLE ? PETBATTLE_INTERACTION_DIST : INTERACTION_DISTANCE))
         return NULL;
 
     return creature;
@@ -3833,7 +3843,7 @@ void Player::InitTalentForLevel()
         // if used more that have then reset
         if (GetUsedTalentCount() > talentPointsForLevel)
         {
-            if (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_MORE_TALENTS_THAN_ALLOWED))
+            if (!AccountMgr::IsAdminAccount(GetSession()->GetSecurity()))
                 ResetTalents(true);
             else
                 SetFreeTalentPoints(0);
@@ -4400,6 +4410,26 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         return false;
     }
 
+    // handle battle pets learned from trainers
+    if (uint16 species = GetBattlePetSpeciesFromSpell(spellId))
+        if (!loading)
+            GetBattlePetMgr().Create(species);
+
+    // handle battle pet training
+    if (!loading && spellId == SPELL_BATTLE_PET_TRAINING)
+    {
+        if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET))
+            return false;
+
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET);
+
+        learnSpell(SPELL_BATTLE_PET_TRAINING_PASSIVE, false);
+        learnSpell(SPELL_TRACK_PETS, false);
+        learnSpell(SPELL_REVIVE_BATTLE_PETS, false);
+
+        GetBattlePetMgr().UnlockLoadoutSlot(0);
+    }
+
     // Validate profession
     if (loading)
     {
@@ -4636,14 +4666,6 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
     {
         CastSpell(this, spellId, true);
         return false;
-    }
-
-    // If is summon companion spell, send update of battle pet journal
-    if (learning && spellInfo->Effects[0].Effect == SPELL_EFFECT_SUMMON && spellInfo->Effects[0].MiscValueB == 3221)
-    {
-        WorldPacket data;
-        GetBattlePetMgr().BuildBattlePetJournal(&data);
-        GetSession()->SendPacket(&data);
     }
 
     // update used talent points count
@@ -9716,6 +9738,25 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
 void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
 {
     ItemTemplate const* proto = item->GetTemplate();
+    if (proto->Class == ITEM_CLASS_MISCELLANEOUS && proto->SubClass == ITEM_SUBCLASS_JUNK_PET)
+    {
+        uint16 speciesId = sObjectMgr->BattlePetGetSpeciesFromItem(item->GetEntry());
+        if (!speciesId)
+            return;
+
+        const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(55884);
+        if (!spellInfo)
+            return;
+
+        GetBattlePetMgr().Create(speciesId);
+
+        Spell* spell = new Spell(this, spellInfo, TRIGGERED_NONE);
+        spell->m_CastItem = item;
+        spell->m_cast_count = cast_count;
+        spell->prepare(&targets);
+        return;
+    }
+
     // special learning case
     if (proto->Spells[0].SpellId == 483 || proto->Spells[0].SpellId == 55884)
     {
@@ -11127,10 +11168,12 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 6665:
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_DG)
                 bg->FillInitialWorldStates(data);
+            break;
         // Silvershard Mines
         case 6126:
             if (bg && bg->GetTypeID(true) == BATTLEGROUND_SSM)
                 bg->FillInitialWorldStates(data);
+            break;
         // Halls of Reflection
         case 4820:
             if (instance && mapid == 668)
@@ -17009,6 +17052,15 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         }
     }
 
+    for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
+    {
+        if (quest->RequiredSourceItemId[i])
+        {
+            uint32 count = quest->RequiredSourceItemCount[i];
+            DestroyItemCount(quest->RequiredSourceItemId[i], count ? count : 9999, true);
+        }
+    }
+
     RemoveTimedQuest(quest_id);
 
     {
@@ -18580,8 +18632,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
 
     // check name limitations
     if (ObjectMgr::CheckPlayerName(m_name) != CHAR_NAME_SUCCESS ||
-        (!GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHARACTER_CREATION_RESERVEDNAME) &&
-         sObjectMgr->IsReservedName(m_name)))
+        (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()) && sObjectMgr->IsReservedName(m_name)))
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
 
@@ -18638,6 +18689,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     SetByteValue(PLAYER_BYTES_3, 1, fields[41].GetUInt8());
     SetUInt32Value(PLAYER_FLAGS, fields[11].GetUInt32());
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[40].GetUInt32());
+
+    // battle pet
+    m_battlePetMgr.LoadFromDb(authHolder->GetPreparedResult(AUTH_LOGIN_QUERY_LOAD_BATTLE_PETS));
+    m_battlePetMgr.LoadSlotsFromDb(authHolder->GetPreparedResult(AUTH_LOGIN_QUERY_LOAD_BATTLE_PET_SLOTS));
 
     // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
 
@@ -19153,7 +19208,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *charHolder, SQLQueryHolder 
     outDebugValues();
 
     // GM state
-    if (GetSession()->HasPermission(rbac::RBAC_PERM_RESTORE_SAVED_GM_STATE))
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
         switch (sWorld->getIntConfig(CONFIG_GM_LOGIN_STATE))
         {
@@ -20979,6 +21034,7 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveConquestPointsWeekCap(charTrans);
     _SaveCurrency(charTrans);
     m_archaeologyMgr.SaveArchaeology(charTrans);
+    m_battlePetMgr.SaveToDb(authTrans);
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
@@ -21761,7 +21817,7 @@ void Player::outDebugValues() const
 void Player::UpdateSpeakTime()
 {
     // ignore chat spam protection for GMs in any mode
-    if (GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_CHAT_SPAM))
+    if (!AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         return;
 
     time_t current = time (NULL);
@@ -22344,7 +22400,7 @@ void Player::TextEmote(const std::string& text)
 
     WorldPacket data;
     BuildPlayerChat(&data, CHAT_MSG_EMOTE, _text, LANG_UNIVERSAL);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT));
 }
 
 void Player::WhisperAddon(const std::string& text, const std::string& prefix, Player* receiver)
@@ -22384,18 +22440,6 @@ void Player::Whisper(const std::string& text, uint32 language, uint64 receiver)
     {
         SetAcceptWhispers(true);
         ChatHandler(GetSession()).SendSysMessage(LANG_COMMAND_WHISPERON);
-    }
-
-    if (rPlayer->GetSession()->HasPermission(rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET))
-    {
-        sLog->outCommand(rPlayer->GetSession()->GetAccountId(), "[W From][%u:%s]: %s",
-                         getLevel(), GetName().c_str(), _text.c_str());
-    }
-
-    if (GetSession()->HasPermission(rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET))
-    {
-        sLog->outCommand(GetSession()->GetAccountId(), "[W To][%u:%s]: %s",
-                         rPlayer->getLevel(), rPlayer->GetName().c_str(), _text.c_str());
     }
 
     // announce to player that player he is whispering to is afk
@@ -24605,15 +24649,6 @@ bool Player::CanJoinToBattleground(Battleground const* bg) const
     if (HasAura(26013))
         return false;
 
-    if (bg->isArena() && !GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_ARENAS))
-        return false;
-
-    if (bg->IsRandom() && !GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_RANDOM_BG))
-        return false;
-
-    if (!GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_NORMAL_BG))
-        return false;
-
     return true;
 }
 
@@ -25223,9 +25258,7 @@ void Player::SendInitialPacketsAfterAddToMap()
         m_archaeologyMgr.ShowResearchProjects();
     }
 
-    WorldPacket data;
-    GetBattlePetMgr().BuildBattlePetJournal(&data);
-    GetSession()->SendPacket(&data);
+    GetBattlePetMgr().SendBattlePetJournal();
 
     SendDeathRuneUpdate();
 }

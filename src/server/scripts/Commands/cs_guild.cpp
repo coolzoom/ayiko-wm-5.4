@@ -37,18 +37,17 @@ public:
     {
         static ChatCommand guildCommandTable[] =
         {
-            { "create",     rbac::RBAC_PERM_COMMAND_GUILD_CREATE,     true, &HandleGuildCreateCommand,     "", NULL },
-            { "delete",     rbac::RBAC_PERM_COMMAND_GUILD_DELETE,     true, &HandleGuildDeleteCommand,     "", NULL },
-            { "invite",     rbac::RBAC_PERM_COMMAND_GUILD_INVITE,     true, &HandleGuildInviteCommand,     "", NULL },
-            { "uninvite",   rbac::RBAC_PERM_COMMAND_GUILD_UNINVITE,   true, &HandleGuildUninviteCommand,   "", NULL },
-            { "rank",       rbac::RBAC_PERM_COMMAND_GUILD_RANK,       true, &HandleGuildMemberRankCommand, "", NULL },
-            { "rename",     rbac::RBAC_PERM_COMMAND_GUILD_RENAME,     true, &HandleGuildRenameCommand,     "", NULL },
+            { "rename",         SEC_GAMEMASTER,     true, &HandleGuildRenameCommand,     "", NULL },
+            { "create",         SEC_GAMEMASTER,     true,  &HandleGuildCreateCommand,           "", NULL },
+            { "delete",         SEC_GAMEMASTER,     true,  &HandleGuildDeleteCommand,           "", NULL },
+            { "invite",         SEC_GAMEMASTER,     true,  &HandleGuildInviteCommand,           "", NULL },
+            { "uninvite",       SEC_GAMEMASTER,     true,  &HandleGuildUninviteCommand,         "", NULL },
             { NULL,             0,                  false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "guild", rbac::RBAC_PERM_COMMAND_GUILD,  true, NULL, "", guildCommandTable },
-            { NULL,    0,                       false, NULL, "", NULL }
+            { "guild",          SEC_ADMINISTRATOR,  true, NULL,                                 "", guildCommandTable },
+            { NULL,             0,                  false, NULL,                                "", NULL }
         };
         return commandTable;
     }

@@ -411,6 +411,15 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
 
             if (const Quest *quest = sObjectMgr->GetQuestTemplate(questId))
             {
+                for (uint8 i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
+                {
+                    if (quest->RequiredSourceItemId[i])
+                    {
+                        uint32 count = quest->RequiredSourceItemCount[i];
+                        _player->DestroyItemCount(quest->RequiredSourceItemId[i], count ? count : 9999, true);
+                    }
+                }
+
                 if (quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
                     _player->RemoveTimedQuest(questId);
             }

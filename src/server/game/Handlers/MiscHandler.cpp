@@ -187,7 +187,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Recvd CMSG_WHO Message");
 
-    if (!HasPermission(rbac::RBAC_PERM_SKIP_CHECK_WHO_SPAM))
+    if (!AccountMgr::IsAdminAccount(GetSecurity()))
     {
         time_t now = time(NULL);
         if (now - timeLastWhoCommand < sWorld->getIntConfig(CONFIG_WHO_OPCODE_INTERVAL))
@@ -295,11 +295,11 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
         Player const * const target = kvPair.second;
 
         // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
-        if (target->GetTeam() != team && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_WHO_LIST))
+        if (target->GetTeam() != team && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST))
             continue;
 
         // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-        if (!HasPermission(rbac::RBAC_PERM_WHO_SEE_ALL_SEC_LEVELS) && target->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList))
+        if (target->GetSession()->GetSecurity() > AccountTypes(gmLevelInWhoList))
             continue;
 
         //do not process players which are not in world
@@ -489,7 +489,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
         DoLootRelease(lguid);
 
     bool instantLogout = (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && !GetPlayer()->IsInCombat()) ||
-            GetPlayer()->isInFlight() || HasPermission(rbac::RBAC_PERM_INSTANT_LOGOUT);
+            GetPlayer()->isInFlight() || GetSecurity() >= AccountTypes(sWorld->getIntConfig(CONFIG_INSTANT_LOGOUT));
 
     /// TODO: Possibly add RBAC permission to log out in combat
     bool canLogoutInCombat = GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
@@ -508,6 +508,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recvData*/)
     data.FlushBits();
     SendPacket(&data);
 
+    timeCharEnumOpcode = time(NULL); // Bypass protection when logging out to ensure that client doesnt get stuck on Retrieving character screen
     if (reason)
     {
         LogoutRequest(0);
@@ -694,13 +695,13 @@ void WorldSession::HandleAddFriendOpcodeCallBack(PreparedQueryResult result, std
         team = Player::TeamForRace(fields[1].GetUInt8());
         friendAccountId = fields[2].GetUInt32();
 
-        if (HasPermission(rbac::RBAC_PERM_ALLOW_GM_FRIEND) || AccountMgr::IsPlayerAccount(AccountMgr::GetSecurity(friendAccountId, realmID)))
+        if (!AccountMgr::IsPlayerAccount(GetSecurity()) || sWorld->getBoolConfig(CONFIG_ALLOW_GM_FRIEND) || AccountMgr::IsPlayerAccount(AccountMgr::GetSecurity(friendAccountId, realmID)))
         {
             if (friendGuid)
             {
                 if (friendGuid == GetPlayer()->GetGUID())
                     friendResult = FRIEND_SELF;
-                else if (GetPlayer()->GetTeam() != team && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_ADD_FRIEND))
+                else if (GetPlayer()->GetTeam() != team && !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND) && AccountMgr::IsPlayerAccount(GetSecurity()))
                     friendResult = FRIEND_ENEMY;
                 else if (GetPlayer()->GetSocial()->HasFriend(lowGuid))
                     friendResult = FRIEND_ALREADY;
@@ -868,9 +869,7 @@ void WorldSession::HandleReportSuggestionOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleRequestBattlePetJournal(WorldPacket& /*recvPacket*/)
 {
-    WorldPacket data;
-    GetPlayer()->GetBattlePetMgr().BuildBattlePetJournal(&data);
-    SendPacket(&data);
+    GetPlayer()->GetBattlePetMgr().SendBattlePetJournal();
 }
 
 void WorldSession::HandleRequestGmTicket(WorldPacket& /*recvPakcet*/)
@@ -1233,6 +1232,9 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recvData)
                 break;
             case ACTION_BUTTON_SUB_BUTTON:
                 TC_LOG_INFO("network", "MISC: Added sub buttons %u into button %u", action, button);
+                break;
+            case ACTION_BUTTON_BATTLEPET:
+                TC_LOG_INFO("network", "MISC: Added Battle Pet %u into button %u", action, button);
                 break;
             case ACTION_BUTTON_ITEM:
                 TC_LOG_INFO("network", "MISC: Added Item %u into button %u", action, button);
@@ -1671,7 +1673,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recvData)
     TC_LOG_DEBUG("network", "CMSG_WORLD_TELEPORT: Player = %s, Time = %u, map = %u, x = %f, y = %f, z = %f, o = %f",
                  GetPlayer()->GetName().c_str(), time, mapid, PositionX, PositionY, PositionZ, Orientation);
 
-    if (HasPermission(rbac::RBAC_PERM_OPCODE_WORLD_TELEPORT))
+    if (AccountMgr::IsAdminAccount(GetSecurity()))
         GetPlayer()->TeleportTo(mapid, PositionX, PositionY, PositionZ, Orientation);
     else
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
@@ -1683,7 +1685,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recvData)
     uint32 textLength = recvData.ReadBits(6);
     std::string charname = recvData.ReadString(textLength);
 
-    if (!HasPermission(rbac::RBAC_PERM_OPCODE_WHOIS))
+    if (!AccountMgr::IsAdminAccount(GetSecurity()))
     {
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
         return;

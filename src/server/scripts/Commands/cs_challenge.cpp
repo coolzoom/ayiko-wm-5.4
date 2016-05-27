@@ -18,7 +18,7 @@ public:
     {
         static ChatCommand commandTable[] =
         {
-            { "challengeplayers", rbac::RBAC_PERM_COMMAND_CHALLENGE_CHALLENGE_PLAYERS, false, &HandleChallengePlayer, "", NULL },
+            { "challengeplayers", SEC_PLAYER, false, &HandleChallengePlayer, "", NULL },
             { NULL, 0, false, NULL, "", NULL }
         };
         return commandTable;

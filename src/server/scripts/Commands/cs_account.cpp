@@ -37,40 +37,40 @@ public:
     {
         static ChatCommand accountSetSecTable[] =
         {
-            { "regmail",        rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_SEC_REGMAIL, true,  &HandleAccountSetRegEmailCommand,  "", NULL },
-            { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_SEC_EMAIL,   true,  &HandleAccountSetEmailCommand,     "", NULL },
-            { NULL,             0,                                         false, NULL,                              "", NULL }
+            { "regmail",        SEC_ADMINISTRATOR,       true,  &HandleAccountSetRegEmailCommand,  "", NULL },
+            { "email",          SEC_ADMINISTRATOR,       true,  &HandleAccountSetEmailCommand,     "", NULL },
+            { NULL,             0,                       false, NULL,                              "", NULL }
         };
         static ChatCommand accountSetCommandTable[] =
         {
-            { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_ADDON,       true,  &HandleAccountSetAddonCommand,     "", NULL },
-            { "sec",            rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_SEC,         true,  NULL,                "", accountSetSecTable },
-            { "gmlevel",        rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_GMLEVEL,     true,  &HandleAccountSetGmLevelCommand,   "", NULL },
-            { "password",       rbac::RBAC_PERM_COMMAND_ACCOUNT_SET_PASSWORD,    true,  &HandleAccountSetPasswordCommand,  "", NULL },
-            { NULL,             0,                                         false, NULL,                              "", NULL }
+            { "addon",          SEC_ADMINISTRATOR,       true,  &HandleAccountSetAddonCommand,     "", NULL },
+            { "sec",            SEC_ADMINISTRATOR,       true,  NULL,                "", accountSetSecTable },
+            { "gmlevel",        SEC_CONSOLE,             true,  &HandleAccountSetGmLevelCommand,   "", NULL },
+            { "password",       SEC_CONSOLE,             true,  &HandleAccountSetPasswordCommand,  "", NULL },
+            { NULL,             0,                       false, NULL,                              "", NULL }
         };
         static ChatCommand accountLockCommandTable[] =
         {
-            { "ip",             rbac::RBAC_PERM_COMMAND_ACCOUNT_LOCK_IP,         true,  &HandleAccountLockIpCommand,       "", NULL },
-            { NULL,             0,                                         false, NULL,                              "", NULL }
+            { "ip",             SEC_PLAYER,              true,  &HandleAccountLockIpCommand,       "", NULL },
+            { NULL,             0,                       false, NULL,                              "", NULL }
         };
         static ChatCommand accountCommandTable[] =
         {
-            { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_ADDON,           false, &HandleAccountAddonCommand,        "", NULL },
-            { "create",         rbac::RBAC_PERM_COMMAND_ACCOUNT_CREATE,          true,  &HandleAccountCreateCommand,       "", NULL },
-            { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_DELETE,          true,  &HandleAccountDeleteCommand,       "", NULL },
-            { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_EMAIL,           false, &HandleAccountEmailCommand,        "", NULL },
-            { "onlinelist",     rbac::RBAC_PERM_COMMAND_ACCOUNT_ONLINE_LIST,     true,  &HandleAccountOnlineListCommand,   "", NULL },
-            { "lock",           rbac::RBAC_PERM_COMMAND_ACCOUNT_LOCK,            false, NULL,           "", accountLockCommandTable },
-            { "set",            rbac::RBAC_PERM_COMMAND_ACCOUNT_SET,             true,  NULL,            "", accountSetCommandTable },
-            { "password",       rbac::RBAC_PERM_COMMAND_ACCOUNT_PASSWORD,        false, &HandleAccountPasswordCommand,     "", NULL },
-            { "",               rbac::RBAC_PERM_COMMAND_ACCOUNT,                 false, &HandleAccountCommand,             "", NULL },
-            { NULL,             0,                                         false, NULL,                              "", NULL }
+            { "addon",          SEC_MODERATOR,           false, &HandleAccountAddonCommand,        "", NULL },
+            { "create",         SEC_CONSOLE,             true,  &HandleAccountCreateCommand,       "", NULL },
+            { "delete",         SEC_CONSOLE,             true,  &HandleAccountDeleteCommand,       "", NULL },
+            { "email",          SEC_ADMINISTRATOR,       false, &HandleAccountEmailCommand,        "", NULL },
+            { "onlinelist",     SEC_CONSOLE,             true,  &HandleAccountOnlineListCommand,   "", NULL },
+            { "lock",           SEC_PLAYER,              false, NULL,           "", accountLockCommandTable },
+            { "set",            SEC_ADMINISTRATOR,       true,  NULL,            "", accountSetCommandTable },
+            { "password",       SEC_PLAYER,              false, &HandleAccountPasswordCommand,     "", NULL },
+            { "",               SEC_PLAYER,              false, &HandleAccountCommand,             "", NULL },
+            { NULL,             0,                       false, NULL,                              "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "account",        rbac::RBAC_PERM_COMMAND_ACCOUNT,                 true,  NULL,              "",  accountCommandTable },
-            { NULL,             0,                                         false, NULL,                              "", NULL }
+            { "account",        SEC_PLAYER,              true,  NULL,              "",  accountCommandTable },
+            { NULL,             0,                       false, NULL,                              "", NULL }
         };
         return commandTable;
     }
@@ -129,20 +129,15 @@ public:
         switch (result)
         {
             case AOR_OK:
-            {
                 handler->PSendSysMessage(LANG_ACCOUNT_CREATED, accountName);
-                WorldSession * const session = handler->GetSession();
-
-                if (session)
+                if (handler->GetSession())
                 {
-                    Player * player = session->GetPlayer();
-
                     TC_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] (GUID: %u) created Account %s (Email: '%s')",
-                        session->GetAccountId(), session->GetRemoteAddress().c_str(), player->GetName().c_str(), player->GetGUIDLow(),
+                        handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
+                        handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow(),
                         accountName, email.c_str());
                 }
                 break;
-            }
             case AOR_NAME_TOO_LONG:
                 handler->SendSysMessage(LANG_ACCOUNT_TOO_LONG);
                 handler->SetSentErrorMessage(true);
@@ -431,7 +426,7 @@ public:
         }
 
         // This compares the old, current email to the entered email - however, only...
-        if ((pwConfig == PW_EMAIL || (pwConfig == PW_RBAC && handler->HasPermission(rbac::RBAC_PERM_EMAIL_CONFIRM_FOR_PASS_CHANGE))) // ...if either PW_EMAIL or PW_RBAC with the Permission is active...
+        if ((pwConfig == PW_EMAIL || (pwConfig == PW_RBAC && handler->GetSession()->GetSecurity() > SEC_PLAYER)) // ...if either PW_EMAIL or PW_RBAC with the Permission is active...
             && !AccountMgr::CheckEmail(handler->GetSession()->GetAccountId(), std::string(emailConfirmation))) // ... and returns false if the comparison fails.
         {
             handler->SendSysMessage(LANG_COMMAND_WRONGEMAIL);
@@ -481,7 +476,7 @@ public:
         handler->PSendSysMessage(LANG_ACCOUNT_LEVEL, uint32(gmLevel));
 
         // Security level required
-        bool hasRBAC = (handler->HasPermission(rbac::RBAC_PERM_EMAIL_CONFIRM_FOR_PASS_CHANGE) ? true : false);
+        bool hasPermission = (gmLevel > SEC_PLAYER ? true : false);
         uint32 pwConfig = sWorld->getIntConfig(CONFIG_ACC_PASSCHANGESEC); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
         handler->PSendSysMessage(LANG_ACCOUNT_SEC_TYPE, (pwConfig == PW_NONE  ? "Lowest level: No Email input required." :
@@ -490,11 +485,11 @@ public:
                                                                                 "Unknown security level: Notify technician for details."));
 
         // RBAC required display - is not displayed for console
-        if (pwConfig == PW_RBAC && handler->GetSession() && hasRBAC)
+        if (pwConfig == PW_RBAC && handler->GetSession() && hasPermission)
             handler->PSendSysMessage(LANG_RBAC_EMAIL_REQUIRED);
 
         // Email display if sufficient rights
-        if (handler->HasPermission(rbac::RBAC_PERM_MAY_CHECK_OWN_EMAIL))
+        if (gmLevel > SEC_PLAYER)
         {
             std::string emailoutput;
             uint32 accountId = handler->GetSession()->GetAccountId();
@@ -672,8 +667,16 @@ public:
             return false;
         }
 
-        rbac::RBACData* rbac = isAccountNameGiven ? NULL : handler->getSelectedPlayer()->GetSession()->GetRBACData();
-        sAccountMgr->UpdateAccountAccess(rbac, targetAccountId, uint8(gm), gmRealmID);
+        if (gm != 0)
+        {
+            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_ACCESS);
+
+            stmt->setUInt32(0, targetAccountId);
+            stmt->setUInt8(1, uint8(gm));
+            stmt->setInt32(2, gmRealmID);
+
+            LoginDatabase.Execute(stmt);
+        }
 
         handler->PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetAccountName.c_str(), gm);
         return true;

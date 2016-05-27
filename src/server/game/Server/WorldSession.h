@@ -33,6 +33,7 @@
 #include "Opcodes.h"
 #include "PetDefines.h"
 #include "PhaseMgr.h"
+#include "BattlePet.h"
 
 #include <unordered_set>
 
@@ -64,8 +65,6 @@ struct LfgReward;
 struct LfgRoleCheck;
 struct LfgUpdateData;
 struct MovementInfo;
-
-namespace rbac { class RBACData; }
 
 enum AccountDataType
 {
@@ -282,11 +281,6 @@ class WorldSession
 
         void SendAuthResponse(uint8 code, bool queued, uint32 queuePos = 0);
         void SendClientCacheVersion(uint32 version);
-
-        rbac::RBACData* GetRBACData();
-        bool HasPermission(uint32 permissionId) const;
-        void LoadPermissions();
-        void ReloadRBACData(); // Used to force LoadPermissions
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -1053,6 +1047,26 @@ class WorldSession
         void HandleBlackMarketBid(WorldPacket& recvData);
         void SendBlackMarketBidResult(uint32 itemEntry, uint32 auctionId);
 
+        // Battle Pet
+        void HandleBattlePetModifyName(WorldPacket& recvData);
+        void HandleBattlePetRelease(WorldPacket& recvData);
+        void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
+        void HandleBattlePetSetFlags(WorldPacket& recvData);
+        void HandleQueryBattlePetName(WorldPacket& recvData);
+        void HandleSummonBattlePetCompanion(WorldPacket& recvData);
+
+        // Pet Battle
+        void HandlePetBattleInput(WorldPacket& recvData);
+        void HandlePetBattleRequestWild(WorldPacket& recvData);
+
+        void SendPetBattleFinaliseLocation(PetBattleRequest& request);
+        void SendPetBattleFirstRound(PetBattle* petBattle);
+        void SendPetBattleInitialUpdate(PetBattle* petBattle);
+        void SendPetBattleRequestFailed(uint8 reason);
+        void SendPetBattleRoundResult(PetBattle* petBattle);
+        void SendPetBatatleFinalRound(PetBattle* petBattle);
+        void SendPetBattleFinished();
+
         void HandleMovieComplete(WorldPacket& recv_data);
     private:
         void InitializeQueryCallbackParameters();
@@ -1150,8 +1164,6 @@ class WorldSession
         time_t timeLastCalendarInvCommand;
         time_t timeLastChangeSubGroupCommand;
         time_t timeLastSellItemOpcode;
-
-        rbac::RBACData* _RBACData;
 
         std::vector<std::pair<uint32, uint32>> m_auctionsToRemove;
 };

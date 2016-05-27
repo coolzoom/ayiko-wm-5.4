@@ -44,18 +44,11 @@ SMSG_CALENDAR_EVENT_INVITE_STATUS_ALERT [ Structure unkown ]
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
 #include "DatabaseEnv.h"
-#include "RBAC.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
 {
     uint64 guid = _player->GetGUID();
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_CALENDAR [" UI64FMTD "]", guid);
-
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
 
     time_t curTime = time_t(time(NULL));
 
@@ -225,12 +218,6 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket &recvData)
 
 void WorldSession::HandleCalendarGetEvent(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 eventId;
     recvData >> eventId;
 
@@ -243,12 +230,6 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarGuildFilter(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_GUILD_FILTER [" UI64FMTD "]", _player->GetGUID());
 
     int32 unk1, unk2, unk3;
@@ -261,12 +242,6 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_ARENA_TEAM [" UI64FMTD "]", _player->GetGUID());
 
     int32 unk1;
@@ -277,12 +252,6 @@ void WorldSession::HandleCalendarArenaTeam(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     std::string title;
     std::string description;
@@ -361,12 +330,6 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
@@ -411,12 +374,6 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
@@ -438,12 +395,6 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
@@ -465,12 +416,6 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     time_t now = time(NULL);
     if (now - timeLastCalendarInvCommand < 5)
         return;
@@ -538,12 +483,6 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint8 status;
@@ -563,12 +502,6 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 inviteId;
@@ -592,12 +525,6 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 invitee;
     uint64 eventId;
@@ -625,12 +552,6 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 invitee;
     uint64 eventId;
@@ -658,12 +579,6 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 invitee;
     uint64 eventId;
@@ -691,12 +606,6 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
 {
-    if (!HasPermission(rbac::RBAC_PERM_USE_CALENDAR))
-    {
-        recvData.rfinish();
-        return;
-    }
-
     uint64 guid = _player->GetGUID();
     uint64 eventId;
     uint64 complainGUID;
@@ -709,7 +618,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
 void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recvData*/)
 {
     uint64 guid = _player->GetGUID();
-    uint32 pending = HasPermission(rbac::RBAC_PERM_USE_CALENDAR) ? sCalendarMgr->GetPlayerNumPending(guid) : 0;
+    uint32 pending = sCalendarMgr->GetPlayerNumPending(guid);
 
     TC_LOG_DEBUG("network", "CMSG_CALENDAR_GET_NUM_PENDING: [" UI64FMTD
         "] Pending: %u", guid, pending);

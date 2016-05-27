@@ -946,6 +946,10 @@ enum TrinityStrings
     LANG_LIST_MAIL_NOT_FOUND            = 1156,
     // Room for more level 3              1157-1199 not used
 
+    // Battle Pet
+    LANG_BATTLE_PET_NOT_PLAYER_OWNED    = 1160,
+    LANG_BATTLE_PET_TARGET_LEVELED      = 1161,
+
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
     LANG_MOVIE_NOT_EXIST                = 1201,

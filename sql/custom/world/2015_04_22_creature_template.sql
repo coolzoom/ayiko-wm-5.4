@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName`='npc_ethereal_soul_trader' WHERE (`entry`='27914')

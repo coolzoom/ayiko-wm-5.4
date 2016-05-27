@@ -487,8 +487,10 @@ enum SMART_ACTION
     SMART_ACTION_SET_HOME_POS                       = 101,    // none
     SMART_ACTION_SET_HEALTH_REGEN                   = 102,    // 0/1
     SMART_ACTION_SET_ROOT                           = 103,    // off/on
+    // CUSTOM ACTION
+    SMART_ACTION_PHASE_SHIFT                        = 116,
 
-    SMART_ACTION_END                                = 104
+    SMART_ACTION_END
 };
 
 struct SmartAction
@@ -928,6 +930,16 @@ struct SmartAction
         {
             uint32 root;
         } setRoot;
+
+        struct
+        {
+            uint32 swap1;
+            uint32 swap2;
+            uint32 swap3;
+            uint32 swap4;
+            uint32 swap5;
+            uint32 swap6;
+        } phaseshift;
 
         //! Note for any new future actions
         //! All parameters must have type uint32

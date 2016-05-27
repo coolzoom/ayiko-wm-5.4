@@ -13,7 +13,9 @@ DoorData const doorData[] =
     { GOB_COUNCIL_EXIT, DATA_COUNCIL_OF_ELDERS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     { GOB_TORTOS_DOOR, DATA_TORTOS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
     { GOB_TORTOS_COLLISION, DATA_TORTOS, DOOR_TYPE_SPAWN_HOLE, BOUNDARY_NONE },
-    { GOB_MEGAERA_EXIT, DATA_MEGAERA, DOOR_TYPE_PASSAGE, BOUNDARY_NONE }
+    { GOB_MEGAERA_EXIT, DATA_MEGAERA, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GOB_PRIMORDIUS_ENTRANCE, DATA_PRIMORDIUS, DOOR_TYPE_ROOM, BOUNDARY_S},
+    { GOB_PRIMORDIUS_EXIT, DATA_PRIMORDIUS, DOOR_TYPE_PASSAGE, BOUNDARY_NONE }
 };
 
 typedef std::unordered_map<uint32, uint64> EntryGuidMap;
@@ -107,6 +109,8 @@ public:
                 case GOB_TORTOS_DOOR:
                 case GOB_TORTOS_COLLISION:
                 case GOB_MEGAERA_EXIT:
+                case GOB_PRIMORDIUS_ENTRANCE:
+                case GOB_PRIMORDIUS_EXIT:
                     AddDoor(pGo, true);
                     m_mGoGuidStorage.insert(std::make_pair(pGo->GetEntry(), pGo->GetGUID()));
                     break;
@@ -281,6 +285,7 @@ public:
                     SaveInstance();
                     break;
                 case TYPE_TORTOS_INTRO:
+                case TYPE_PRIMORDIUS_INTRO:
                     // Council and Twin Consorts are handled in scripts
                 case TYPE_TWIN_CONSORTS:
                 case TYPE_COUNCIL:
@@ -370,6 +375,8 @@ public:
                 case GOB_MOGU_STATUE_3:
                 case GOB_MOGU_STATUE_4:
                 case GOB_JIKUN_FEATHER:
+                case GOB_PRIMORDIUS_ENTRANCE:
+                case GOB_PRIMORDIUS_EXIT:
                 {                                          
                     EntryGuidMap::const_iterator find = m_mGoGuidStorage.find(uiType);
                     if (find != m_mGoGuidStorage.cend())
@@ -411,6 +418,11 @@ public:
                             }
                         }
                         break;
+                    case EVENT_PRIMORDIUS_INTRO:
+                        if (Creature* pBoss = instance->GetCreature(GetData64(BOSS_PRIMORDIUS)))
+                            if (pBoss->AI())
+                                pBoss->AI()->DoAction(ACTION_START_INTRO);
+                        break;
                 }
             }
         }
@@ -423,7 +435,8 @@ public:
             saveStream << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' '
                 << m_auiEncounter[3] << ' ' << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6]
                 << ' ' << m_auiEncounter[7] << ' ' << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10]
-                << ' ' << m_auiEncounter[11] << ' ' << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_auiEncounter[15];
+                << ' ' << m_auiEncounter[11] << ' ' << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] 
+                << ' ' << m_auiEncounter[15] << ' ' << m_auiEncounter[16];
 
             strSaveData = saveStream.str();
 
@@ -445,7 +458,7 @@ public:
 
             loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6]
                 >> m_auiEncounter[7] >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >> m_auiEncounter[12] >> m_auiEncounter[13]
-                >> m_auiEncounter[14] >> m_auiEncounter[15];
+                >> m_auiEncounter[14] >> m_auiEncounter[15] >> m_auiEncounter[16];
             for (int i = 0; i < MAX_TYPES; ++i)
             {
                 // For storage purposes
@@ -467,6 +480,9 @@ public:
                         break;
                     case TYPE_BELLS_RUNG:
                         m_mEvents.ScheduleEvent(EVENT_MOGU_BELLS, 100);
+                        break;
+                    case TYPE_PRIMORDIUS_INTRO:
+                        m_mEvents.ScheduleEvent(EVENT_PRIMORDIUS_INTRO, 500);
                         break;
                     }
                 }

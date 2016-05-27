@@ -47,27 +47,27 @@ public:
     {
         static ChatCommand deserterInstanceCommandTable[] =
         {
-            { "add",      rbac::RBAC_PERM_COMMAND_DESERTER_INSTANCE_ADD,    false, &HandleDeserterInstanceAdd,    "", NULL },
-            { "remove",   rbac::RBAC_PERM_COMMAND_DESERTER_INSTANCE_REMOVE, false, &HandleDeserterInstanceRemove, "", NULL },
+            { "add",      SEC_GAMEMASTER, false, &HandleDeserterInstanceAdd,    "", NULL },
+            { "remove",   SEC_GAMEMASTER, false, &HandleDeserterInstanceRemove, "", NULL },
             { NULL,       0,                                          false, NULL,                          "", NULL }
         };
         static ChatCommand deserterBGCommandTable[] =
         {
-            { "add",      rbac::RBAC_PERM_COMMAND_DESERTER_BG_ADD,    false, &HandleDeserterBGAdd,    "", NULL },
-            { "remove",   rbac::RBAC_PERM_COMMAND_DESERTER_BG_REMOVE, false, &HandleDeserterBGRemove, "", NULL },
+            { "add",      SEC_GAMEMASTER, false, &HandleDeserterBGAdd,    "", NULL },
+            { "remove",   SEC_GAMEMASTER, false, &HandleDeserterBGRemove, "", NULL },
             { NULL,       0,                                    false, NULL,                    "", NULL }
         };
 
         static ChatCommand deserterCommandTable[] =
         {
-            { "instance", rbac::RBAC_PERM_COMMAND_DESERTER_INSTANCE, false, NULL, "", deserterInstanceCommandTable },
-            { "bg",       rbac::RBAC_PERM_COMMAND_DESERTER_BG,       false, NULL, "", deserterBGCommandTable },
+            { "instance", SEC_GAMEMASTER, false, NULL, "", deserterInstanceCommandTable },
+            { "bg",       SEC_GAMEMASTER, false, NULL, "", deserterBGCommandTable },
             { NULL,       0,                                   false, NULL, "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "deserter", rbac::RBAC_PERM_COMMAND_DESERTER, false, NULL, "", deserterCommandTable },
-            { NULL,       0,                          false, NULL, "", NULL }
+            { "deserter", SEC_GAMEMASTER, false, NULL, "", deserterCommandTable },
+            { NULL,       0,              false, NULL, "", NULL }
         };
         return commandTable;
     }

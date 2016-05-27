@@ -478,6 +478,7 @@ uint32 Condition::GetMaxAvailableConditionTargets()
         case CONDITION_SOURCE_TYPE_SMART_EVENT:
         case CONDITION_SOURCE_TYPE_NPC_VENDOR:
         case CONDITION_SOURCE_TYPE_SPELL_PROC:
+        case CONDITION_SOURCE_TYPE_NPC_TRAINER:
             return 2;
         default:
             return 1;
@@ -630,7 +631,8 @@ bool ConditionMgr::CanHaveSourceGroupSet(ConditionSourceType sourceType) const
             sourceType == CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT ||
             sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT ||
             sourceType == CONDITION_SOURCE_TYPE_NPC_VENDOR ||
-            sourceType == CONDITION_SOURCE_TYPE_PHASE_DEFINITION);
+            sourceType == CONDITION_SOURCE_TYPE_PHASE_DEFINITION ||
+            sourceType == CONDITION_SOURCE_TYPE_NPC_TRAINER);
 }
 
 bool ConditionMgr::CanHaveSourceIdSet(ConditionSourceType sourceType) const
@@ -736,6 +738,22 @@ ConditionList ConditionMgr::GetConditionsForPhaseDefinition(uint32 zone, uint32 
         }
     }
 
+    return cond;
+}
+
+ConditionList ConditionMgr::GetConditionsForNpcTrainerEvent(uint32 creatureId, uint32 spellId)
+{
+    ConditionList cond;
+    auto itr = NpcTrainerConditionContainerStore.find(creatureId);
+    if (itr != NpcTrainerConditionContainerStore.end())
+    {
+        auto i = itr->second.find(spellId);
+        if (i != itr->second.end())
+        {
+            cond = i->second;
+            TC_LOG_DEBUG("condition", "GetConditionsForNpcTrainerEvent: found conditions for creature entry %u spell %u", creatureId, spellId);
+        }
+    }
     return cond;
 }
 
@@ -975,6 +993,13 @@ void ConditionMgr::LoadConditions(bool isReload)
                     PhaseDefinitionsConditionStore[cond->SourceGroup][cond->SourceEntry].push_back(cond);
                     valid = true;
                     ++count;
+                    continue;
+                }
+                case CONDITION_SOURCE_TYPE_NPC_TRAINER:
+                {
+                    NpcTrainerConditionContainerStore[cond->SourceGroup][cond->SourceEntry].push_back(cond);
+                    valid = true;
+                    count++;
                     continue;
                 }
                 default:
@@ -1505,6 +1530,23 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                 return false;
             }
             break;
+        case CONDITION_SOURCE_TYPE_NPC_TRAINER:
+        {
+            if (!sObjectMgr->GetCreatureTemplate(cond->SourceGroup))
+            {
+                TC_LOG_ERROR("sql.sql", "SourceEntry %u in `condition` table, does not exist in `creature_template`, ignoring.", cond->SourceGroup);
+                return false;
+            }
+
+            SpellInfo const* spellProto = sSpellMgr->GetSpellInfo(cond->SourceEntry);
+            if (!spellProto)
+            {
+                TC_LOG_ERROR("sql.sql", "SourceEntry %u in `condition` table, does not exist in `spell.dbc`, ignoring.", cond->SourceEntry);
+                return false;
+            }
+
+            break;
+        }
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
         case CONDITION_SOURCE_TYPE_SMART_EVENT:
@@ -2092,6 +2134,17 @@ void ConditionMgr::Clean()
     }
 
     PhaseDefinitionsConditionStore.clear();
+
+    for (auto &itr : NpcTrainerConditionContainerStore)
+    {
+        for (auto &it : itr.second)
+        {
+            for (auto &i : it.second)
+                delete i;
+            it.second.clear();
+        }
+        itr.second.clear();
+    }
 
     // this is a BIG hack, feel free to fix it if you can figure out the ConditionMgr ;)
     for (std::list<Condition*>::const_iterator itr = AllocatedMemoryStore.begin(); itr != AllocatedMemoryStore.end(); ++itr)

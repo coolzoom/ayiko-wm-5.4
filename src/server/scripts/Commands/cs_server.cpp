@@ -39,70 +39,69 @@ public:
     {
         static ChatCommand serverIdleRestartCommandTable[] =
         {
-            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
-            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART,        true, &HandleServerIdleRestartCommand,    "", NULL },
-            { NULL,     0,                                          false, NULL,                               "", NULL }
+            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
+            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerIdleRestartCommand,         "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverIdleShutdownCommandTable[] =
         {
-            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
-            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN,        true, &HandleServerIdleShutDownCommand,   "", NULL },
-            { NULL,     0,                                           false, NULL,                               "", NULL }
+            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
+            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerIdleShutDownCommand,        "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverRestartCommandTable[] =
         {
-            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_RESTART_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
-            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_RESTART,        true, &HandleServerRestartCommand,        "", NULL },
-            { NULL,     0,                                      false, NULL,                               "", NULL }
+            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
+            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerRestartCommand,             "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverShutdownCommandTable[] =
         {
-            { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN_CANCEL, true, &HandleServerShutDownCancelCommand, "", NULL },
-            { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,        true, &HandleServerShutDownCommand,       "", NULL },
-            { NULL,     0,                                       false, NULL,                               "", NULL }
+            { "cancel",         SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCancelCommand,      "", NULL },
+            { ""   ,            SEC_ADMINISTRATOR,  true,  &HandleServerShutDownCommand,            "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverSetCommandTable[] =
         {
-            { "loglevel", rbac::RBAC_PERM_COMMAND_SERVER_SET_LOGLEVEL, true, &HandleServerSetLogLevelCommand, "", NULL },
-            { "motd",     rbac::RBAC_PERM_COMMAND_SERVER_SET_MOTD,     true, &HandleServerSetMotdCommand,     "", NULL },
-            { "closed",   rbac::RBAC_PERM_COMMAND_SERVER_SET_CLOSED,   true, &HandleServerSetClosedCommand,   "", NULL },
+            { "loglevel", SEC_ADMINISTRATOR, true, &HandleServerSetLogLevelCommand, "", NULL },
+            { "motd",     SEC_ADMINISTRATOR, true, &HandleServerSetMotdCommand,     "", NULL },
+            { "closed",   SEC_ADMINISTRATOR, true, &HandleServerSetClosedCommand,   "", NULL },
             { NULL,       0,                                false, NULL,                            "", NULL }
         };
 
         static ChatCommand serverDiffCommandTable[] =
         {
-            { "last",     rbac::RBAC_PERM_COMMAND_SERVER_DIFF_LAST,     true, &HandleServerDiffLastCommand,            "", NULL },
-            { "average",  rbac::RBAC_PERM_COMMAND_SERVER_DIFF_AVERAGE,  true, &HandleServerDiffAverageCommand,         "", NULL },
-            { "interval", rbac::RBAC_PERM_COMMAND_SERVER_DIFF_INTERVAL, true, &HandleServerDiffIntervalCommand,        "", NULL },
+            { "last",           SEC_ADMINISTRATOR,  true, &HandleServerDiffLastCommand,            "", NULL },
+            { "average",        SEC_ADMINISTRATOR,  true, &HandleServerDiffAverageCommand,         "", NULL },
+            { "interval",       SEC_ADMINISTRATOR,  true, &HandleServerDiffIntervalCommand,        "", NULL },
             { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
         static ChatCommand serverCommandTable[] =
         {
-            { "corpses",      rbac::RBAC_PERM_COMMAND_SERVER_CORPSES,      true, &HandleServerCorpsesCommand, "", NULL },
-            { "exit",         rbac::RBAC_PERM_COMMAND_SERVER_EXIT,         true, &HandleServerExitCommand,    "", NULL },
-            { "idlerestart",  rbac::RBAC_PERM_COMMAND_SERVER_IDLERESTART,  true, NULL,                        "", serverIdleRestartCommandTable },
-            { "idleshutdown", rbac::RBAC_PERM_COMMAND_SERVER_IDLESHUTDOWN, true, NULL,                        "", serverIdleShutdownCommandTable },
-            { "info",         rbac::RBAC_PERM_COMMAND_SERVER_INFO,         true, &HandleServerInfoCommand,    "", NULL },
-            { "motd",         rbac::RBAC_PERM_COMMAND_SERVER_MOTD,         true, &HandleServerMotdCommand,    "", NULL },
-            { "plimit",       rbac::RBAC_PERM_COMMAND_SERVER_PLIMIT,       true, &HandleServerPLimitCommand,  "", NULL },
-            { "restart",      rbac::RBAC_PERM_COMMAND_SERVER_RESTART,      true, NULL,                        "", serverRestartCommandTable },
-            { "shutdown",     rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,     true, NULL,                        "", serverShutdownCommandTable },
-            { "set",          rbac::RBAC_PERM_COMMAND_SERVER_SET,          true, NULL,                        "", serverSetCommandTable },
-            { "diff",         rbac::RBAC_PERM_COMMAND_SERVER_DIFF,         true,  NULL,                       "", serverDiffCommandTable },
-            { NULL,           0,                                    false, NULL,                        "", NULL }
+            { "diff",           SEC_ADMINISTRATOR,  true,  NULL,                       "", serverDiffCommandTable },
+            { "corpses",        SEC_GAMEMASTER,     true,  &HandleServerCorpsesCommand,             "", NULL },
+            { "exit",           SEC_CONSOLE,        true,  &HandleServerExitCommand,                "", NULL },
+            { "idlerestart",    SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleRestartCommandTable },
+            { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
+            { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "", NULL },
+            { "motd",           SEC_PLAYER,         true,  &HandleServerMotdCommand,                "", NULL },
+            { "plimit",         SEC_ADMINISTRATOR,  true,  &HandleServerPLimitCommand,              "", NULL },
+            { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
+            { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
+            { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverSetCommandTable },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
 
-        static ChatCommand commandTable[] =
+         static ChatCommand commandTable[] =
         {
-            { "server", rbac::RBAC_PERM_COMMAND_SERVER, true, NULL, "", serverCommandTable },
-            { NULL,     0,                       false, NULL, "", NULL }
+            { "server",         SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverCommandTable },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
-
         return commandTable;
     }
 
@@ -211,7 +210,7 @@ public:
                 secName = "Player";
                 break;
             case SEC_MODERATOR:
-                secName = "Donor";
+                secName = "Moderator";
                 break;
             case SEC_GAMEMASTER:
                 secName = "Gamemaster";

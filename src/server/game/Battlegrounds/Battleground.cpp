@@ -269,7 +269,6 @@ void Battleground::Update(uint32 diff)
                 m_Events |= BG_STARTING_EVENT_5;
                 StartingEventDespawnDoors();
             }
-
             // after 20 minutes without one team losing, the arena closes with no winner and no rating change
             if (isArena())
             {
@@ -469,6 +468,7 @@ void Battleground::_ProcessProgress(uint32 diff)
     }
     else if (m_PrematureCountDownTimer < diff)
     {
+        // time's up!
         EndBattleground(GetPrematureWinner());
         m_PrematureCountDown = false;
     }
@@ -1337,7 +1337,9 @@ void Battleground::AddPlayer(Player* player)
 
         player->DestroyConjuredItems(true);
         player->ClearComboPoints();
+
         player->UnsummonPetTemporaryIfAny();
+        player->GetBattlePetMgr().UnSummonCurrentBattlePet(false);
 
         if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
         {
@@ -1667,15 +1669,6 @@ bool Battleground::AddObject(uint32 type, uint32 entry, float x, float y, float 
 
 // Some doors aren't despawned so we cannot handle their closing in gameobject::update()
 // It would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
-void Battleground::DoorDespawn(uint32 type)
-{
-    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
-        DelObject(type);
-    else
-        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
-        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
-}
-
 void Battleground::DoorClose(uint32 type)
 {
     if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
@@ -1690,6 +1683,15 @@ void Battleground::DoorClose(uint32 type)
     else
         TC_LOG_ERROR("bg.battleground", "Battleground::DoorClose: door gameobject (type: %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
             type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
+}
+
+void Battleground::DoorDespawn(uint32 type)
+{
+    if (GameObject* obj = GetBgMap()->GetGameObject(BgObjects[type]))
+        DelObject(type);
+    else
+        TC_LOG_ERROR("bg.battleground", "Battleground::DoorDespawn: door gameobject (type : %u, GUID: %u) not found for BG (map: %u, instance id: %u)!",
+        type, GUID_LOPART(BgObjects[type]), m_MapId, m_InstanceID);
 }
 
 void Battleground::DoorOpen(uint32 type)

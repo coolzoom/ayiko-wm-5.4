@@ -37,15 +37,15 @@ public:
     {
         static ChatCommand achievementCommandTable[] =
         {
-            { "add",      rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_ADD,      false, &HandleAchievementAddCommand, "", NULL },
-            { "criteria", rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_CRITERIA, false, &HandleAchievementCriteriaCommand, "", NULL },
-            { "check",    rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_CHECK,    false, &HandleAchievementCheckCommand,    "", NULL },
-            { "start",    rbac::RBAC_PERM_COMMAND_ACHIEVEMENT_START,    false, &HandleAchievementStartTimedCriteriaCommand, "", NULL },
+            { "criteria", SEC_GAMEMASTER, false, &HandleAchievementCriteriaCommand, "", NULL },
+            { "check",    SEC_GAMEMASTER, false, &HandleAchievementCheckCommand,    "", NULL },
+            { "start",    SEC_GAMEMASTER, false, &HandleAchievementStartTimedCriteriaCommand, "", NULL },
+            { "add", SEC_ADMINISTRATOR, false, &HandleAchievementAddCommand, "", NULL },
             { NULL, 0, false, NULL, "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "achievement", rbac::RBAC_PERM_COMMAND_ACHIEVEMENT,  false, NULL, "", achievementCommandTable },
+            { "achievement", SEC_ADMINISTRATOR,  false, NULL, "", achievementCommandTable },
             { NULL, 0, false, NULL, "", NULL }
         };
         return commandTable;

@@ -38,26 +38,26 @@ public:
     {
         static ChatCommand channelSetCommandTable[] =
         {
-            { "ownership", rbac::RBAC_PERM_COMMAND_CHANNEL_SET_OWNERSHIP, false, &HandleChannelSetOwnership, "", NULL },
-            { NULL,        0,                                       false, NULL,                       "", NULL }
+            { "ownership",      SEC_ADMINISTRATOR,  false,  &HandleChannelSetOwnership,         "", NULL },
+            { NULL,             0,                  false,  NULL,                               "", NULL }
         };
         static ChatCommand channelCommandTable[] =
         {
-            { "set", rbac::RBAC_PERM_COMMAND_CHANNEL_SET, true, NULL, "", channelSetCommandTable },
-            { NULL,  0,                            false, NULL, "", NULL }
+            { "set",            SEC_ADMINISTRATOR,  true,   NULL,                               "", channelSetCommandTable },
+            { NULL,             0,                  false,  NULL,                               "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "channel",        rbac::RBAC_PERM_COMMAND_CHANNEL,        true, NULL,                         "", channelCommandTable  },
-            { "nameannounce",   rbac::RBAC_PERM_COMMAND_NAMEANNOUNCE,   true, &HandleNameAnnounceCommand,   "", NULL },
-            { "gmnameannounce", rbac::RBAC_PERM_COMMAND_GMNAMEANNOUNCE, true, &HandleGMNameAnnounceCommand, "", NULL },
-            { "announce",       rbac::RBAC_PERM_COMMAND_ANNOUNCE,       true, &HandleAnnounceCommand,       "", NULL },
-            { "gmannounce",     rbac::RBAC_PERM_COMMAND_GMANNOUNCE,     true, &HandleGMAnnounceCommand,     "", NULL },
-            { "notify",         rbac::RBAC_PERM_COMMAND_NOTIFY,         true, &HandleNotifyCommand,         "", NULL },
-            { "gmnotify",       rbac::RBAC_PERM_COMMAND_GMNOTIFY,       true, &HandleGMNotifyCommand,       "", NULL },
-            { "whispers",       rbac::RBAC_PERM_COMMAND_WHISPERS,      false, &HandleWhispersCommand,       "", NULL },
-            { "qannounce",      rbac::RBAC_PERM_COMMAND_QANNOUNCE,     false, &HandleQAnnounceCommand,      "", NULL },
-            { NULL,             0,                               false, NULL,                         "", NULL }
+            { "qannounce",      SEC_ADMINISTRATOR,  false, &HandleQAnnounceCommand,      "", NULL },
+            { "channel",        SEC_ADMINISTRATOR,  true,   NULL,                               "", channelCommandTable  },
+            { "nameannounce",   SEC_MODERATOR,      true,   &HandleNameAnnounceCommand,         "", NULL },
+            { "gmnameannounce", SEC_MODERATOR,      true,   &HandleGMNameAnnounceCommand,       "", NULL },
+            { "announce",       SEC_MODERATOR,      true,   &HandleAnnounceCommand,             "", NULL },
+            { "gmannounce",     SEC_MODERATOR,      true,   &HandleGMAnnounceCommand,           "", NULL },
+            { "notify",         SEC_MODERATOR,      true,   &HandleNotifyCommand,               "", NULL },
+            { "gmnotify",       SEC_MODERATOR,      true,   &HandleGMNotifyCommand,             "", NULL },
+            { "whispers",       SEC_MODERATOR,      false,  &HandleWhispersCommand,             "", NULL },
+            { NULL,             0,                  false,  NULL,                               "", NULL }
         };
         return commandTable;
     }
@@ -110,14 +110,23 @@ public:
             return false;
 
         WorldSession* session = handler->GetSession();
+        if (!session)
+        {
+            sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_ADMIN, "Console", "Server", args);
+            return true;
+        }
 
         switch (session->GetSecurity())
         {
             case SEC_ADMINISTRATOR:
+            case SEC_CONSOLE:
                 sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_ADMIN, "Admin", session->GetPlayer()->GetName().c_str(), args);
                 break;
             case SEC_GAMEMASTER:
                 sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_GM, "GM", session->GetPlayer()->GetName().c_str(), args);
+                break;
+            case SEC_MODERATOR:
+                sWorld->SendWorldText(LANG_ANNOUNCE_COLOR_GM, "Mod", session->GetPlayer()->GetName().c_str(), args);
                 break;
             default:
                 break;

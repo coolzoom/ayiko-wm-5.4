@@ -125,7 +125,7 @@ const char *ChatHandler::GetTrinityString(int32 entry) const
 
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
-    return HasPermission(cmd.Permission);
+    return m_session->GetSecurity() >= AccountTypes(cmd.SecurityLevel);
 }
 
 bool ChatHandler::HasLowerSecurity(Player* target, uint64 guid, bool strong)
@@ -157,7 +157,7 @@ bool ChatHandler::HasLowerSecurityAccount(WorldSession const *target, uint32 tar
         return false;
 
     // ignore only for non-players for non strong checks (when allow apply command at least to same sec level)
-    if (m_session->HasPermission(rbac::RBAC_PERM_CHECK_FOR_LOWER_SECURITY) && !strong && !sWorld->getBoolConfig(CONFIG_GM_LOWER_SECURITY))
+    if (!AccountMgr::IsPlayerAccount(m_session->GetSecurity()) && !strong && !sWorld->getBoolConfig(CONFIG_GM_LOWER_SECURITY))
         return false;
 
     // our own account should not be affected by `strong` parameter
@@ -389,7 +389,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand* table, const char* text, co
     return false;
 }
 
-bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, char const* text, uint32 permission, std::string const& help, std::string const& fullcommand)
+bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, char const* text, uint32 security, std::string const& help, std::string const& fullcommand)
 {
     std::string cmd = "";
 
@@ -410,7 +410,7 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, char const* text,
         // select subcommand from child commands list (including "")
         if (table[i].ChildCommands != NULL)
         {
-            if (SetDataForCommandInTable(table[i].ChildCommands, text, permission, help, fullcommand))
+            if (SetDataForCommandInTable(table[i].ChildCommands, text, security, help, fullcommand))
                 return true;
             else if (*text)
                 return false;
@@ -424,10 +424,10 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand* table, char const* text,
             return false;
         }
 
-        if (table[i].Permission != permission)
-            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].Permission, permission);
+        if (table[i].SecurityLevel != security)
+            TC_LOG_INFO("misc", "Table `command` overwrite for command '%s' default permission (%u) by %u", fullcommand.c_str(), table[i].SecurityLevel, security);
 
-        table[i].Permission = permission;
+        table[i].SecurityLevel = security;
         table[i].Help          = help;
         return true;
     }
@@ -474,7 +474,7 @@ bool ChatHandler::ParseCommands(const char* text)
 
     if (!ExecuteCommandInTable(getCommandTable(), text, fullcmd))
     {
-        if (m_session && !m_session->HasPermission(rbac::RBAC_PERM_COMMANDS_NOTIFY_COMMAND_NOT_FOUND_ERROR))
+        if (m_session && AccountMgr::IsPlayerAccount(m_session->GetSecurity()))
             return false;
 
         SendSysMessage(LANG_NO_CMD);

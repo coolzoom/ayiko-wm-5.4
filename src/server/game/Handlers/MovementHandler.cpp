@@ -294,6 +294,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
 
+    // resummon temporarily unsummoned battle pet
+    GetPlayer()->GetBattlePetMgr().ResummonLastBattlePet();
+
     //lets process all delayed operations on successful teleport
     GetPlayer()->ProcessDelayedOperations();
 
@@ -360,6 +363,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 
     // resummon pet
     plMover->ResummonPetTemporaryUnSummonedIfAny();
+
+    // resummon temporarily unsummoned battle pet
+    GetPlayer()->GetBattlePetMgr().ResummonLastBattlePet();
 
     //lets process all delayed operations on successful teleport
     plMover->ProcessDelayedOperations();

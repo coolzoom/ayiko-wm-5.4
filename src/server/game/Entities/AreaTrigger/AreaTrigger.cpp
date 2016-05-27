@@ -241,6 +241,9 @@ bool AreaTrigger::CreateAreaTrigger(uint32 guidlow, uint32 triggerEntry, Unit* c
         case 124506: // Gift of the Ox
             scale = 0.5f;
             break;
+        case 136049:
+            scale = 0.14f;
+            break;
         default:
             scale = 1.0f;
             break;
@@ -322,22 +325,6 @@ void AreaTrigger::Update(uint32 p_time)
 
             for (auto itr : targetList)
                 itr->CastSpell(itr, 135299, true);
-
-            break;
-        }
-        case 102793:// Ursol's Vortex
-        {
-            std::list<Unit*> targetList;
-            radius = 8.0f;
-
-            Trinity::NearestAttackableUnitInObjectRangeCheck u_check(this, caster, radius);
-            Trinity::UnitListSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> searcher(this, targetList, u_check);
-            Trinity::VisitNearbyObject(this, radius, searcher);
-
-            if (!targetList.empty())
-                for (auto itr : targetList)
-                    if (!itr->HasAura(127797))
-                        caster->CastSpell(itr, 127797, true);
 
             break;
         }

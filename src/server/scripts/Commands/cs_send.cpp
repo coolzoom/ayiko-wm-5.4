@@ -31,16 +31,16 @@ public:
     {
         static ChatCommand sendCommandTable[] =
         {
-            { "items",   rbac::RBAC_PERM_COMMAND_SEND_ITEMS,   true, &HandleSendItemsCommand,   "", NULL },
-            { "mail",    rbac::RBAC_PERM_COMMAND_SEND_MAIL,    true, &HandleSendMailCommand,    "", NULL },
-            { "message", rbac::RBAC_PERM_COMMAND_SEND_MESSAGE, true, &HandleSendMessageCommand, "", NULL },
-            { "money",   rbac::RBAC_PERM_COMMAND_SEND_MONEY,   true, &HandleSendMoneyCommand,   "", NULL },
+            { "items",   SEC_ADMINISTRATOR,              true, &HandleSendItemsCommand,   "", NULL },
+            { "mail",    SEC_ADMINISTRATOR,    true, &HandleSendMailCommand,    "", NULL },
+            { "message", SEC_ADMINISTRATOR, true, &HandleSendMessageCommand, "", NULL },
+            { "money",   SEC_ADMINISTRATOR,   true, &HandleSendMoneyCommand,   "", NULL },
             { NULL,      0,                             false, NULL,                      "", NULL }
         };
 
         static ChatCommand commandTable[] =
         {
-            { "send", rbac::RBAC_PERM_COMMAND_SEND, false, NULL, "", sendCommandTable },
+            { "send", SEC_ADMINISTRATOR, false, NULL, "", sendCommandTable },
             { NULL,   0,                      false, NULL, "", NULL }
         };
         return commandTable;

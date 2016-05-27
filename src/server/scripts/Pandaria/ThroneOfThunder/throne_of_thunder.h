@@ -44,6 +44,7 @@ enum SaveData
     TYPE_JINROKH_INTRO,
     TYPE_TORTOS_INTRO,
     TYPE_BELLS_RUNG,
+    TYPE_PRIMORDIUS_INTRO,
     MAX_TYPES
 };
 
@@ -51,7 +52,8 @@ enum InstanceEvents : uint32
 {
     EVENT_NONE,
     EVENT_JINROKH_DOOR,
-    EVENT_MOGU_BELLS
+    EVENT_MOGU_BELLS,
+    EVENT_PRIMORDIUS_INTRO
 };
 
 enum GlobalToTSpells : uint32
@@ -128,6 +130,8 @@ enum ObjectsIds
     GOB_TORTOS_DOOR                         = 218980,
     GOB_TORTOS_COLLISION                    = 218987,
     GOB_MEGAERA_EXIT                        = 218746,
+    GOB_PRIMORDIUS_ENTRANCE                 = 218584,
+    GOB_PRIMORDIUS_EXIT                     = 218585,
  
     GOB_TRIBAL_DOOR_GURUBASHI               = 218670,
     GOB_TRIBAL_DOOR_DRAKKARI                = 218671,

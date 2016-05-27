@@ -224,22 +224,20 @@ void SocialMgr::GetFriendInfo(Player* player, uint64 friendGUID, FriendInfo &fri
     if (!target)
         return;
 
+    uint32 team = player->GetTeam();
+    AccountTypes security = player->GetSession()->GetSecurity();
+    bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    AccountTypes gmLevelInWhoList = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
     if (itr != player->GetSocial()->m_playerSocialMap.end())
         friendInfo.Note = itr->second.Note;
 
     // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
     // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-
-    if (!player->GetSession()->HasPermission(rbac::RBAC_PERM_WHO_SEE_ALL_SEC_LEVELS) &&
-        target->GetSession()->GetSecurity() > AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST)))
-        return;
-
-    // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
-    if (target->GetTeam() != player->GetTeam() && !player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_WHO_LIST))
-        return;
-
-    if (target->IsVisibleGloballyFor(player))
+    if ((!AccountMgr::IsPlayerAccount(security) ||
+        ((target->GetTeam() == team || allowTwoSideWhoList) && (target->GetSession()->GetSecurity() <= gmLevelInWhoList))) &&
+        target->IsVisibleGloballyFor(player))
     {
         if (target->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
@@ -302,7 +300,12 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
     if (!player)
         return;
 
-    AccountTypes gmSecLevel = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    uint32 team = player->GetTeam();
+    AccountTypes security = player->GetSession()->GetSecurity();
+    uint32 guid = player->GetGUIDLow();
+    AccountTypes gmLevelInWhoList = AccountTypes(sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST));
+    bool allowTwoSideWhoList = sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+
     for (SocialMap::const_iterator itr = m_socialMap.begin(); itr != m_socialMap.end(); ++itr)
     {
         PlayerSocialMap::const_iterator itr2 = itr->second.m_playerSocialMap.find(player->GetGUID());
@@ -312,15 +315,12 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
             if (!target || !target->IsInWorld())
                 continue;
 
-            WorldSession* session = target->GetSession();
-            if (!session->HasPermission(rbac::RBAC_PERM_WHO_SEE_ALL_SEC_LEVELS) && player->GetSession()->GetSecurity() > gmSecLevel)
-                continue;
-
-            if (target->GetTeam() != player->GetTeam() && !session->HasPermission(rbac::RBAC_PERM_TWO_SIDE_WHO_LIST))
-                continue;
-
-            if (player->IsVisibleGloballyFor(target))
-                session->SendPacket(packet);
+            if ((!AccountMgr::IsPlayerAccount(target->GetSession()->GetSecurity()) ||
+                ((target->GetTeam() == team || allowTwoSideWhoList) && security <= gmLevelInWhoList)) &&
+                player->IsVisibleGloballyFor(target))
+            {
+                target->GetSession()->SendPacket(packet);
+            }
         }
     }
 }

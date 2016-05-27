@@ -2391,7 +2391,7 @@ public:
         void HandleOnRemove(AuraEffect const* /*aureff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* target = GetOwner()->ToUnit())
-                if (!target->HasAura(SPELL_CONCEALING_FOG))
+                if (!target->HasAura(SPELL_CONCEALING_FOG) && !target->HasAura(137064))
                     target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 

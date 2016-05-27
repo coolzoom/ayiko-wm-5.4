@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BattlePet.h"
 #include "DB2Stores.h"
 #include "Log.h"
 #include "SharedDefines.h"
@@ -28,6 +29,7 @@
 namespace {
 
 QuestPackageItemMap sQuestPackageItemMap;
+BattlePetSpellStore sBattlePetSpellXSpeciesStore;
 
 typedef std::list<std::string> StoreProblemList1;
 
@@ -43,11 +45,22 @@ bool LoadDB2_assert_print(uint32 fsize,uint32 rsize, const std::string& filename
 
 } // namespace
 
+DB2Storage<BattlePetAbilityEntry> sBattlePetAbilityStore(BattlePetAbilityfmt);
+DB2Storage<BattlePetAbilityStateEntry> sBattlePetAbilityStateStore(BattlePetAbilityStatefmt);
+DB2Storage<BattlePetAbilityEffectEntry> sBattlePetAbilityEffectStore(BattlePetAbilityEffectfmt);
+DB2Storage<BattlePetAbilityTurnEntry> sBattlePetAbilityTurnStore(BattlePetAbilityTurnfmt);
+DB2Storage<BattlePetBreedQualityEntry> sBattlePetBreedQualityStore(BattlePetBreedQualityfmt);
+DB2Storage<BattlePetBreedStateEntry> sBattlePetBreedStateStore(BattlePetBreedStatefmt);
+DB2Storage<BattlePetEffectPropertiesEntry> sBattlePetEffectPropertiesStore(BattlePetEffectPropertiesfmt);
+DB2Storage<BattlePetSpeciesEntry> sBattlePetSpeciesStore(BattlePetSpeciesfmt);
+DB2Storage<BattlePetSpeciesStateEntry> sBattlePetSpeciesStateStore(BattlePetSpeciesStatefmt);
+DB2Storage<BattlePetSpeciesXAbilityEntry> sBattlePetSpeciesXAbilityStore(BattlePetSpeciesXAbilityfmt);
+DB2Storage<BattlePetState> sBattlePetStateStore(sBattlePetStatefmt);
+
 DB2Storage<ItemEntry> sItemStore(Itemfmt);
 DB2Storage<ItemCurrencyCostEntry> sItemCurrencyCostStore(ItemCurrencyCostfmt);
 DB2Storage<ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DB2Storage<ItemSparseEntry> sItemSparseStore (ItemSparsefmt);
-DB2Storage<BattlePetSpeciesEntry> sBattlePetSpeciesStore(BattlePetSpeciesEntryfmt);
 DB2Storage<SpellReagentsEntry> sSpellReagentsStore(SpellReagentsEntryfmt);
 DB2Storage<ItemUpgradeEntry> sItemUpgradeStore(ItemUpgradeEntryfmt);
 DB2Storage<RulesetItemUpgradeEntry> sRulesetItemUpgradeStore(RulesetItemUpgradeEntryfmt);
@@ -83,7 +96,28 @@ void LoadDB2Stores(const std::string& dataPath)
 
     StoreProblemList1 bad_db2_files;
 
+    LoadDB2(bad_db2_files, sBattlePetAbilityStore, db2Path, "BattlePetAbility.db2");
+    LoadDB2(bad_db2_files, sBattlePetAbilityEffectStore, db2Path, "BattlePetAbilityEffect.db2");
+    LoadDB2(bad_db2_files, sBattlePetAbilityStateStore, db2Path, "BattlePetAbilityState.db2");
+    LoadDB2(bad_db2_files, sBattlePetAbilityTurnStore, db2Path, "BattlePetAbilityTurn.db2");
+    LoadDB2(bad_db2_files, sBattlePetBreedQualityStore, db2Path, "BattlePetBreedQuality.db2");
+    LoadDB2(bad_db2_files, sBattlePetBreedStateStore, db2Path, "BattlePetBreedState.db2");
+    LoadDB2(bad_db2_files, sBattlePetEffectPropertiesStore, db2Path, "BattlePetEffectProperties.db2");
     LoadDB2(bad_db2_files, sBattlePetSpeciesStore, db2Path, "BattlePetSpecies.db2");
+
+    for (uint32 i = 0; i < sBattlePetSpeciesStore.GetNumRows(); i++)
+    {
+        auto speciesEntry = sBattlePetSpeciesStore.LookupEntry(i);
+        if (!speciesEntry)
+            continue;
+
+        sBattlePetSpellXSpeciesStore[speciesEntry->SpellId] = speciesEntry->Id;
+    }
+
+    LoadDB2(bad_db2_files, sBattlePetSpeciesStateStore, db2Path, "BattlePetSpeciesState.db2");
+    LoadDB2(bad_db2_files, sBattlePetSpeciesXAbilityStore, db2Path, "BattlePetSpeciesXAbility.db2");
+    LoadDB2(bad_db2_files, sBattlePetStateStore, db2Path, "BattlePetState.db2");
+
     LoadDB2(bad_db2_files, sItemStore, db2Path, "Item.db2");
     LoadDB2(bad_db2_files, sItemCurrencyCostStore, db2Path, "ItemCurrencyCost.db2");
     LoadDB2(bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
@@ -136,4 +170,31 @@ std::pair<QuestPackageItemMap::const_iterator, QuestPackageItemMap::const_iterat
 GetQuestPackageItems(uint32 packageId)
 {
     return sQuestPackageItemMap.equal_range(packageId);
+}
+
+bool HasBattlePetSpeciesFlag(uint16 species, uint16 flag)
+{
+    auto speciesEntry = sBattlePetSpeciesStore.LookupEntry(species);
+    if (!speciesEntry)
+        return false;
+
+    return (speciesEntry->Flags & flag) != 0;
+}
+
+uint32 GetBattlePetSummonSpell(uint16 species)
+{
+    auto speciesEntry = sBattlePetSpeciesStore.LookupEntry(species);
+    if (!speciesEntry)
+        return 0;
+
+    return speciesEntry->SpellId;
+}
+
+uint16 GetBattlePetSpeciesFromSpell(uint32 spellId)
+{
+    auto spellSpeciesEntry = sBattlePetSpellXSpeciesStore.find(spellId);
+    if (spellSpeciesEntry == sBattlePetSpellXSpeciesStore.end())
+        return 0;
+
+    return spellSpeciesEntry->second;
 }

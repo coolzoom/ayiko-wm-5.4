@@ -99,6 +99,10 @@ enum Opcodes
     CMSG_BATTLEMASTER_JOIN                            = 0x133E, // 5.4.0 17399
     CMSG_BATTLEMASTER_JOIN_ARENA                      = 0x12EA, // 5.4.0 17399
     CMSG_BATTLEMASTER_JOIN_RATED                      = 0x10A3, // 5.4.0 17399
+    CMSG_BATTLE_PET_MODIFY_NAME                       = 0x124B, // 5.4.0 17399
+    CMSG_BATTLE_PET_RELEASE                           = 0x1A0A, // 5.4.0 17399
+    CMSG_BATTLE_PET_SET_BATTLE_SLOT                   = 0x1712, // 5.4.0 17399
+    CMSG_BATTLE_PET_SET_FLAGS                         = 0x1292, // 5.4.0 17399
     CMSG_BEGIN_TRADE                                  = 0x1806, // 5.4.0 17399
     CMSG_BINDER_ACTIVATE                              = 0x1AE2, // 5.4.0 17399
     CMSG_BLACK_MARKET_HELLO                           = 0x1AFF, // 5.4.0 17399
@@ -394,6 +398,8 @@ enum Opcodes
     CMSG_PETITION_SIGN                                = 0x17F3, // 5.4.0 17399
     CMSG_PET_ABANDON                                  = 0x1222, // 5.4.0 17399
     CMSG_PET_ACTION                                   = 0x1722, // 5.4.0 17399
+    CMSG_PET_BATTLE_INPUT                             = 0x1302, // 5.4.0 17399
+    CMSG_PET_BATTLE_REQUEST_WILD                      = 0x102D, // 5.4.0 17399
     CMSG_PET_CANCEL_AURA                              = 0x17FA, // 5.4.0 17399
     CMSG_PET_CAST_SPELL                               = 0x1006, // 5.4.0 17399
     CMSG_PET_NAME_QUERY                               = 0x1428, // 5.4.0 17399
@@ -410,6 +416,7 @@ enum Opcodes
     CMSG_PUSHQUESTTOPARTY                             = 0x12AA, // 5.4.0 17399
     CMSG_PVP_LOG_DATA                                 = 0x15AD, // 5.4.0 17399
     CMSG_QUERY_BATTLEFIELD_STATE                      = 0x10A8, // 5.4.0 17399
+    CMSG_QUERY_BATTLE_PET_NAME                        = 0x11AC, // 5.4.0 17399
     CMSG_QUERY_GUILD_MEMBERS_FOR_RECIPE               = 0x000,  // 5.0.5 16048
     CMSG_QUERY_GUILD_MEMBER_RECIPES                   = 0x000,  // 5.0.5 16048
     CMSG_QUERY_GUILD_RECIPES                          = 0xA6C,  // 5.4.0 17399
@@ -1227,10 +1234,11 @@ enum Opcodes
     SMSG_PET_BROKEN                                   = 0x000,  // 5.0.5 16048
     SMSG_PET_BATTLE_CHAT_RESTRICTED                   = 0x4B0,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_DEBUG_QUEUE_DUMP_RESPONSE         = 0x190,  // 5.4.0 17399 PET_BATTLE NYI
-    SMSG_PET_BATTLE_FULL_UPDATE                       = 0x596,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_FINAL_ROUND                       = 0x0AE,  // 5.4.0 17399 PET_BATTLE NYI
+    SMSG_PET_BATTLE_FINALISE_LOCATION                 = 0x0A4,  // 5.4.0 17399
     SMSG_PET_BATTLE_FINISHED                          = 0x593,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_FIRST_ROUND                       = 0x10B,  // 5.4.0 17399 PET_BATTLE NYI
+    SMSG_PET_BATTLE_INITIAL_UPDATE                    = 0x596,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_MAX_GAME_LENGHT_WARNING           = 0x42D,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_PVP_CHALLENGE                     = 0x91E,  // 5.4.0 17399 PET_BATTLE NYI
     SMSG_PET_BATTLE_QUEUE_PROPOSE_MATCH               = 0x026,  // 5.4.0 17399 PET_BATTLE NYI

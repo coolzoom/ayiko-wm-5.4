@@ -214,6 +214,43 @@ class spell_dru_genesis : public SpellScriptLoader
         }
 };
 
+// Rejuv
+class spell_dru_rejuv : public SpellScriptLoader
+{
+    public:
+        spell_dru_rejuv() : SpellScriptLoader("spell_dru_rejuv") { }
+
+        class sspell_dru_rejuv_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(sspell_dru_rejuv_AuraScript);
+
+            void OnTick(AuraEffect const * aurEff)
+            {
+                Unit* caster = GetCaster();
+                if (!caster || aurEff->GetTickNumber() < 2)
+                    return;
+
+                if (AuraEffect* setBonus = caster->GetAuraEffect(138286, EFFECT_0))
+                    if (AuraEffect* rejuv = GetTarget()->GetAuraEffect(aurEff->GetId(), aurEff->GetEffIndex(), caster->GetGUID()))
+                    {
+                        int32 amount = rejuv->GetFixedDamageInfo().GetFixedDamage();
+                        AddPct(amount, setBonus->GetAmount());
+                        rejuv->GetFixedDamageInfo().SetFixedDamage(amount);
+                    }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(sspell_dru_rejuv_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new sspell_dru_rejuv_AuraScript();
+        }
+};
+
 // Glyph of the Treant - 125047
 class spell_dru_glyph_of_the_treant : public SpellScriptLoader
 {
@@ -1594,105 +1631,47 @@ public:
     }
 };
 
-// Ursol's Vortex (snare) - 127797
-class spell_dru_ursols_vortex_snare : public SpellScriptLoader
+// Ursols Vortex
+class sat_druid_ursols_vortex : public SpellAreaTriggerScript
 {
-    public:
-        spell_dru_ursols_vortex_snare() : SpellScriptLoader("spell_dru_ursols_vortex_snare") { }
+public:
+    sat_druid_ursols_vortex() : SpellAreaTriggerScript("sat_druid_ursols_vortex") {}
 
-        class spell_dru_ursols_vortex_snare_AuraScript : public AuraScript
+    class sat_druid_ursols_vortex_interface : public IAreaTriggerAura
+    {
+        bool CheckTriggering(WorldObject* triggering) override
         {
-            PrepareAuraScript(spell_dru_ursols_vortex_snare_AuraScript);
+            Unit* unit = triggering->ToUnit();
+            if (!unit)
+                return false;
 
-            std::list<Unit*> targetList;
+            if (!m_target->IsWithinDistInMap(unit, m_range))
+                return false;
 
-            void OnUpdate(uint32 /*diff*/, AuraEffect *aurEff)
-            {
-                aurEff->GetTargetList(targetList);
+            if (!m_caster->_IsValidAttackTarget(unit, m_spellInfo, m_target))
+                return false;
 
-                for (auto itr : targetList)
-                {
-                    if (Unit* caster = GetCaster())
-                        if (AreaTrigger* areaTrigger = caster->GetAreaTrigger(SPELL_DRUID_URSOLS_VORTEX_AREA_TRIGGER))
-                            if (itr->GetDistance(areaTrigger) > 8.0f && !itr->HasAura(SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST))
-                                itr->CastSpell(areaTrigger->GetPositionX(), areaTrigger->GetPositionY(), areaTrigger->GetPositionZ(), SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST, true);
-                }
-
-                targetList.clear();
-            }
-
-            void Register()
-            {
-                OnEffectUpdate += AuraEffectUpdateFn(spell_dru_ursols_vortex_snare_AuraScript::OnUpdate, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dru_ursols_vortex_snare_AuraScript();
-        }
-};
-
-// Ursol's Vortex - 102793
-class spell_dru_ursols_vortex : public SpellScriptLoader
-{
-    public:
-        spell_dru_ursols_vortex() : SpellScriptLoader("spell_dru_ursols_vortex") { }
-
-        class spell_dru_ursols_vortex_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_dru_ursols_vortex_SpellScript);
-
-            void HandleOnHit()
-            {
-                if (Player* _player = GetCaster()->ToPlayer())
-                    if (Unit* target = GetHitUnit())
-                        if (!target->HasAura(SPELL_DRUID_URSOLS_VORTEX_AREA_TRIGGER))
-                            _player->CastSpell(target, SPELL_DRUID_URSOLS_VORTEX_SNARE, true);
-            }
-
-            void Register()
-            {
-                OnHit += SpellHitFn(spell_dru_ursols_vortex_SpellScript::HandleOnHit);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_dru_ursols_vortex_SpellScript();
+            return true;
         }
 
-        class spell_dru_ursols_vortex_AuraScript : public AuraScript
+        void OnTriggeringApply(WorldObject* triggering) override
         {
-            PrepareAuraScript(spell_dru_ursols_vortex_AuraScript);
-
-            std::list<Unit*> targetList;
-
-            void OnUpdate(uint32 /*diff*/, AuraEffect *aurEff)
-            {
-                aurEff->GetTargetList(targetList);
-
-                for (auto itr : targetList)
-                {
-                    if (Unit* caster = GetCaster())
-                        if (DynamicObject* dynObj = caster->GetDynObject(SPELL_DRUID_URSOLS_VORTEX_AREA_TRIGGER))
-                            if (itr->GetDistance(dynObj) > 8.0f && !itr->HasAura(SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST))
-                                itr->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST, true);
-                }
-
-                targetList.clear();
-            }
-
-            void Register()
-            {
-                OnEffectUpdate += AuraEffectUpdateFn(spell_dru_ursols_vortex_AuraScript::OnUpdate, EFFECT_0, SPELL_AURA_MOD_DECREASE_SPEED);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dru_ursols_vortex_AuraScript();
+            m_caster->CastSpell(triggering->ToUnit(), 127797, true);
         }
+
+        void OnTriggeringRemove(WorldObject* triggering) override
+        {
+            if (!triggering->ToUnit()->HasAura(118283))
+                triggering->ToUnit()->CastSpell(GetLocation()->GetPositionX(), GetLocation()->GetPositionY(), GetLocation()->GetPositionZ(), SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST, true);
+
+            triggering->ToUnit()->RemoveAurasDueToSpell(127797);
+        }
+    };
+
+    IAreaTrigger* GetInterface() const override
+    {
+        return new sat_druid_ursols_vortex_interface();
+    }
 };
 
 // 983 - Solar Beam
@@ -2694,7 +2673,7 @@ class spell_dru_swiftmend_heal : public SpellScriptLoader
                 targets.clear();
 
                 unitList.sort(Trinity::HealthPctOrderPred());
-                unitList.resize(3);
+                unitList.resize(GetCaster()->HasAura(138284) ? 4 :3);
 
                 for (auto itr : unitList)
                     targets.push_back(itr);
@@ -3039,45 +3018,37 @@ class spell_dru_stampeding_roar : public SpellScriptLoader
         }
 };
 
-// Innervate - 29166
+
+// 29166 - Innervate
 class spell_dru_innervate : public SpellScriptLoader
 {
     public:
         spell_dru_innervate() : SpellScriptLoader("spell_dru_innervate") { }
 
-        class spell_dru_innervate_SpellScript : public SpellScript
+        class spell_druid_innervate_AuraScript : public AuraScript
         {
-            PrepareSpellScript(spell_dru_innervate_SpellScript);
+            PrepareAuraScript(spell_druid_innervate_AuraScript);
 
-            void HandleOnHit()
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
-                if (Player* _player = GetCaster()->ToPlayer())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        int32 mana = target->GetMaxPower(POWER_MANA) / 10;
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
 
-                        if (target->GetGUID() == _player->GetGUID())
-                            mana *= 2;
-
-                        if (Aura *innervate = target->GetAura(29166))
-                        {
-                            if (auto eff0 = innervate->GetEffect(0))
-                                eff0->ChangeAmount(mana / 10);
-                        }
-                    }
-                }
+                int32 spiritAmount = CalculatePct(int32(caster->GetStat(STAT_SPIRIT)), 50);
+                int32 manaAmount = CalculatePct(int32(caster->GetMaxPower(POWER_MANA) / aurEff->GetTotalTicks()), 8);
+                amount = std::max(spiritAmount, manaAmount);
             }
 
-            void Register()
+            void Register() override
             {
-                OnHit += SpellHitFn(spell_dru_innervate_SpellScript::HandleOnHit);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_druid_innervate_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_ENERGIZE);
             }
         };
 
-        SpellScript* GetSpellScript() const
+        AuraScript* GetAuraScript() const override
         {
-            return new spell_dru_innervate_SpellScript();
+            return new spell_druid_innervate_AuraScript();
         }
 };
 
@@ -3194,6 +3165,9 @@ class spell_dru_growl : public SpellScriptLoader
                 // This spell activate the bear form
                 if (Player* _player = GetCaster()->ToPlayer())
                 {
+                    if (_player->HasAura(114300))
+                        return;
+
                     if (GetSpellInfo()->Id == 106898 && _player->GetShapeshiftForm() != FORM_CAT && _player->GetShapeshiftForm() != FORM_BEAR)
                         _player->CastSpell(_player, SPELL_DRUID_BEAR_FORM, true);
                     else if (GetSpellInfo()->Id != 106898)
@@ -3261,12 +3235,12 @@ class spell_dru_eclipse : public SpellScriptLoader
 
             void HandleAfterCast()
             {
+                Unit * const caster = GetCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
                 if (GetSpellInfo()->Id == SPELL_DRUID_STARSURGE)
                 {
-                    Unit * const caster = GetCaster();
-                    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
                     Spell::UsedSpellMods const &mods = appliedSpellMods();
                     AuraEffect * const aurEff = caster->GetAuraEffect(SPELL_DRUID_SHOOTING_STARS, EFFECT_0);
 
@@ -3277,42 +3251,12 @@ class spell_dru_eclipse : public SpellScriptLoader
                     if (found)
                         caster->ToPlayer()->RemoveSpellCooldown(GetSpellInfo()->Id, true);
                 }
-            }
 
-            void HandleOnHit()
-            {
-                auto player = GetCaster()->ToPlayer();
-                auto target = GetHitUnit();
+                auto player = caster->ToPlayer();
+                auto target = GetExplTargetUnit();
 
                 if (!player || !target || player->GetSpecializationId(player->GetActiveSpec()) != SPEC_DRUID_BALANCE)
                     return;
-
-                // Soul of the Forest
-                if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST) && roll_chance_i(8))
-                    player->CastSpell(player, SPELL_DRUID_ASTRAL_INSIGHT, true);
-
-                // Your crits also increase moonfire/sunfire duration by 2s depending on spell
-                if (GetSpell()->IsCritForTarget(target))
-                {
-                    if (GetSpellInfo()->Id != SPELL_DRUID_WRATH)
-                    {
-                        if (Aura *const aura = target->GetAura(SPELL_DRUID_MOONFIRE))
-                        {
-                            aura->SetDuration(aura->GetDuration() + 2000);
-                            if (aura->GetMaxDuration() < aura->GetDuration())
-                                aura->SetMaxDuration(aura->GetDuration());
-                        }
-                    }
-                    if (GetSpellInfo()->Id != SPELL_DRUID_STARFALL)
-                    {
-                        if (Aura * const aura = target->GetAura(SPELL_DRUID_SUNFIRE))
-                        {
-                            aura->SetDuration(aura->GetDuration() + 2000);
-                            if (aura->GetMaxDuration() < aura->GetDuration())
-                                aura->SetMaxDuration(aura->GetDuration());
-                        }
-                    }
-                }
 
                 if (!player->HasAura(SPELL_DRUID_CELESTIAL_ALIGNMENT))
                 {
@@ -3354,6 +3298,42 @@ class spell_dru_eclipse : public SpellScriptLoader
                         eclipse *= 2;
 
                     player->SetEclipsePower(int32(player->GetPower(POWER_ECLIPSE) + eclipse));
+                }
+            }
+
+            void HandleOnHit()
+            {
+                auto player = GetCaster()->ToPlayer();
+                auto target = GetHitUnit();
+
+                if (!player || !target || player->GetSpecializationId(player->GetActiveSpec()) != SPEC_DRUID_BALANCE)
+                    return;
+
+                // Soul of the Forest
+                if (player->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST) && roll_chance_i(8))
+                    player->CastSpell(player, SPELL_DRUID_ASTRAL_INSIGHT, true);
+
+                // Your crits also increase moonfire/sunfire duration by 2s depending on spell
+                if (GetSpell()->IsCritForTarget(target))
+                {
+                    if (GetSpellInfo()->Id != SPELL_DRUID_WRATH)
+                    {
+                        if (Aura *const aura = target->GetAura(SPELL_DRUID_MOONFIRE))
+                        {
+                            aura->SetDuration(aura->GetDuration() + 2000);
+                            if (aura->GetMaxDuration() < aura->GetDuration())
+                                aura->SetMaxDuration(aura->GetDuration());
+                        }
+                    }
+                    if (GetSpellInfo()->Id != SPELL_DRUID_STARFALL)
+                    {
+                        if (Aura * const aura = target->GetAura(SPELL_DRUID_SUNFIRE))
+                        {
+                            aura->SetDuration(aura->GetDuration() + 2000);
+                            if (aura->GetMaxDuration() < aura->GetDuration())
+                                aura->SetMaxDuration(aura->GetDuration());
+                        }
+                    }
                 }
             }
 
@@ -3992,8 +3972,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_moonfire();
     new spell_dru_natures_vigil();
     new spell_dru_cenarion_ward();
-    new spell_dru_ursols_vortex_snare();
-    new spell_dru_ursols_vortex();
     new sat_druid_solar_beam();
     new spell_dru_dash();
     new spell_dru_rip_duration();
@@ -4042,4 +4020,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_dream_of_cenarius_restoration();
     new spell_dru_heart_of_the_wild();
     new spell_dru_wild_mushroom_heal();
+    new spell_dru_rejuv();
+    new sat_druid_ursols_vortex();
 }

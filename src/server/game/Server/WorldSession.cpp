@@ -103,7 +103,6 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec,
     , timeLastChannelKickCommand(0), timeLastServerCommand(0)
     , timeLastArenaTeamCommand(0), timeLastCalendarInvCommand(0)
     , timeLastChangeSubGroupCommand(0), timeLastSellItemOpcode(0)
-    , _RBACData()
 {
         _warden = NULL;
     _filterAddonMessages = false;
@@ -566,6 +565,9 @@ void WorldSession::LogoutPlayer(bool Save)
         //! Broadcast a logout message to the player's friends
         sSocialMgr->SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUID(), true);
         sSocialMgr->RemovePlayerSocial(_player->GetGUIDLow());
+
+        // forfiet any pet battles in progress
+        sPetBattleSystem->ForfietBattle(_player->GetGUID());
 
         //! Call script hook before deletion
         sScriptMgr->OnPlayerLogout(_player);
@@ -1132,40 +1134,4 @@ void WorldSession::InitWarden(BigNumber* k, std::string const &os)
         _warden = new WardenWin();
         _warden->Init(this, k);
     }
-}
-
-void WorldSession::LoadPermissions()
-{
-    uint32 id = GetAccountId();
-    std::string name;
-    AccountMgr::GetName(id, name);
-    uint8 secLevel = GetSecurity();
-
-    _RBACData = new rbac::RBACData(id, name, realmID, secLevel);
-    _RBACData->LoadFromDB();
-
-    TC_LOG_DEBUG("rbac", "WorldSession::LoadPermissions [AccountId: %u, Name: %s, realmId: %d, secLevel: %u]",
-                 id, name.c_str(), realmID, secLevel);
-}
-
-rbac::RBACData* WorldSession::GetRBACData()
-{
-    return _RBACData;
-}
-
-bool WorldSession::HasPermission(uint32 permission) const
-{
-    bool hasPermission = _RBACData->HasPermission(permission);
-    TC_LOG_DEBUG("rbac", "WorldSession::HasPermission [AccountId: %u, Name: %s, realmId: %d]",
-                 _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
-
-    return hasPermission;
-}
-
-void WorldSession::ReloadRBACData()
-{
-    TC_LOG_DEBUG("rbac", "WorldSession::Invalidaterbac::RBACData [AccountId: %u, Name: %s, realmId: %d]",
-                 _RBACData->GetId(), _RBACData->GetName().c_str(), realmID);
-    delete _RBACData;
-    LoadPermissions();
 }

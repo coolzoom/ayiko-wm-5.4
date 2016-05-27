@@ -80,7 +80,7 @@ void DoPrepareStatements(MySQLConnection &conn)
     conn.prepareStatement(WORLD_SEL_WAYPOINT_SCRIPT_ID_BY_GUID, "SELECT id FROM waypoint_scripts WHERE guid = ?");
     conn.prepareStatement(WORLD_DEL_CREATURE, "DELETE FROM creature WHERE guid = ?");
     conn.prepareStatement(WORLD_INS_CREATURE_TRANSPORT, "INSERT INTO creature_transport (npc_entry, transport_entry,  TransOffsetX, TransOffsetY, TransOffsetZ, TransOffsetO) values (?, ?, ?, ?, ?, ?)");
-    conn.prepareStatement(WORLD_SEL_COMMANDS, "SELECT name, permission, help FROM command");
+    conn.prepareStatement(WORLD_SEL_COMMANDS, "SELECT name, security, help FROM command");
     conn.prepareStatement(WORLD_SEL_CREATURE_TEMPLATE,
                           "SELECT difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, difficulty_entry_4, difficulty_entry_5, difficulty_entry_6, "
                           "difficulty_entry_7, difficulty_entry_8, difficulty_entry_9, difficulty_entry_10, difficulty_entry_11, difficulty_entry_12, "

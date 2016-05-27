@@ -71,7 +71,6 @@ void AddSC_misc_commandscript();
 void AddSC_modify_commandscript();
 void AddSC_npc_commandscript();
 void AddSC_quest_commandscript();
-void AddSC_rbac_commandscript();
 void AddSC_reload_commandscript();
 void AddSC_reset_commandscript();
 void AddSC_send_commandscript();
@@ -81,6 +80,7 @@ void AddSC_ticket_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_challenge_commandscript();
+void AddSC_battlepet_commandscript();
 
 #ifdef SCRIPTS
 //world
@@ -833,7 +833,6 @@ void AddCommandScripts()
     AddSC_modify_commandscript();
     AddSC_npc_commandscript();
     AddSC_quest_commandscript();
-    AddSC_rbac_commandscript();
     AddSC_reload_commandscript();
     AddSC_reset_commandscript();
     AddSC_send_commandscript();
@@ -843,6 +842,7 @@ void AddCommandScripts()
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
     AddSC_challenge_commandscript();
+    AddSC_battlepet_commandscript();
 }
 
 void AddWorldScripts()

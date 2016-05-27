@@ -38,25 +38,25 @@ public:
     {
         static ChatCommand castVisualKitCommandTable[] =
         {
-            { "self",   rbac::RBAC_PERM_COMMAND_CAST,   false, &HandleCastVisualKitSelfCommand,     "", NULL },
-            { "",       rbac::RBAC_PERM_COMMAND_CAST,   false, &HandleCastVisualKitCommand,         "", NULL },
+            { "self",   SEC_ADMINISTRATOR,   false, &HandleCastVisualKitSelfCommand,     "", NULL },
+            { "",       SEC_ADMINISTRATOR,   false, &HandleCastVisualKitCommand,         "", NULL },
             { NULL,     0,                              false, NULL,                                "", NULL }
         };
         static ChatCommand castCommandTable[] =
         {
-            { "back",   rbac::RBAC_PERM_COMMAND_CAST_BACK,      false, &HandleCastBackCommand,  "", NULL },
-            { "dist",   rbac::RBAC_PERM_COMMAND_CAST_DIST,      false, &HandleCastDistCommand,  "", NULL },
-            { "self",   rbac::RBAC_PERM_COMMAND_CAST_SELF,      false, &HandleCastSelfCommand,  "", NULL },
-            { "target", rbac::RBAC_PERM_COMMAND_CAST_TARGET,    false, &HandleCastTargetCommad, "", NULL },
-            { "dest",   rbac::RBAC_PERM_COMMAND_CAST_DEST,      false, &HandleCastDestCommand,  "", NULL },
-            { "kit",    rbac::RBAC_PERM_COMMAND_CAST,           false, NULL,  "", castVisualKitCommandTable },
-            { "",       rbac::RBAC_PERM_COMMAND_CAST,           false, &HandleCastCommand,      "", NULL },
-            { NULL,     0,                                      false, NULL,                    "", NULL }
+            { "kit",    SEC_ADMINISTRATOR, false, NULL,  "", castVisualKitCommandTable },
+            { "back",   SEC_ADMINISTRATOR, false, &HandleCastBackCommand,  "", NULL },
+            { "dist",   SEC_ADMINISTRATOR, false, &HandleCastDistCommand,  "", NULL },
+            { "self",   SEC_ADMINISTRATOR, false, &HandleCastSelfCommand,  "", NULL },
+            { "target", SEC_ADMINISTRATOR, false, &HandleCastTargetCommad, "", NULL },
+            { "dest",   SEC_ADMINISTRATOR, false, &HandleCastDestCommand,  "", NULL },
+            { "",       SEC_ADMINISTRATOR, false, &HandleCastCommand,      "", NULL },
+            { NULL,     0,                 false, NULL,                    "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "cast",               rbac::RBAC_PERM_COMMAND_CAST,   false, NULL,    "", castCommandTable },
-            { NULL,     0,                             false, NULL,                    "", NULL }
+            { "cast",   SEC_ADMINISTRATOR, false, NULL,                    "", castCommandTable },
+            { NULL,     0,                false, NULL,                    "", NULL }
         };
         return commandTable;
     }

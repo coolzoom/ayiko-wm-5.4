@@ -48,6 +48,7 @@
 #include "DB2Stores.h"
 #include "Configuration/Config.h"
 #include "Log.h"
+#include "BattlePet.h"
 
 namespace {
 
@@ -217,7 +218,7 @@ ObjectMgr::ObjectMgr() : _auctionId(1), _equipmentSetGuid(1),
     _itemTextId(1), _mailId(1), _hiPetNumber(1), _voidItemId(1), _hiCharGuid(1),
     _hiCreatureGuid(1), _hiPetGuid(1), _hiVehicleGuid(1), _hiItemGuid(1),
     _hiGoGuid(1), _hiDoGuid(1), _hiCorpseGuid(1), _hiAreaTriggerGuid(1),
-    _hiMoTransGuid(1)
+    _hiMoTransGuid(1), _battlePetId(1)
 { }
 
 ObjectMgr::~ObjectMgr()
@@ -6334,6 +6335,10 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(itemId) from character_void_storage");
     if (result)
         _voidItemId = (*result)[0].GetUInt64()+1;
+
+    QueryResult authResult = LoginDatabase.Query("SELECT MAX(id) FROM account_battle_pet");
+    if (result)
+        _battlePetId = (*authResult)[0].GetUInt64() + 1;
 }
 
 uint32 ObjectMgr::GenerateAuctionID()
@@ -6823,6 +6828,11 @@ uint32 ObjectMgr::GeneratePetNumber()
 uint64 ObjectMgr::GenerateVoidStorageItemId()
 {
     return ++_voidItemId;
+}
+
+uint64 ObjectMgr::GenerateBattlePetId()
+{
+    return _battlePetId++;
 }
 
 void ObjectMgr::LoadCorpses()
@@ -9602,4 +9612,149 @@ LFRLootBind const* ObjectMgr::GetLFRLootBind(uint32 entry, uint8 type) const
 LFRLootBindSet const& ObjectMgr::GetLFRLootBindLinked(uint8 linkGroup)
 {
     return m_lfrLootBindsLinked[linkGroup];
+}
+
+void ObjectMgr::LoadBattlePetBreedData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT species, breed FROM `battle_pet_breed`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pets breed definitions. DB table `battle_pet_breed` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint16 speciesId = fields[0].GetUInt16();
+        uint8 breedId    = fields[1].GetUInt8();
+
+        if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet species %u defined in `battle_pet_breed` does not exists, skipped!", speciesId);
+            continue;
+        }
+
+        if (breedId > BATTLE_PET_MAX_BREED)
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet breed %u defined in `battle_pet_breed` is not valid, skipped!", breedId);
+        }
+
+        m_battlePetBreedXSpeciesStore[speciesId].insert(breedId);
+        count++;
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Battle Pet breed definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadBattlePetQualityData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT species, quality FROM `battle_pet_quality`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pets quality definitions. DB table `battle_pet_quality` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint16 speciesId = fields[0].GetUInt16();
+        uint8 quality    = fields[1].GetUInt8();
+
+        if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet species %u defined in `battle_pet_quality` does not exists, skipped!", speciesId);
+            continue;
+        }
+
+        if (quality > ITEM_QUALITY_LEGENDARY)
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet quality %u defined in `battle_pet_quality` is invalid, skipped!", quality);
+            continue;
+        }
+
+        m_battlePetQualityXSpeciesStore[speciesId].insert(quality);
+        count++;
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Battle Pet quality definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+uint8 ObjectMgr::BattlePetGetRandomBreed(uint16 speciesId) const
+{
+    auto breedMap = m_battlePetBreedXSpeciesStore.find(speciesId);
+    if (breedMap != m_battlePetBreedXSpeciesStore.end())
+    {
+        auto breedEntry(breedMap->second.begin());
+        std::advance(breedEntry, urand(0, breedMap->second.size() - 1));
+        return *breedEntry;
+    }
+
+    return 0;
+}
+
+uint8 ObjectMgr::BattlePetGetRandomQuality(uint16 speciesId) const
+{
+    auto qualityMap = m_battlePetQualityXSpeciesStore.find(speciesId);
+    if (qualityMap != m_battlePetQualityXSpeciesStore.end())
+    {
+        auto qualityEntry(qualityMap->second.begin());
+        std::advance(qualityEntry, urand(0, qualityMap->second.size() - 1));
+        return *qualityEntry;
+    }
+
+    return ITEM_QUALITY_NORMAL;
+}
+
+void ObjectMgr::LoadBattlePetItemToSpeciesData()
+{
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult result = WorldDatabase.Query("SELECT itemId, species FROM `battle_pet_item_to_species`");
+    if (!result)
+    {
+        TC_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pets item to species definitions. DB table `battle_pet_item_to_species` is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 itemId    = fields[0].GetUInt32();
+        uint16 speciesId = fields[1].GetUInt16();
+
+        if (!GetItemTemplate(itemId))
+        {
+            TC_LOG_ERROR("sql.sql", "Item id %u defined in `battle_pet_item_to_species` does not exists, skipped!", itemId);
+            continue;
+        }
+
+        if (!sBattlePetSpeciesStore.LookupEntry(speciesId))
+        {
+            TC_LOG_ERROR("sql.sql", "Battle Pet species %u defined in `battle_pet_item_to_species` does not exists, skipped!", speciesId);
+            continue;
+        }
+
+        m_battlePetItemToSpeciesStore[itemId] = speciesId;
+        count++;
+    } while (result->NextRow());
+
+    TC_LOG_INFO("server.loading", ">> Loaded %u Battle Pet quality definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+uint16 ObjectMgr::BattlePetGetSpeciesFromItem(uint32 itemId) const
+{
+    auto itemSpeciesMap = m_battlePetItemToSpeciesStore.find(itemId);
+    if (itemSpeciesMap == m_battlePetItemToSpeciesStore.end())
+        return 0;
+
+    return itemSpeciesMap->second;
 }

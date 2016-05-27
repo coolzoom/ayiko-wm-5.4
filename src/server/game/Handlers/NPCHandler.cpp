@@ -199,6 +199,13 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         if (!valid)
             continue;
 
+        ConditionList conditions = sConditionMgr->GetConditionsForNpcTrainerEvent(unit->GetEntry(), tSpell->spell);
+        if (!sConditionMgr->IsObjectMeetToConditions(_player, unit, conditions))
+        {
+            TC_LOG_DEBUG("condition", "SendTrainerList: conditions not met for creature entry %u spell %u", unit->GetEntry(), tSpell->spell);
+            continue;
+        }
+
         TrainerSpellState state = _player->GetTrainerSpellState(tSpell);
 
         dataBuffer << uint32(tSpell->reqSkillValue);

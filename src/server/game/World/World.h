@@ -379,6 +379,7 @@ enum WorldIntConfigs
     CONFIG_CHEAT_MOVING_MAX_FAILED_SPEED_CHECKS,
     CONFIG_SUMMONALERT_TIMEFRAME,
     CONFIG_SUMMONALERT_COUNT,
+    CONFIG_RAID_FINDER_MODE,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -792,7 +793,6 @@ class World
         std::string const & GetRealmName() const { return m_realmName; }
 
         void UpdatePhaseDefinitions();
-        void ReloadRBAC();
 
         void ResetCurrencyWeekCap();
 

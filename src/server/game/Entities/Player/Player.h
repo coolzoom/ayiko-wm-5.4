@@ -193,9 +193,11 @@ enum ActionButtonType
 {
     ACTION_BUTTON_SPELL     = 0x00,
     ACTION_BUTTON_C         = 0x01,                         // click?
+    ACTION_BUTTON_PET       = 0x10,
     ACTION_BUTTON_EQSET     = 0x20,
     ACTION_BUTTON_SUB_BUTTON= 0x30,
     ACTION_BUTTON_MACRO     = 0x40,
+    ACTION_BUTTON_BATTLEPET = ACTION_BUTTON_PET | ACTION_BUTTON_MACRO,
     ACTION_BUTTON_CMACRO    = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
     ACTION_BUTTON_ITEM      = 0x80
 };
@@ -485,8 +487,8 @@ enum AtLoginFlags
     AT_LOGIN_CUSTOMIZE              = 0x008,
     AT_LOGIN_FIRST                  = 0x020,
     AT_LOGIN_CHANGE_FACTION         = 0x040,
-    AT_LOGIN_CHANGE_RACE            = 0x080,
 	//0x100 - this one is warsong specific to clean talents on login
+    AT_LOGIN_CHANGE_RACE            = 0x080,
     AT_LOGIN_NO_CHAR				= 0x200 // deleteme
 };
 
@@ -792,6 +794,8 @@ enum AuthLoginQueryIndex
     AUTH_LOGIN_QUERY_LOAD_SPELLS = 0,
     AUTH_LOGIN_QUERY_LOAD_ACHIEVEMENTS,
     AUTH_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS,
+    AUTH_LOGIN_QUERY_LOAD_BATTLE_PETS,
+    AUTH_LOGIN_QUERY_LOAD_BATTLE_PET_SLOTS,
 
     MAX_AUTH_LOGIN_QUERY
 };
@@ -1510,6 +1514,7 @@ class Player final : public Unit, public GridObject<Player>
         void SetQuestStatus(uint32 quest_id, QuestStatus status);
         void RemoveActiveQuest(uint32 quest_id);
         void RemoveRewardedQuest(uint32 quest_id);
+
 
         void SetDailyQuestStatus(uint32 quest_id);
         void SetWeeklyQuestStatus(uint32 quest_id);

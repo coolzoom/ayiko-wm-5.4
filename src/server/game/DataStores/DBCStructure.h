@@ -1276,6 +1276,18 @@ struct GtBarberShopCostBaseEntry
     float   cost;
 };
 
+struct GtBattlePetTypeDamageModEntry
+{
+    // uint32 [petType][damageType];
+    float Modifier;
+};
+
+struct GtBattlePetXpEntry
+{
+    // uint32 [level][levelOffset];
+    float Value;
+};
+
 struct GtCombatRatingsEntry
 {
     //uint32 level;

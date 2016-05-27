@@ -45,7 +45,6 @@
 #include "PacketLog.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
-#include "RBAC.h"
 
 namespace {
 
@@ -170,8 +169,17 @@ int WorldSocket::SendPacket(WorldPacket const* pct)
 
     if (m_Session)
     {
-        TC_LOG_TRACE("network.opcode", "S->C: %s %s",
+        switch (pct->GetOpcode())
+        {
+            case SMSG_MONSTER_MOVE:
+            case SMSG_UPDATE_OBJECT:
+            case SMSG_THREAT_UPDATE:
+                break;
+            default:
+                TC_LOG_ERROR("network", "S->C: %s %s",
                      m_Session->GetPlayerName().c_str(), GetOpcodeNameForLogging(pct->GetOpcode(), WOW_SERVER).c_str());
+                break;
+        }
     }
 
     ServerPktHeader header(pct->size() + 2, pct->GetOpcode(), m_Crypt.IsInitialized());
@@ -694,8 +702,16 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
 
     if (m_Session)
     {
-        TC_LOG_TRACE("network.opcode", "C->S: %s %s",
+        switch (opcode)
+        {
+            case CMSG_PLAYER_MOVE:
+            case CMSG_MOVE_TIME_SKIPPED:
+                break;
+            default:
+                TC_LOG_ERROR("network", "C->S: %s %s",
                      m_Session->GetPlayerName().c_str(), GetOpcodeNameForLogging(opcode, WOW_CLIENT).c_str());
+                break;
+        }
     }
 
     try
@@ -1160,7 +1176,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(addonsData);
-    m_Session->LoadPermissions();
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
@@ -1198,7 +1213,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
             {
                 ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
 
-                if (m_Session && !m_Session->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_OVERSPEED_PING))
+                if (m_Session && AccountMgr::IsPlayerAccount(m_Session->GetSecurity()))
                 {
                     TC_LOG_ERROR("network", "WorldSocket::HandlePing: %s kicked for over-speed pings (address: %s)",
                         m_Session->GetPlayerName(false).c_str(), GetRemoteAddress().c_str());
@@ -1234,7 +1249,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
 void WorldSocket::LogPacket(WorldPacket const &packet, Direction direction)
 {
-    if (m_Session && m_Session->HasPermission(rbac::RBAC_PERM_LOG_PACKETS))
+    if (m_Session)
     {
         // This permission can be enabled at runtime, so we perform
         // lazy initialization

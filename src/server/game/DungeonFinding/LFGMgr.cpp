@@ -28,7 +28,6 @@
 #include "LFGScripts.h"
 #include "LFGGroupData.h"
 #include "LFGPlayerData.h"
-#include "RBAC.h"
 #include "Chat.h"
 
 #include "Group.h"
@@ -514,7 +513,6 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
 
     LfgDungeonSet const &dungeons = GetDungeonsByRandom(0);
     LfgLockMap lock;
-    bool denyJoin = !player->GetSession()->HasPermission(rbac::RBAC_PERM_JOIN_DUNGEON_FINDER);
 
     for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)
     {
@@ -537,14 +535,19 @@ void LFGMgr::InitializeLockedDungeons(Player* player)
                 LevelMax = ar->levelMax;
         }
 
-        if (denyJoin)
-            lockData.lockstatus = LFG_LOCKSTATUS_ATTUNEMENT_TOO_HIGH_LEVEL;
+        uint32 raidFinderMode = sWorld->getIntConfig(CONFIG_RAID_FINDER_MODE);
+        if (dungeon->difficulty == RAID_TOOL_DIFFICULTY && raidFinderMode == RAID_FINDER_MODE_DISABLED)
+            lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
+        else if (dungeon->difficulty == RAID_TOOL_DIFFICULTY && raidFinderMode == RAID_FINDER_MODE_TEST && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+            lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
+        //else if (dungeon->difficulty == RAID_TOOL_DIFFICULTY)
+        //    lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
         else if (dungeon->expansion > expansion)
             lockData.lockstatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
         else if (DisableMgr::IsDisabledFor(DISABLE_TYPE_MAP, dungeon->map, player, Difficulty(dungeon->difficulty)))
             lockData.lockstatus = LFG_LOCKSTATUS_TEMPORARILY_DISABLED;
         else if (dungeon->difficulty > REGULAR_DIFFICULTY && dungeon->difficulty != RAID_TOOL_DIFFICULTY && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
-                lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
+            lockData.lockstatus = LFG_LOCKSTATUS_RAID_LOCKED;
         else if (dungeon->minlevel > level || LevelMin)
             lockData.lockstatus = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
         else if (dungeon->maxlevel < level || LevelMax)
@@ -2609,10 +2612,23 @@ LfgRolesRequired* LFGMgr::GetRolesRequired(uint32 difficulty) const
             rolesRequired->tanksNeeded = 1;
             break;
         case RAID_TOOL_DIFFICULTY:
-            rolesRequired->dpsNeeded = 17;
-            rolesRequired->healersNeeded = 6;
-            rolesRequired->tanksNeeded = 2;
+        {
+            // raid finder is in test mode, only 1 dps, 1 healer and 1 tank is required for queue pop
+            if (sWorld->getIntConfig(CONFIG_RAID_FINDER_MODE) == RAID_FINDER_MODE_TEST)
+            {
+                rolesRequired->dpsNeeded = 1;
+                rolesRequired->healersNeeded = 1;
+                rolesRequired->tanksNeeded = 1;
+            }
+            else
+            {
+                rolesRequired->dpsNeeded = 17;
+                rolesRequired->healersNeeded = 6;
+                rolesRequired->tanksNeeded = 2;
+            }
+
             break;
+        }
         case SCENARIO_HEROIC_DIFFICULTY:
         case SCENARIO_DIFFICULTY:
             rolesRequired->dpsNeeded = 3;

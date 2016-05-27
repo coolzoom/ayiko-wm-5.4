@@ -37,6 +37,7 @@
 #include "Timer.h"
 #include "UnitDefines.hpp"
 #include "../AreaTrigger/AreaTrigger.h"
+#include "Util.h"
 
 #include <array>
 #include <list>
@@ -1030,6 +1031,7 @@ class Unit : public WorldObject
 
         void SetMinion(Minion *minion, bool apply, bool stampeded = false);
         void GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry);
+        Unit* GetFirstMinionByEntry(uint32 entry);
         void RemoveAllMinionsByEntry(uint32 entry);
         void SetCharm(Unit* target, bool apply);
         Unit* GetNextRandomRaidMemberOrPet(float radius);
@@ -1495,7 +1497,6 @@ class Unit : public WorldObject
         void SendPetActionFeedback (uint8 msg);
         void SendPetTalk (uint32 pettalk);
         void SendPetAIReaction(uint64 guid);
-        bool IsCasterPet();
         ///----------End of Pet responses methods----------
 
         void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }
@@ -1573,6 +1574,7 @@ class Unit : public WorldObject
         bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }
         virtual bool CanFly() const = 0;
         bool IsFlying() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_DISABLE_GRAVITY); }
+        bool canWaterWalk() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WATERWALKING); }
         void SetCanFly(bool apply);
         bool SetSwim(bool enable);
 

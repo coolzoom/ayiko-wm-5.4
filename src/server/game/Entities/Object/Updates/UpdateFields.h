@@ -267,9 +267,10 @@ enum EPlayerFields
     PLAYER_SKILL_LINEID_0                            = UNIT_END + 0x03E1, // SIZE:64
     PLAYER_SKILL_STEP_0                              = UNIT_END + 0x0421, // SIZE:64
     PLAYER_SKILL_RANK_0                              = UNIT_END + 0x0461, // Size:64
-    PLAYER_SKILL_MAX_RANK_0                          = UNIT_END + 0x04A1, // Size:64
-    PLAYER_SKILL_MODIFIER_0                          = UNIT_END + 0x04E1, // Size:64
-    PLAYER_SKILL_TALENT_0                            = UNIT_END + 0x0521, // Size:64
+    PLAYER_SKILL_STARTING_RANK_0                     = UNIT_END + 0x04A1, // Size:64
+    PLAYER_SKILL_MAX_RANK_0                          = UNIT_END + 0x04E1, // Size:64
+    PLAYER_SKILL_MODIFIER_0                          = UNIT_END + 0x0521, // Size:64
+    PLAYER_SKILL_TALENT_0                            = UNIT_END + 0x0561, // Size:64
     PLAYER_SKILL_UNK_0                               = UNIT_END + 0x0561, // Size:64
     PLAYER_CHARACTER_POINTS                          = UNIT_END + 0x05A1, // SIZE:1
     PLAYER_MAX_TALENT_TIERS                          = 1602, // SIZE:1
@@ -341,9 +342,9 @@ enum EPlayerFields
 
 enum EPlayerDynamicFields
 {
-    PLAYER_DYNAMIC_RESEARCH_SITES                    = 0x0000,
-    PLAYER_DYNAMIC_DAILY_QUESTS_COMPLETED            = 0x0002,
-    PLAYER_DYNAMIC_END                               = 0x0004
+    PLAYER_DYNAMIC_RESEARCH_SITES                    = PLAYER_END + 0x0000,
+    PLAYER_DYNAMIC_DAILY_QUESTS_COMPLETED            = PLAYER_END + 0x0002,
+    PLAYER_DYNAMIC_END                               = PLAYER_END + 0x0004
 };
 
 enum EGameObjectFields

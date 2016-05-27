@@ -414,7 +414,7 @@ void World::AddSession_(WorldSession* s)
     if (decrease_session)
         --Sessions;
 
-    if (pLimit > 0 && Sessions >= pLimit && !s->HasPermission(rbac::RBAC_PERM_SKIP_QUEUE) && !HasRecentlyDisconnected(s))
+    if (pLimit > 0 && Sessions >= pLimit && AccountMgr::IsPlayerAccount(s->GetSecurity()) && !HasRecentlyDisconnected(s))
     {
         AddQueuedPlayer (s);
         UpdateMaxSessionCounters();
@@ -1383,6 +1383,7 @@ void World::LoadConfigSettings(bool reload)
 
     // Dungeon finder
     m_bool_configs[CONFIG_DUNGEON_FINDER_ENABLE] = sConfigMgr->GetBoolDefault("DungeonFinder.Enable", false);
+    m_int_configs[CONFIG_RAID_FINDER_MODE] = sConfigMgr->GetIntDefault("RaidFinder.Mode", RAID_FINDER_MODE_DISABLED);
 
     // DBC_ItemAttributes
     m_bool_configs[CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES] = sConfigMgr->GetBoolDefault("DBC.EnforceItemAttributes", true);
@@ -1610,9 +1611,6 @@ void World::SetInitialWorldSettings()
 
     sObjectMgr->SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
     TC_LOG_INFO("server.loading", ">> Localization strings loaded in %u ms", GetMSTimeDiffToNow(oldMSTime));
-
-    TC_LOG_INFO("server.loading", "Loading Account Roles and Permissions...");
-    sAccountMgr->LoadRBAC();
 
     TC_LOG_INFO("server.loading", "Loading Page Texts...");
     sObjectMgr->LoadPageTexts();
@@ -2509,7 +2507,7 @@ void World::SendGlobalGMMessage(WorldPacket* packet, WorldSession* self, uint32 
     {
         // check if session and can receive global GM Messages and its not self
         WorldSession* session = itr->second;
-        if (!session || session == self || !session->HasPermission(rbac::RBAC_PERM_RECEIVE_GLOBAL_GM_TEXTMESSAGE))
+        if (!session || session == self || AccountMgr::IsPlayerAccount(itr->second->GetSecurity()))
             continue;
 
         // Player should be in world
@@ -2629,7 +2627,7 @@ void World::SendGMText(int32 string_id, ...)
     {
         // Session should have permissions to receive global gm messages
         WorldSession* session = itr->second;
-        if (!session || !session->HasPermission(rbac::RBAC_PERM_RECEIVE_GLOBAL_GM_TEXTMESSAGE))
+        if (!session || AccountMgr::IsPlayerAccount(itr->second->GetSecurity()))
             continue;
 
         // Player should be in world
@@ -3582,17 +3580,6 @@ void World::ProcessMailboxQueue()
 
     CharacterDatabase.Execute("DELETE FROM mailbox_queue WHERE processed = 1");
     TC_LOG_DEBUG("misc", "MailboxQueue: Complete");
-}
-
-void World::ReloadRBAC()
-{
-    // Pasive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
-    TC_LOG_INFO("rbac", "World::ReloadRBAC()");
-    for (auto &kvPair : m_sessions) {
-        auto const session = kvPair.second;
-        sThreadPoolMgr->schedule([session] { session->ReloadRBACData(); });
-    }
-    sThreadPoolMgr->wait();
 }
 
 void World::ProcessRealmTransfers()

@@ -63,6 +63,7 @@
 #include "ScriptMgr.h"
 #include "ObjectVisitors.hpp"
 #include "Chat.h"
+#include "BattlePet.h"
 
 #include <numeric>
 
@@ -9244,6 +9245,13 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect *trigg
             case SPELLFAMILY_GENERIC:
                 switch (auraSpellInfo->Id)
                 {
+                    case 50051: // Ethereal Pet Aura
+                        if (GetTypeId() == TYPEID_PLAYER)
+                        {
+                            ToPlayer()->AddItem(38186, 1);
+                            return true;
+                        }
+                        break;
                     case 23780:             // Aegis of Preservation (Aegis of Preservation trinket)
                         trigger_spell_id = 23781;
                         break;
@@ -11414,6 +11422,20 @@ void Unit::GetAllMinionsByEntry(std::list<Creature*>& Minions, uint32 entry)
             && unit->ToCreature()->IsSummon()) // minion, actually
             Minions.push_back(unit->ToCreature());
     }
+}
+
+Unit* Unit::GetFirstMinionByEntry(uint32 entry)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+        if (unit->GetEntry() == entry && unit->GetTypeId() == TYPEID_UNIT
+            && unit->ToCreature()->IsSummon())
+            return unit;
+    }
+
+    return NULL;
 }
 
 void Unit::RemoveAllMinionsByEntry(uint32 entry)
@@ -13682,17 +13704,9 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
             }
         }
 
-        // unsummon pet
-        Pet* pet = player->GetPet();
-        if (pet)
-        {
-            Battleground* bg = ToPlayer()->GetBattleground();
-            // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
-            if (bg && bg->isArena())
-                pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-            else
-                player->UnsummonPetTemporaryIfAny();
-        }
+        // don't unsummon pet but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
+        if (Pet* pet = player->GetPet())
+            pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         player->SendMovementSetCollisionHeight(player->GetCollisionHeight(true));
     }
@@ -13952,8 +13966,15 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, bool isControlled)
             Dismount();
     }
 
-    if (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->IsInWorgenForm() && ToPlayer()->CanSwitch())
-        ToPlayer()->SwitchToWorgenForm();
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        auto player = ToPlayer();
+        if (!player->IsInWorgenForm() && player->CanSwitch())
+            player->SwitchToWorgenForm();
+
+        if (auto petBattle = sPetBattleSystem->GetPlayerPetBattle(player->GetGUID()))
+            petBattle->FinishBattle(nullptr);
+    }
 }
 
 void Unit::ClearInCombat()
@@ -20230,6 +20251,7 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
                 break;
             default:
                 player->UnsummonPetTemporaryIfAny();
+                player->GetBattlePetMgr().UnSummonCurrentBattlePet(false);
                 break;
         }
     }
@@ -21473,19 +21495,4 @@ int32 Unit::GetSplineDuration() const
 bool Unit::IsOnVehicle(Unit const *vehicle) const
 {
     return m_vehicle && m_vehicle->GetBase() == vehicle;
-}
-
-bool Unit::IsCasterPet()
-{
-    if (!GetOwner() || !IsControlledByPlayer())
-        return false;
-
-    switch (GetEntry())
-    {
-        case 510: // Water Elemental
-        case 416: // Imp
-            return true;
-    }
-
-    return false;
 }

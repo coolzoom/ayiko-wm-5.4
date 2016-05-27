@@ -35,6 +35,7 @@
 
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f
+#define PETBATTLE_INTERACTION_DIST  20.0f
 #define ATTACK_DISTANCE             5.0f
 #define MAX_VISIBILITY_DISTANCE     SIZE_OF_GRIDS           // max distance for visible objects
 #define SIGHT_RANGE_UNIT            50.0f

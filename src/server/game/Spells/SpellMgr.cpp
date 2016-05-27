@@ -3680,6 +3680,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AuraInterruptFlags = 0x0;
                 spellInfo->AreaGroupId = 0;
                 break;
+            case 139144:    // Evolution
+                spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(21);
+                break;
                 // Throne of Thunder end
             case 136909:
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
@@ -4599,9 +4602,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 83968: // Mass Resurrect
                     spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
                     break;
-                case 102141:// Transcendence (summon)
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_SUMMON_PET;
-                    break;
                 case 108507:// Kil'Jaeden's Cunning (passive)
                     spellInfo->Effects[1].SpellClassMask[0] = 0x7C01487D;
                     spellInfo->Effects[1].SpellClassMask[1] = 0x48022DF0;
@@ -4896,10 +4896,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 116694:// Surging Mists
                 case 117952:// Crackling Jade Lightning
                     spellInfo->PreventionType = SPELL_PREVENTION_TYPE_SILENCE;
-                    break;
-                case 102793:
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-                    spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
                     break;
                 case 34433: // Shadowfiend
                     spellInfo->Effects[EFFECT_0].MiscValueB = 1561;
@@ -5404,7 +5400,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_1].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     spellInfo->Effects[EFFECT_1].Mechanic = MECHANIC_NONE;
                     break;
-                case 33891:  // Tree form
                 case 114282: // Tree form
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(9);
                     break;

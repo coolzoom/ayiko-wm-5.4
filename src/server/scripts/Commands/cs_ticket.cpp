@@ -41,39 +41,37 @@ public:
     {
         static ChatCommand ticketResponseCommandTable[] =
         {
-            { "append",   rbac::RBAC_PERM_COMMAND_TICKET_RESPONSE_APPEND,   true,  &HandleGMTicketResponseAppendCommand,   "", NULL },
-            { "appendln", rbac::RBAC_PERM_COMMAND_TICKET_RESPONSE_APPENDLN, true,  &HandleGMTicketResponseAppendLnCommand, "", NULL },
-            { NULL,       0,                                         false, NULL,                                    "", NULL }
+            { "append",         SEC_MODERATOR,      true,  &HandleGMTicketResponseAppendCommand,    "", NULL },
+            { "appendln",       SEC_MODERATOR,      true,  &HandleGMTicketResponseAppendLnCommand,  "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
-
         static ChatCommand ticketCommandTable[] =
         {
-            { "assign",        rbac::RBAC_PERM_COMMAND_TICKET_ASSIGN,        true, &HandleGMTicketAssignToCommand,          "", NULL },
-            { "close",         rbac::RBAC_PERM_COMMAND_TICKET_CLOSE,         true, &HandleGMTicketCloseByIdCommand,         "", NULL },
-            { "closedlist",    rbac::RBAC_PERM_COMMAND_TICKET_CLOSEDLIST,    true, &HandleGMTicketListClosedCommand,        "", NULL },
-            { "comment",       rbac::RBAC_PERM_COMMAND_TICKET_COMMENT,       true, &HandleGMTicketCommentCommand,           "", NULL },
-            { "complete",      rbac::RBAC_PERM_COMMAND_TICKET_COMPLETE,      true, &HandleGMTicketCompleteCommand,          "", NULL },
-            { "delete",        rbac::RBAC_PERM_COMMAND_TICKET_DELETE,        true, &HandleGMTicketDeleteByIdCommand,        "", NULL },
-            { "escalate",      rbac::RBAC_PERM_COMMAND_TICKET_ESCALATE,      true, &HandleGMTicketEscalateCommand,          "", NULL },
-            { "escalatedlist", rbac::RBAC_PERM_COMMAND_TICKET_ESCALATEDLIST, true, &HandleGMTicketListEscalatedCommand,     "", NULL },
-            { "list",          rbac::RBAC_PERM_COMMAND_TICKET_LIST,          true, &HandleGMTicketListCommand,              "", NULL },
-            { "onlinelist",    rbac::RBAC_PERM_COMMAND_TICKET_ONLINELIST,    true, &HandleGMTicketListOnlineCommand,        "", NULL },
-            { "reset",         rbac::RBAC_PERM_COMMAND_TICKET_RESET,         true, &HandleGMTicketResetCommand,             "", NULL },
-            { "response",      rbac::RBAC_PERM_COMMAND_TICKET_RESPONSE,      true, NULL,              "", ticketResponseCommandTable },
-            { "togglesystem",  rbac::RBAC_PERM_COMMAND_TICKET_TOGGLESYSTEM,  true, &HandleToggleGMTicketSystem,             "", NULL },
-            { "unassign",      rbac::RBAC_PERM_COMMAND_TICKET_UNASSIGN,      true, &HandleGMTicketUnAssignCommand,          "", NULL },
-            { "viewid",        rbac::RBAC_PERM_COMMAND_TICKET_VIEWID,        true, &HandleGMTicketGetByIdCommand,           "", NULL },
-            { "viewname",      rbac::RBAC_PERM_COMMAND_TICKET_VIEWNAME,      true, &HandleGMTicketGetByNameCommand,         "", NULL },
-            { "closefirst",    rbac::RBAC_PERM_COMMAND_TICKET_CLOSEFIRST,   false, &HandleGMTicketCloseFirstCommand,        "", NULL },
-            { "deletefirst",   rbac::RBAC_PERM_COMMAND_TICKET_DELETEFIRST,  false, &HandleGMTicketDeleteFirstCommand,       "", NULL },
-            { "viewfirst",     rbac::RBAC_PERM_COMMAND_TICKET_VIEWFIRST,    false, &HandleGMTicketGetFirstCommand,          "", NULL },
-            { NULL,            0,                                           false, NULL,                                    "", NULL }
+            { "closefirst",     SEC_GAMEMASTER,     false, &HandleGMTicketCloseFirstCommand,        "", NULL },
+            { "deletefirst",    SEC_GAMEMASTER,     false, &HandleGMTicketDeleteFirstCommand,       "", NULL },
+            { "viewfirst",      SEC_GAMEMASTER,     false, &HandleGMTicketGetFirstCommand,          "", NULL },
+            { "assign",         SEC_GAMEMASTER,     true,  &HandleGMTicketAssignToCommand,          "", NULL },
+            { "close",          SEC_MODERATOR,      true,  &HandleGMTicketCloseByIdCommand,         "", NULL },
+            { "closedlist",     SEC_MODERATOR,      true,  &HandleGMTicketListClosedCommand,        "", NULL },
+            { "comment",        SEC_MODERATOR,      true,  &HandleGMTicketCommentCommand,           "", NULL },
+            { "complete",       SEC_MODERATOR,      true,  &HandleGMTicketCompleteCommand,          "", NULL },
+            { "delete",         SEC_ADMINISTRATOR,  true,  &HandleGMTicketDeleteByIdCommand,        "", NULL },
+            { "escalate",       SEC_MODERATOR,      true,  &HandleGMTicketEscalateCommand,          "", NULL },
+            { "escalatedlist",  SEC_GAMEMASTER,     true,  &HandleGMTicketListEscalatedCommand,     "", NULL },
+            { "list",           SEC_MODERATOR,      true,  &HandleGMTicketListCommand,              "", NULL },
+            { "onlinelist",     SEC_MODERATOR,      true,  &HandleGMTicketListOnlineCommand,        "", NULL },
+            { "reset",          SEC_ADMINISTRATOR,  true,  &HandleGMTicketResetCommand,             "", NULL },
+            { "response",       SEC_MODERATOR,      true,  NULL,                                    "", ticketResponseCommandTable },
+            { "togglesystem",   SEC_ADMINISTRATOR,  true,  &HandleToggleGMTicketSystem,             "", NULL },
+            { "unassign",       SEC_GAMEMASTER,     true,  &HandleGMTicketUnAssignCommand,          "", NULL },
+            { "viewid",         SEC_MODERATOR,      true,  &HandleGMTicketGetByIdCommand,           "", NULL },
+            { "viewname",       SEC_MODERATOR,      true,  &HandleGMTicketGetByNameCommand,         "", NULL },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
-
         static ChatCommand commandTable[] =
         {
-            { "ticket", rbac::RBAC_PERM_COMMAND_TICKET, false, NULL, "", ticketCommandTable },
-            { NULL,     0,                        false, NULL, "", NULL }
+            { "ticket",         SEC_MODERATOR,      false, NULL,                                    "", ticketCommandTable },
+            { NULL,             0,                  false, NULL,                                    "", NULL }
         };
         return commandTable;
     }
@@ -104,7 +102,8 @@ public:
         uint64 targetGuid = sObjectMgr->GetPlayerGUIDByName(target);
         uint32 accountId = sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
         // Target must exist and have administrative rights
-        if (!AccountMgr::HasPermission(accountId, rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET, realmID))
+        // Target must exist and have administrative rights
+        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
         {
             handler->SendSysMessage(LANG_COMMAND_TICKETASSIGNERROR_A);
             return true;
@@ -500,9 +499,6 @@ public:
         handler->SendSysMessage(msg.c_str());
 
         WorldSession const * const s = handler->GetSession();
-        if (s && s->HasPermission(rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET))
-            sLog->outCommand(s->GetAccountId(), "%s", msg.c_str());
-
         return true;
     }
 
@@ -522,9 +518,6 @@ public:
         handler->SendSysMessage(msg.c_str());
 
         WorldSession const * const s = handler->GetSession();
-        if (s && s->HasPermission(rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET))
-            sLog->outCommand(s->GetAccountId(), "%s", msg.c_str());
-
         return true;
     }
 
@@ -567,9 +560,6 @@ public:
         handler->SendSysMessage(msg.c_str());
 
         WorldSession const * const s = handler->GetSession();
-        if (s && s->HasPermission(rbac::RBAC_PERM_COMMANDS_BE_ASSIGNED_TICKET))
-            sLog->outCommand(s->GetAccountId(), "%s", msg.c_str());
-
         return true;
     }
 

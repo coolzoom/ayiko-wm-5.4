@@ -34,6 +34,7 @@
 #include "Vehicle.h"
 #include "ObjectGridLoader.h"
 #include "Profiler/ProbePoint.hpp"
+#include "BattlePetSpawnMgr.h"
 
 namespace {
 
@@ -179,6 +180,8 @@ void Map::ObjectUpdater::updateCollected(uint32 diff)
 
 Map::~Map()
 {
+    sBattlePetSpawnMgr->DepopulateMap(i_mapEntry->MapID);
+
     UnloadAll();
 
     while (!i_worldObjects.empty())
@@ -575,6 +578,10 @@ bool Map::AddToMap(T *obj)
     //something, such as vehicle, needs to be update immediately
     //also, trigger needs to cast spell, if not update, cannot see visual
     obj->UpdateObjectVisibility(true);
+
+    if (Creature* creature = obj->ToCreature())
+        sBattlePetSpawnMgr->OnAddToOrRemoveFromMap(creature);
+
     return true;
 }
 
@@ -671,6 +678,9 @@ void Map::RemovePlayerFromMap(Player* player, bool remove)
 template<class T>
 void Map::RemoveFromMap(T *obj, bool remove)
 {
+    if (Creature* creature = obj->ToCreature())
+        sBattlePetSpawnMgr->OnAddToOrRemoveFromMap(creature, true);
+
     obj->RemoveFromWorld();
     if (obj->isActiveObject())
         RemoveFromActive(obj);

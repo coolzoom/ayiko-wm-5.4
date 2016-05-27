@@ -39,20 +39,20 @@ public:
     {
         static ChatCommand resetCommandTable[] =
         {
-            { "achievements", rbac::RBAC_PERM_COMMAND_RESET_ACHIEVEMENTS, true, &HandleResetAchievementsCommand, "", NULL },
-            { "honor",        rbac::RBAC_PERM_COMMAND_RESET_HONOR,        true, &HandleResetHonorCommand,        "", NULL },
-            { "level",        rbac::RBAC_PERM_COMMAND_RESET_LEVEL,        true, &HandleResetLevelCommand,        "", NULL },
-            { "spells",       rbac::RBAC_PERM_COMMAND_RESET_SPELLS,       true, &HandleResetSpellsCommand,       "", NULL },
-            { "stats",        rbac::RBAC_PERM_COMMAND_RESET_STATS,        true, &HandleResetStatsCommand,        "", NULL },
-            { "talents",      rbac::RBAC_PERM_COMMAND_RESET_TALENTS,      true, &HandleResetTalentsCommand,      "", NULL },
-            { "spec",         rbac::RBAC_PERM_COMMAND_RESET_SPEC,         true, &HandleResetSpecializationCommand,   "", NULL },
-            { "currencycap",  rbac::RBAC_PERM_COMMAND_RESET_CURRENCY_CAP, true, &HandleResetCurrencyCapCommand, "", NULL },
-            { NULL,           0,                                   false, NULL,                            "", NULL }
+            { "currencycap",    SEC_ADMINISTRATOR,  true, &HandleResetCurrencyCapCommand, "", NULL },
+            { "achievements",   SEC_ADMINISTRATOR,  true,  &HandleResetAchievementsCommand,     "", NULL },
+            { "honor",          SEC_ADMINISTRATOR,  true,  &HandleResetHonorCommand,            "", NULL },
+            { "level",          SEC_ADMINISTRATOR,  true,  &HandleResetLevelCommand,            "", NULL },
+            { "spells",         SEC_ADMINISTRATOR,  true,  &HandleResetSpellsCommand,           "", NULL },
+            { "stats",          SEC_ADMINISTRATOR,  true,  &HandleResetStatsCommand,            "", NULL },
+            { "talents",        SEC_ADMINISTRATOR,  true,  &HandleResetTalentsCommand,          "", NULL },
+            { "spec",           SEC_ADMINISTRATOR,  true,  &HandleResetSpecCommand,   "", NULL },
+            { NULL,             0,                  false, NULL,                                "", NULL }
         };
         static ChatCommand commandTable[] =
         {
-            { "reset", rbac::RBAC_PERM_COMMAND_RESET, true, NULL, "", resetCommandTable },
-            { NULL,    0,                      false, NULL, "", NULL }
+            { "reset",          SEC_ADMINISTRATOR,  true, NULL,                                 "", resetCommandTable },
+            { NULL,             0,                  false, NULL,                                "", NULL }
         };
         return commandTable;
     }
@@ -253,14 +253,27 @@ public:
         return false;
     }
 
-    static bool HandleResetSpecializationCommand(ChatHandler* handler, char const* args)
+    static bool HandleResetSpecCommand(ChatHandler* handler, char const* args)
     {
         Player* target;
-        if (!handler->extractPlayerTarget((char*)args, &target))
+        uint64 targetGuid;
+        std::string targetName;
+        if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
             return false;
+        }
 
-        target->ResetSpec(true);
-        return true;
+        if (target)
+        {
+            target->ResetSpec();
+            target->SendTalentsInfoData(target->GetPet());
+            return true;
+        }
+        handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+        handler->SetSentErrorMessage(true);
+        return false;
     }
 };
 

@@ -28,6 +28,13 @@ class LfgPlayerData;
 class Group;
 class Player;
 
+enum RaidFinderMode
+{
+    RAID_FINDER_MODE_DISABLED                   = 0,
+    RAID_FINDER_MODE_ENABLED                    = 1,
+    RAID_FINDER_MODE_TEST                       = 2
+};
+
 enum LFGenum
 {
     LFG_TIME_ROLECHECK                           = 40*IN_MILLISECONDS,

@@ -1,0 +1,1 @@
+DELETE FROM disables WHERE entry=58677 AND sourceType=0;

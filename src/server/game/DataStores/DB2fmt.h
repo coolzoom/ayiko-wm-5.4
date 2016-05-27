@@ -18,12 +18,23 @@
 #ifndef TRINITY_DB2SFRM_H
 #define TRINITY_DB2SFRM_H
 
+const char BattlePetAbilityfmt[] = "nixiiiss";
+const char BattlePetAbilityStatefmt[] = "niii";
+const char BattlePetAbilityEffectfmt[] = "niiiixiiiiii";
+const char BattlePetAbilityTurnfmt[] = "niiiii";
+const char BattlePetBreedQualityfmt[] = "nif";
+const char BattlePetBreedStatefmt[] = "niii";
+const char BattlePetEffectPropertiesfmt[] = "nissssssiiiiii";
+const char BattlePetSpeciesfmt[] = "niiiixiss";
+const char BattlePetSpeciesStatefmt[] = "niii";
+const char BattlePetSpeciesXAbilityfmt[] = "niiii";
+const char sBattlePetStatefmt[] = "nxsi";
+
 const char SpellReagentsEntryfmt[] = "diiiiiiiiiiiiiiiixx";
 const char Itemfmt[] = "niiiiiii";
 const char ItemCurrencyCostfmt[] = "xn";
 const char ItemSparsefmt[] = "niiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisssssiiiiiiiiiiiiiiiiiiiiiifiiifii"; // done @author : Izidor
 const char ItemExtendedCostEntryfmt[] = "nxxiiiiiiiiiiiixiiiiiiiiiiiiiii";
-const char BattlePetSpeciesEntryfmt[] = "inxxxxxxx";
 const char ItemUpgradeEntryfmt[] = "niiiii";
 const char RulesetItemUpgradeEntryfmt[] = "niii";
 const char QuestPackageItemEntryfmt[] = "niiii";
